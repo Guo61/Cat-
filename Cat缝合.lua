@@ -54,6 +54,10 @@ credits:Textbox("重力设置!", "Gravity", "输入", function(Gravity)
   spawn(function() while task.wait() do game.Workspace.Gravity = Gravity end end)
 end)
 
+credits:Button("飞行", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/fcsdsss/games/refs/heads/main/Silent%20aim/1.1"))()
+end)
+
 credits:Toggle("夜视", "Light", false, function(Light)
   spawn(function() while task.wait() do if Light then game.Lighting.Ambient = Color3.new(1, 1, 1) else game.Lighting.Ambient = Color3.new(0, 0, 0) end end end)
 end)
