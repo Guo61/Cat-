@@ -156,8 +156,8 @@ end)
 
 local credits = creds:section("doors", true)
 
-credits:Button("中文doors", function()
-   loadstring(game:HttpGet("https://rscripts.net/raw/not-patched-infinite-money-money-farm-open-shop_1753743540999_gqxO4z8nzH.txt"))()
+credits:Button("英文doors", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/Protected_2809220311826785.lua.txt", true))()
 end)
 
 local credits = creds:section("生存99夜", true)
