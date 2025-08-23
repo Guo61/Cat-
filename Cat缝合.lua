@@ -62,7 +62,34 @@ credits:Toggle("穿墙", "NoClip", false, function(NC)  local Workspace = game:G
 end)
 
 credits:Button("透视", function()
-  local Players = game:GetService("Players"):GetChildren() local RunService = game:GetService("RunService") local highlight = Instance.new("Highlight") highlight.Name = "Highlight" for i, v in pairs(Players) do repeat wait() until v.Character if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then local highlightClone = highlight:Clone() highlightClone.Adornee = v.Character highlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart") highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop highlightClone.Name = "Highlight" end end game.Players.PlayerAdded:Connect(function(player) repeat wait() until player.Character if not player.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then local highlightClone = highlight:Clone() highlightClone.Adornee = player.Character highlightClone.Parent = player.Character:FindFirstChild("HumanoidRootPart") highlightClone.Name = "Highlight" end end) game.Players.PlayerRemoving:Connect(function(playerRemoved) playerRemoved.Character:FindFirstChild("HumanoidRootPart").Highlight:Destroy() end) RunService.Heartbeat:Connect(function() for i, v in pairs(Players) do repeat wait() until v.Character if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then local highlightClone = highlight:Clone() highlightClone.Adornee = v.Character highlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart") highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop highlightClone.Name = "Highlight" task.wait() end end end)
+  local espEnabled = false
+local function applyESPToPlayer(model)
+    if not model or not model:IsA("Model") then return end
+    if model:FindFirstChild("ESP_Highlight") then return end
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.FillColor = Color3.fromRGB(255, 100, 100)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.6
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = model
+    highlight.Parent = model
+end
+local function removeAllESP()
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Highlight") and obj.Name == "ESP_Highlight" then
+            obj:Destroy()
+        end
+    end
+end
+RunService.RenderStepped:Connect(function()
+    if espEnabled then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= player and plr.Character then
+                applyESPToPlayer(plr.Character)
+            end
+        end
+    end
 end)
 
   local credits = creds:section("自瞄功能", true)
