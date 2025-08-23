@@ -162,8 +162,8 @@ end)
 
 local credits = creds:section("生存99夜", true)
 
-credits:Button("二狗子", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("TX", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/99-Nights-TX-XIAN-MIAN______-_-_--_-_-_-_--_-_-_-_--_-_-_-_-_--_-_-_-__------_-_-_-_.lua"))()
 end)
 
 credits:Button("英文99day", function()
@@ -172,12 +172,12 @@ end)
 
 local credits = creds:section("墨水游戏", true)
 
-credits:Button("AX英文", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("未知", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef127382/inkgames.github.io/refs/heads/main/ringta.lua"))()
 end)
 
-credits:Button("Cat超好用英文", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("OP", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/ScripterVaz/InkGameAzure/main/Protected_7974105512464815.lua.txt"))()
 end)
 
 local credits = creds:section("死铁轨", true)
