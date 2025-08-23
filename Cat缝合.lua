@@ -1,64 +1,64 @@
-local library = loadstring(game:HttpGet("https://pastebin.com/raw/3vQbADjh", true))()
-local StarterGui = game:GetService("StarterGui")
+当地的库=loadstring(游戏：HttpGet("https://pastebin.com/raw/3vQbADjh"本地库=loadstring(游戏：HttpGet("https://pastebin.com/raw/3vQbADjh"，正确))()
+当地的StarterGui=游戏：GetService("StarterGui"本地StarterGui=游戏：GetService("StarterGui")
 
-StarterGui:SetCore("SendNotification", {
-    Title = "Cat Hub",
-    Text = "欢迎使用Cat Hub",
-    Icon = "1755932241571",
-    Duration = 10
+StarterGui:SetCore("SendNotification", {"发送通知", {
+    Title = "Cat轮毂"，"Cat集线器",
+text="欢迎使用cat轮毂"，，"欢迎使用cat轮毂"，
+    Icon = "1755932241571","1755932241571",
+    Duration = 1010
 })
 
-local StarterGui = game:GetService("StarterGui")
+当地的StarterGui=游戏：GetService("StarterGui"本地StarterGui=游戏：GetService("StarterGui")
 
-StarterGui:SetCore("SendNotification", {
-    Title = "Cat Hub",
-    Text = "祝您玩的愉快",
-    Icon = "1755932241571",
-    Duration = 10
+StarterGui:SetCore("SendNotification", {"发送通知", {
+    Title = "Cat轮毂"，"Cat集线器",
+text="祝您玩的愉快"，"祝您玩的愉快",
+    Icon = "1755932241571","1755932241571",
+    Duration = 1010
 })
 
-local window = library:new("Cat脚本")
-    local creds = window:Tab("关于", "6031097229")
-    local bin = creds:section("信息", true)
+当地的window=库：新建("Cat脚本"本地窗口=库：新("Cat脚本")
+本地信用=窗口：选项卡("关于" creds = window:Tab("关于")"关于", "6031097229")
+当地的 bin=creds:section("信息"，正确)"信息", 正确)
     bin:Label("ByCat")    
-    bin:Label("主群1040073182")
-    bin:Label("免费脚本，禁止倒卖")
-    bin:Label("感谢使用")
+    bin:Label("主群1040073182")"主群1040073182")
+    bin:Label("免费脚本，禁止倒卖")"免费脚本，禁止倒卖")
+    bin:Label("感谢使用")"感谢使用")
 
-    local credits = creds:section("Ul设置", true)
+本地学分=学分：部分("Ul设置"，正确)"Ul设置", 正确)
 
-credits:Toggle("移除UI颜色", "", false, function(state)
-        if state then
-            game:GetService("CoreGui")["frosty is cute"].Main.DropShadowHolder.Visible = false
-        else
-            game:GetService("CoreGui")["frosty is cute"].Main.DropShadowHolder.Visible = true
-        end
-    end)
+credits:Toggle("移除UI颜色"，""，假的，功能(州)"移除UI颜色", function, 假的, 功能(州)
+        如果状态然后
+            game:GetService("CoreGuui")["frosty is cute"].Main.DropShadowHolder.Visible=假的"CoreGui")["霜是可爱的"].Main.DropShadowHolder.Visible=假的
+        其他
+            game:GetService("CoreGuui")["frosty is cute"].Main.DropShadowHolder.Visible=正确"CoreGui")["霜是可爱的"].Main.DropShadowHolder.Visible=正确
+        结束
+    结束)
    
-        credits:Button("关闭脚本",function()
+        credits:Button("关闭脚本",功能()
             game:GetService("CoreGui")["frosty is cute"]:Destroy()
-        end)
+        结束)
 
-    local creds = window:Tab("通用", "6031097229")
-    local credits = creds:section("玩家功能", true)
+    当地的creds=窗口：标签("通用" creds = window:Tab("通用")
+    当地的学分=学分：节("玩家功能", 正确)
 
-credits:Slider("步行速度!", "WalkSpeed", game.Players.LocalPlayer.Character.Humanoid.WalkSpeed, 16, 400, false, function(Speed)
-  spawn(function() while task.wait() do game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Speed end end)
-end)
+credits:Slider("步行速度!", "WalkSpeed", game.Players.LocalPlayer.Character.Humanoid.WalkSpeed, 16, 400, 假的, 功能(Speed)
+  spawn(功能() while task.wait() 在……期间task.wait()
+结束)
 
-credits:Slider("跳跃高度!", "JumpPower", game.Players.LocalPlayer.Character.Humanoid.JumpPower, 50, 400, false, function(Jump)
-  spawn(function() while task.wait() do game.Players.LocalPlayer.Character.Humanoid.JumpPower = Jump end end)
-end)
+credits:Slider("跳跃高度!", "JumpPower", game.Players.LocalPlayer.Character.Humanoid.JumpPower, 50, 400, 假的, 功能(Jump)
+  spawn(function() 在……期间task.wait()做游戏。球员。LocalPlayer。性格。类人的。JumpPower=跳转end task.wait() 
+endend)
 
 credits:Textbox("重力设置!", "Gravity", "输入", function(Gravity)
-  spawn(function() while task.wait() do game.Workspace.Gravity = Gravity end end)
-end)
+  spawn(function() 在……期间task.wait()做游戏.工作空间.重力=重力end task.wait() end game.Workspace.Gravity = Gravity 
+endend)
 
-credits:Button("飞行", function()
+credits:Button("子追", function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/fcsdsss/games/refs/heads/main/Silent%20aim/1.1"))()
-end)
+endend)
 
-credits:Toggle("夜视", "Light", false, function(Light)
+credits:Toggle("夜视", "Light", 假的, function(Light)
   spawn(function() while task.wait() do if Light then game.Lighting.Ambient = Color3.new(1, 1, 1) else game.Lighting.Ambient = Color3.new(0, 0, 0) end end end)
 end)
 
