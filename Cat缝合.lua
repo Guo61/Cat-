@@ -2,10 +2,19 @@ local library = loadstring(game:HttpGet("https://pastebin.com/raw/3vQbADjh", tru
 local StarterGui = game:GetService("StarterGui")
 
 StarterGui:SetCore("SendNotification", {
-    Title = "通知",
+    Title = "Cat脚本",
     Text = "欢迎使用Cat脚本",
     Icon = "1755932241571",
-    Duration = 8
+    Duration = 20
+})
+
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Cat脚本",
+    Text = "玩的开心",
+    Icon = "1755932241571",
+    Duration = 20
 })
 
 local window = library:new("Cat脚本")
