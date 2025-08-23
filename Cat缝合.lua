@@ -24,7 +24,7 @@ local window = library:new("Cat脚本")
     bin:Label("主群1040073182")
     bin:Label("免费脚本，禁止倒卖")
     bin:Label("感谢使用")
-    bin:Label(最近更新-8.23)
+    bin:Label(最近更新8月23日)
 
     local credits = creds:section("Ul设置", true)
 
