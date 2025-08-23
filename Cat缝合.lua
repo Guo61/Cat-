@@ -5,7 +5,7 @@ StarterGui:SetCore("SendNotification", {
     Title = "通知",
     Text = "欢迎使用Cat脚本",
     Icon = "1755932241571",
-    Duration = 4
+    Duration = 8
 })
 
 local window = library:new("Cat脚本")
