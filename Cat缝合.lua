@@ -20,11 +20,11 @@ StarterGui:SetCore("SendNotification", {
 local window = library:new("Cat脚本")
     local creds = window:Tab("关于", "6031097229")
     local bin = creds:section("信息", true)
-    bin:Label("作者Cat")    
-    bin:Label("QQ:3395858053")
+    bin:Label("ByCat")    
+    bin:Label("主群1040073182")
     bin:Label("免费脚本，禁止倒卖")
     bin:Label("感谢使用")
-    bin:Label("欢迎使用")
+    bin:Label(最近更新-8.23)
 
     local credits = creds:section("Ul设置", true)
 
