@@ -181,16 +181,12 @@ credits:Button("Cat超好用英文", function()
 end)
 
 local credits = creds:section("死铁轨", true)
-credits:Button("刷债券", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("脚本1", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/iopjklbnmsss/SansHubScript/refs/heads/main/SansHub"))()
 end)
 
 credits:Button("好用刷债券", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
-end)
-
-credits:Button("死铁轨英文", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/thantzy/thanhub/refs/heads/main/thanv1"))()
 end)
 
 local credits = creds:section("战争大亨", true)
@@ -229,10 +225,6 @@ credits:Button("AgentX771", function()
 end)
 
 local credits = creds:section("被遗弃", true)
-
-credits:Button("英文Cat卡密在群公告", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
-end)
 
 credits:Button("NOL", function()
    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
