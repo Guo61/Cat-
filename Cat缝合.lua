@@ -140,15 +140,10 @@ end)
 
     local creds = window:Tab("脚本区", "6031097229")
 
-local credits = creds:section("其他", true)
-
-credits:Button("XK", function()
-   loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))(), true))()
-end)
     local credits = creds:section("最强战场", true)
 
 credits:Button("英文无限侧翻", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat907692/Cat/14a46d9fe32a99b38db472919199398754699419/Cat", true))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat907692/Cat/14a46d9fe32a99b38db472919199398754699419/Jay", true))()
 end)
 
 credits:Button("中文最强战场", function()
@@ -161,7 +156,7 @@ end)
 
 local credits = creds:section("doors", true)
 
-credits:Button("Cat中文doors", function()
+credits:Button("中文doors", function()
    loadstring(game:HttpGet("https://rscripts.net/raw/not-patched-infinite-money-money-farm-open-shop_1753743540999_gqxO4z8nzH.txt"))()
 end)
 
