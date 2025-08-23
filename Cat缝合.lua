@@ -146,12 +146,12 @@ credits:Button("英文无限侧翻", function()
    loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat907692/Cat/14a46d9fe32a99b38db472919199398754699419/Jay", true))()
 end)
 
-credits:Button("中文最强战场", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("垃圾桶", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/gycgchgyfytdttr/shenqin/refs/heads/main/V1.0.0.txt"))()
 end)
 
-credits:Button("英文丢垃圾桶", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("自动格挡+自瞄", function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/Cyborg883/TSB/refs/heads/main/CombatGui"))()
 end)
 
 local credits = creds:section("doors", true)
@@ -226,8 +226,8 @@ end)
 
 local credits = creds:section("被遗弃", true)
 
-credits:Button("NOL", function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest"))()
+credits:Button("被遗弃", function()
+   loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/ivannetta/ShitScripts/refs/heads/main/forsaken.lua")))()
 end)
 
    local creds = window:Tab("脚本区", "6031097229")
