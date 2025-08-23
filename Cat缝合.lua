@@ -139,7 +139,12 @@ end)
 end)
 
     local creds = window:Tab("脚本区", "6031097229")
-  
+
+local credits = creds:section("其他", true)
+
+credits:Button("XK", function()
+   loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))(), true))()
+end)
     local credits = creds:section("最强战场", true)
 
 credits:Button("英文无限侧翻", function()
