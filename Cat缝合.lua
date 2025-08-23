@@ -5,7 +5,7 @@ StarterGui:SetCore("SendNotification", {
     Title = "Cat脚本",
     Text = "欢迎使用Cat脚本",
     Icon = "1755932241571",
-    Duration = 20
+    Duration = 10
 })
 
 local StarterGui = game:GetService("StarterGui")
@@ -14,7 +14,7 @@ StarterGui:SetCore("SendNotification", {
     Title = "Cat脚本",
     Text = "玩的开心",
     Icon = "1755932241571",
-    Duration = 20
+    Duration = 10
 })
 
 local window = library:new("Cat脚本")
@@ -139,12 +139,6 @@ end)
 end)
 
     local creds = window:Tab("脚本区", "6031097229")
-
-    local cedits = creds:sction("其他脚本",true)
-  
-credits:Button("XK",function()
-   loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()
-end)
   
     local credits = creds:section("最强战场", true)
 
