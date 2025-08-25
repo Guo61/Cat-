@@ -30,17 +30,10 @@ SidebarLine.ZIndex = 5
 SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
-local AboutSection = MainWindow:Section({ Title = "关于", Openen = true })
-local AboutTab = AboutSection:Tab({ Title = "信息", Icon = "info" })
-
-AboutTab:Paragraph({
-     Title = "Cat Hub",
-     Desc = "ByCcat\nQQ3395858053\n感谢使用\n公益",
-     Image = "user",
-     ImageSize = 24,
-     Color = "White"
-})
-AboutTab:Divider()
+local Tab = Window:Tab({Title = "信息", Icon = "star"}) do
+    Tab:Section({Title = "Cat Hub\n感谢使用\nBy Ccat\nQQ:3395858053\n感谢Gz-神明的一路陪伴})
+    
+    Window:Line()
      
 --Tab
 local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
