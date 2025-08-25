@@ -61,7 +61,7 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
         print("Button clicked!")
             Window:Notify({
                 Title = "正在运行",
-                Desc = "这是空壳",
+                Desc = "",
                 Time = 1
             })
         end
