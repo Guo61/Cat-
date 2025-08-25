@@ -31,8 +31,9 @@ SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 -- Tab
-local Tab = Window:Tab({Title = "关于",Icon = "moon"}) do
+local Tab = Window:Tab({Title = "关于", Icon = "star"}) do
 Window:Line()
+--Tab
 local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
     -- Section
     Tab:Section({Title = "通用"})
