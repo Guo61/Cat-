@@ -9,7 +9,7 @@ local StarterGui = game:GetService("StarterGui")
 StarterGui:SetCore("SendNotification", {
     Title = "Cat Hub",
     Text = "欢迎使用",
-    Icon = "star",
+    Icon = "rbxassetid://108453362719381",
     Duration = 5
 })
 
@@ -18,7 +18,7 @@ local StarterGui = game:GetService("StarterGui")
 StarterGui:SetCore("SendNotification", {
     Title = "Cat Hub",
     Text = "加载完毕",
-    Icon = "star",
+    Icon = "rbxassetid://108453362719381",
     Duration = 8
 })
 
@@ -60,8 +60,8 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
         Callback = function()
         print("Button clicked!")
             Window:Notify({
-                Title = "Button",
-                Desc = "Action performed successfully.",
+                Title = "正在运行",
+                Desc = "这是空壳",
                 Time = 1
             })
         end
