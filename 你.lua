@@ -67,18 +67,6 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
         end
     })
 
-    -- Textbox
-    Tab:Textbox({
-        Title = "Input Text",
-        Desc = "Type something here",
-        Placeholder = "Enter value",
-        Value = "",
-        ClearTextOnFocus = false,
-        Callback = function(text)
-            print("Textbox value:", text)
-        end
-    })
-
     -- Slider
     Tab:Slider({
         Title = "设置速度",
@@ -88,16 +76,6 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
         Value = 25,
         Callback = function(val)
             print("Slider:", val)
-        end
-    })
-
-    -- Dropdown
-    Tab:Dropdown({
-        Title = "Choose Option",
-        List = {"Option 1", "Option 2", "Option 3"},
-        Value = "Option 1",
-        Callback = function(choice)
-            print("Selected:", choice)
         end
     })
 
@@ -120,8 +98,8 @@ Window:Line()
 local Extra = Window:Tab({Title = "极速传奇", Icon = "tag"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
-        Title = "Show Message",
-        Desc = "Display a popup",
+        Title = "传送到城市",
+        Desc = "点击",
         Callback = function()
             Window:Notify({
                 Title = "Fluent UI",
