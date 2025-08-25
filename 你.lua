@@ -4,10 +4,50 @@
 -- Load UI Library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/DummyUi-leak-by-x2zu/fetching-main/Tools/Framework.luau"))()
 
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Cat Hub",
+    Text = "欢迎使用",
+    Icon = "star",
+    Duration = 5
+})
+
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Cat Hub",
+    Text = "加载完毕",
+    Icon = "star",
+    Duration = 8
+})
+
+local Tab = Window:MakeTab({"个人信息", "cool"})
+
+local Section = Tab:AddSection("注册时间:"..day.."天")
+
+local Section = Tab:AddSection("注册时间:"..week.."星期")
+
+local Section = Tab:AddSection("注册时间:"..mouth.."月")
+
+local Section = Tab:AddSection("注册时间:"..year.."年")
+
+local Section = Tab:AddSection("游戏id:"..game.GameId)
+
+local Section = Tab:AddSection("用户id:"..game.Players.LocalPlayer.UserId)
+
+local Section = Tab:AddSection("客户端id:"..game:GetService("RbxAnalyticsService"):GetClientId())
+
+local Section = Tab:AddSection("注入器:"..identifyexecutor())
+
+local Section = Tab:AddSection("用户名:"..game.Players.LocalPlayer.Character.Name)
+
+local Section = Tab:AddSection("服务器名称:"..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
+
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
-    Desc = "By Ccat(3395858053)",
+    Desc = "感谢游玩与支持",
     Icon = 105059922903197,
     Theme = "Dark",
     Config = {
