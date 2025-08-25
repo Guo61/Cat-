@@ -32,7 +32,7 @@ SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 -- Tab
 local Tab = Window:Tab({Title = "关于",Icon = "moon"}) do
-
+Window:Line()
 local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
     -- Section
     Tab:Section({Title = "通用"})
@@ -126,7 +126,7 @@ local Extra = Window:Tab({Title = "速度传奇", Icon = "tag"}) do
     })
 end
 Window:Line()
-local Extra = Window:Tab({Title = "Settings", Icon = "wrench"}) do
+local Extra = Window:Tab({Title = "设置", Icon = "wrench"}) do
     Extra:Section({Title = "Config"})
     Extra:Button({
         Title = "Show Message",
