@@ -31,7 +31,9 @@ SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 -- Tab
-local Tab = Window:Tab({Title = "Main", Icon = "star"}) do
+local Tab = Window:Tab({Title = "关于",Icon = "moon"}) do
+
+local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
     -- Section
     Tab:Section({Title = "通用"})
 
@@ -109,14 +111,14 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
-    Extra:Section({Title = "速度传奇"})
+local Extra = Window:Tab({Title = "速度传奇", Icon = "tag"}) do
+    Extra:Section({Title = "传送"})
     Extra:Button({
-        Title = "我爱你",
+        Title = "传送到city",
         Desc = "Cat Hub",
         Callback = function()
             Window:Notify({
-                Title = "Fluent UI",
+                Title = "通知",
                 Desc = "正在运行!",
                 Time = 3
             })
