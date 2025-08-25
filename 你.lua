@@ -30,15 +30,11 @@ SidebarLine.ZIndex = 5
 SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
-local Tab = Window:Tab({Title = "信息", Icon = "star"}) do
-    Tab:Section({Title = "Cat Hub\n感谢使用\nBy Ccat\nQQ:3395858053\n感谢Gz-神明的一路陪伴})
-    
-    Window:Line()
-     
 --Tab
 local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
     -- Section
-    Tab:Section({Title = "通用"})
+    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053\n感谢Gz-神明的支持与陪伴"}),
+    Tsb:Section({Title = "通用"})
 
     -- Toggle
     Tab:Toggle({
