@@ -30,7 +30,7 @@ local Window = Library:Window({
     Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
-        Size = UDim2.new(0, 500, 0, 400)
+        Size = UDim2.new(0, 500, 0, 350)
     },
     CloseUIButton = {
         Enabled = true,
@@ -55,14 +55,9 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 
     -- Button
     Tab:Button({
-        Title = "感谢支持",
-        Desc = "传送到极速传奇",
-        Callback = function()
-            print("Button clicked!")
-            Window:Notify({
-                Title = "Button",
-                Desc = "Action performed successfully.",
-                Time = 3
+        Title = "传送到极速传奇",
+        Desc = "感谢支持",
+        Callback = function()          
             })
         end
     })
