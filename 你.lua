@@ -54,14 +54,21 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     Tab:Section({Title = "By Ccat\nQQ3395858053"})
 
     -- Button
-    Tab:Button({
-        Title = "传送到极速传奇",
-        Desc = "感谢支持",
-        Callback = function()
-        loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()
-            })
-        end
-    })
+    Tab:AddButton({
+    
+    Name = "无限钻石",
+    
+    Callback = function()
+    while true do
+local args = {
+	"collectOrb",
+	"Gem",
+	"City"
+}
+game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
+wait(0.5)
+end
+    end}).
 
     -- Slider
     Tab:Slider({
