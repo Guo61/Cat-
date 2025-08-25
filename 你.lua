@@ -12,7 +12,7 @@ local Window = Library:Window({
     Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
-        Size = UDim2.new(0, 500, 0, 400)
+        Size = UDim2.new(0, 500, 0, 350)
     },
     CloseUIButton = {
         Enabled = true,
@@ -30,15 +30,6 @@ SidebarLine.ZIndex = 5
 SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
-local AboutTab = AboutSection:Tab({Title = "信息", Icon = "star"})
-AboutTab:Paragraph({
-    Title = "Cat Hub",
-    Desc = "ByCcat\nQQ3395858053\n8月25日",
-    Image = "user",
-    ImageSize = 24
-    Color = "White"
-})
-AboutTab:Divider()
 --Tab
 local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
     -- Section
