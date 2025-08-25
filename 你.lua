@@ -131,38 +131,15 @@ local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
         Title = "传送到城市",
-        Desc = "传送至指定城市坐标",
+        Desc = "传送至指定坐标",
         Callback = function()
-            -- 检查玩家是否存在且有角色
-            local player = game.Players.LocalPlayer
-            if not player or not player.Character then
-                Window:Notify({
-                    Title = "错误",
-                    Desc = "玩家角色不存在，无法传送",
-                    Time = 3
-                })
-                return
-            end
-
-            -- 定义目标 CFrame（使用你提供的城市坐标参数）
-            local targetCFrame = CFrame.new(-9682.98828, 74.8522873, 3099.03394, 0.087131381, 0, 0.996196866, 0, 1, 0, -0.996196866, 0, 0.087131381)
-
-            -- 获取角色的 HumanoidRootPart 并设置其 CFrame
-            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                humanoidRootPart.CFrame = targetCFrame
-                Window:Notify({
-                    Title = "传送成功",
-                    Desc = "已传送到城市指定位置",
-                    Time = 3
-                })
-            else
-                Window:Notify({
-                    Title = "错误",
-                    Desc = "未找到 HumanoidRootPart，无法传送",
-                    Time = 3
-                })
-            end
+ game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-9682.98828, 74.8522873, 3099.03394, 0.087131381, 0, 0.996196866, 0, 1, 0, -0.996196866, 0, 0.087131381)
+end})
+            Window:Notify({
+                Title = "Fluent UI",
+                Desc = "Everything works fine!",
+                Time = 3
+            })
         end
     })
 end
