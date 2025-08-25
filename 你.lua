@@ -9,7 +9,7 @@ local Window = Library:Window({
     Title = "Cat Hub",
     Desc = "By Ccat(3395858053)",
     Icon = 105059922903197,
-    Theme = "黑色",
+    Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
         Size = UDim2.new(0, 500, 0, 400)
@@ -112,11 +112,11 @@ Window:Line()
 local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
     Extra:Section({Title = "速度传奇"})
     Extra:Button({
-        Title = "Show Message",
-        Desc = "Display a popup",
+        Title = "我爱你",
+        Desc = "Cat Hub",
         Callback = function()
             Window:Notify({
-                Title = "通知",
+                Title = "Fluent UI",
                 Desc = "正在运行!",
                 Time = 3
             })
