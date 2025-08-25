@@ -31,10 +31,9 @@ SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 --Tab
-local Tab = Window:Tab({Title = "人物", Icon = "star"}) do
+local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     -- Section
-    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053\n感谢Gz-神明的支持与陪伴"}),
-    Tsb:Section({Title = "通用"})
+    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053\n感谢Gz-神明支持"})
 
     -- Toggle
     Tab:Toggle({
