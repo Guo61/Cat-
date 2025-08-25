@@ -25,16 +25,16 @@ StarterGui:SetCore("SendNotification", {
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
-    Desc = "感谢游玩与支持",
+    Desc = "感谢游玩",
     Icon = 105059922903197,
     Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
-        Size = UDim2.new(0, 500, 0, 350)
+        Size = UDim2.new(0, 500, 0, 400)
     },
     CloseUIButton = {
         Enabled = true,
-        Text = "关闭/打开"
+        Text = "打开/关闭"
     }
 })
 
@@ -48,25 +48,15 @@ SidebarLine.ZIndex = 5
 SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
---Tab
+-- Tab
 local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     -- Section
-    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053"})
-
-    -- Toggle
-    Tab:Toggle({
-        Title = "Enable Feature",
-        Desc = "Toggle to enable or disable the feature",
-        Value = false,
-        Callback = function(v)
-            print("Toggle:", v)
-        end
-    })
+    Tab:Section({Title = "By Ccat\nQQ3395858053"})
 
     -- Button
     Tab:Button({
-        Title = "Run Action",
-        Desc = "Click to perform something",
+        Title = "感谢支持",
+        Desc = "传送到极速传奇",
         Callback = function()
             print("Button clicked!")
             Window:Notify({
@@ -127,11 +117,11 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
+local Extra = Window:Tab({Title = "极速传奇", Icon = "tag"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
-        Title = "传送到城市",
-        Desc = "Cat Hub",
+        Title = "Show Message",
+        Desc = "Display a popup",
         Callback = function()
             Window:Notify({
                 Title = "Fluent UI",
@@ -149,7 +139,7 @@ local Extra = Window:Tab({Title = "设置", Icon = "wrench"}) do
         Desc = "Display a popup",
         Callback = function()
             Window:Notify({
-                Title = "Fluent UI"
+                Title = "Fluent UI",
                 Desc = "Everything works fine!",
                 Time = 3
             })
