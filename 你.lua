@@ -22,28 +22,6 @@ StarterGui:SetCore("SendNotification", {
     Duration = 8
 })
 
-local Tab = Window:MakeTab({"个人信息", "cool"})
-
-local Section = Tab:AddSection("注册时间:"..day.."天")
-
-local Section = Tab:AddSection("注册时间:"..week.."星期")
-
-local Section = Tab:AddSection("注册时间:"..mouth.."月")
-
-local Section = Tab:AddSection("注册时间:"..year.."年")
-
-local Section = Tab:AddSection("游戏id:"..game.GameId)
-
-local Section = Tab:AddSection("用户id:"..game.Players.LocalPlayer.UserId)
-
-local Section = Tab:AddSection("客户端id:"..game:GetService("RbxAnalyticsService"):GetClientId())
-
-local Section = Tab:AddSection("注入器:"..identifyexecutor())
-
-local Section = Tab:AddSection("用户名:"..game.Players.LocalPlayer.Character.Name)
-
-local Section = Tab:AddSection("服务器名称:"..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
-
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
@@ -149,21 +127,24 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "速度传奇", Icon = "tag"}) do
-    Extra:Section({Title = "传送"})
-    Extra:Button({
-        Title = "传送到city",
-        Desc = "Cat Hub",
-        Callback = function()
-            Window:Notify({
-                Title = "通知",
-                Desc = "正在运行!",
-                Time = 3
-            })
-        end
-    })
-end
-Window:Line()
+local Tab = Window:MakeTab({"传送", "cool"})
+
+Tab:AddButton({"城市", function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-9682.98828, 74.8522873, 3099.03394, 0.087131381, 0, 0.996196866, 0, 1, 0, -0.996196866, 0, 0.087131381)
+end})
+
+Tab:AddButton({"白雪城", function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-9676.13867, 74.8522873, 3782.69385, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+end})
+
+Tab:AddButton({"熔岩城", function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-11054.9688, 232.791656, 4898.62842, -0.0872479677, 0.000158954252, -0.996186614, -0.00054083002, 0.999999821, 0.00020692969, 0.996186495, 0.000556821818, -0.0872478485)
+end})
+
+Tab:AddButton({"传奇公路", function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-13098.8711, 232.791656, 5907.62793, -0.0872479677, 0.000158954252, -0.996186614, -0.00054083002, 0.999999821, 0.00020692969, 0.996186495, 0.000556821818, -0.0872478485)
+end})
+
 local Extra = Window:Tab({Title = "设置", Icon = "wrench"}) do
     Extra:Section({Title = "Config"})
     Extra:Button({
