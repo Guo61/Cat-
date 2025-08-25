@@ -57,7 +57,8 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     Tab:Button({
         Title = "传送到极速传奇",
         Desc = "感谢支持",
-        Callback = function()          
+        Callback = function()
+        loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()
             })
         end
     })
