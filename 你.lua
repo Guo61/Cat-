@@ -51,7 +51,7 @@ SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 --Tab
 local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     -- Section
-    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053\n感谢Gz-神明支持"})
+    Tab:Section({Title = "感谢游玩\nBy Ccat\nQQ3395858053"})
 
     -- Toggle
     Tab:Toggle({
@@ -131,7 +131,7 @@ local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
         Title = "传送到城市",
-        Desc = "传送至指定坐标",
+        Desc = "Cat Hub",
         Callback = function()
             Window:Notify({
                 Title = "Fluent UI",
@@ -142,7 +142,6 @@ local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
     })
 end
 Window:Line()
-
 local Extra = Window:Tab({Title = "设置", Icon = "wrench"}) do
     Extra:Section({Title = "Config"})
     Extra:Button({
