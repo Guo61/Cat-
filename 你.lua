@@ -95,13 +95,13 @@ local Tab = Window:Tab({Title = "Main", Icon = "star"}) do
 
     -- Code Display
     local CodeBlock = Tab:Code({
-        Title = "我喜欢你",
+        Title = "Example Code",
         Code = "-- This is a code preview\nprint('Hello world')"
     })
 
     -- Simulate update
     task.delay(5, function()
-        CodeBlock:SetCode("-- Updated!\nprint('我爱你')")
+        CodeBlock:SetCode("-- Updated!\nprint('New content loaded')")
     end)
 end
 
