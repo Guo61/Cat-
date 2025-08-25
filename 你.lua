@@ -133,8 +133,6 @@ local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
         Title = "传送到城市",
         Desc = "传送至指定坐标",
         Callback = function()
- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-9682.98828, 74.8522873, 3099.03394, 0.087131381, 0, 0.996196866, 0, 1, 0, -0.996196866, 0, 0.087131381)
-end})
             Window:Notify({
                 Title = "Fluent UI",
                 Desc = "Everything works fine!",
