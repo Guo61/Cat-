@@ -81,7 +81,7 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 
     -- Code Display
     local CodeBlock = Tab:Code({
-        Title = "Example Code",
+        Title = "Love Code",
         Code = "-- This is a code preview\nprint('Hello world')"
     })
 
@@ -102,31 +102,31 @@ local Extra = Window:Tab({Title = "极速传奇", Icon = "tag"}) do
         Desc = "点击",
         Callback = function()
             Window:Notify({
-                Title = "Fluent UI",
-                Desc = "Everything works fine!",
-                Time = 3
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
             })
         end
     })
 end
 Window:Line()
-local Extra = Window:Tab({Title = "设置", Icon = "wrench"}) do
-    Extra:Section({Title = "Config"})
+local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
+    Extra:Section({Title = "传送"})
     Extra:Button({
-        Title = "Show Message",
-        Desc = "Display a popup",
+        Title = "出生点",
+        Desc = "单击以执行",
         Callback = function()
             Window:Notify({
-                Title = "Fluent UI",
-                Desc = "Everything works fine!",
-                Time = 3
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
             })
         end
     })
 end
 -- Final Notification
 Window:Notify({
-    Title = "x2zu",
-    Desc = "All components loaded successfully! Credits leak: @x2zu",
-    Time = 4
+    Title = "Cat Hub关闭",
+    Desc = "感谢您的游玩",
+    Time = 1
 })
