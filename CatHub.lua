@@ -111,7 +111,7 @@ Tab:Button({
         highlight.Name = "Highlight"
         highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 设置高亮始终在最上层显示
 
-        -- 为已有玩家添加高亮
+        -- 为已有玩家添加高亮和名字显示
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
                 repeat
@@ -123,10 +123,27 @@ Tab:Button({
                     highlightClone.Adornee = player.Character
                     highlightClone.Parent = humanoidRootPart
                 end
+                -- 创建显示名字的 BillboardGui
+                local billboardGui = Instance.new("BillboardGui")
+                billboardGui.Name = "PlayerNameDisplay"
+                billboardGui.Adornee = humanoidRootPart
+                billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                billboardGui.StudsOffset = Vector3.new(0, 3, 0) -- 名字在人物上方的偏移
+                billboardGui.AlwaysOnTop = true
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Parent = billboardGui
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Text = player.Name
+                textLabel.TextColor3 = Color3.new(1, 1, 1)
+                textLabel.TextSize = 20
+
+                billboardGui.Parent = humanoidRootPart
             end
         end
 
-        -- 新玩家加入时添加高亮
+        -- 新玩家加入时添加高亮和名字显示
         game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function(character)
                 repeat
@@ -138,29 +155,74 @@ Tab:Button({
                     highlightClone.Adornee = character
                     highlightClone.Parent = humanoidRootPart
                 end
+                -- 创建显示名字的 BillboardGui
+                local billboardGui = Instance.new("BillboardGui")
+                billboardGui.Name = "PlayerNameDisplay"
+                billboardGui.Adornee = humanoidRootPart
+                billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+                billboardGui.AlwaysOnTop = true
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Parent = billboardGui
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Text = player.Name
+                textLabel.TextColor3 = Color3.new(1, 1, 1)
+                textLabel.TextSize = 20
+
+                billboardGui.Parent = humanoidRootPart
             end)
         end)
 
-        -- 玩家离开时移除高亮
+        -- 玩家离开时移除高亮和名字显示
         game.Players.PlayerRemoving:Connect(function(player)
             if player.Character then
                 local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart and humanoidRootPart:FindFirstChild("Highlight") then
-                    humanoidRootPart.Highlight:Destroy()
+                if humanoidRootPart then
+                    if humanoidRootPart:FindFirstChild("Highlight") then
+                        humanoidRootPart.Highlight:Destroy()
+                    end
+                    if humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
+                        humanoidRootPart.PlayerNameDisplay:Destroy()
+                    end
                 end
             end
         end)
 
-        -- 每帧检查并维护高亮（确保人物存在时高亮也存在）
+        -- 每帧检查并维护高亮和名字显示
         RunService.Heartbeat:Connect(function()
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= game.Players.LocalPlayer and player.Character then
                     local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                    if humanoidRootPart and not humanoidRootPart:FindFirstChild("Highlight") then
-                        local highlightClone = highlight:Clone()
-                        highlightClone.Adornee = player.Character
-                        highlightClone.Parent = humanoidRootPart
-                        task.wait()
+                    if humanoidRootPart then
+                        -- 维护高亮
+                        if not humanoidRootPart:FindFirstChild("Highlight") then
+                            local highlightClone = highlight:Clone()
+                            highlightClone.Adornee = player.Character
+                            highlightClone.Parent = humanoidRootPart
+                            task.wait()
+                        end
+                        -- 维护名字显示
+                        if not humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
+                            local billboardGui = Instance.new("BillboardGui")
+                            billboardGui.Name = "PlayerNameDisplay"
+                            billboardGui.Adornee = humanoidRootPart
+                            billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                            billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+                            billboardGui.AlwaysOnTop = true
+
+                            local textLabel = Instance.new("TextLabel")
+                            textLabel.Parent = billboardGui
+                            textLabel.Size = UDim2.new(1, 0, 1, 0)
+                            textLabel.BackgroundTransparency = 1
+                            textLabel.Text = player.Name
+                            textLabel.TextColor3 = Color3.new(1, 1, 1)
+                            textLabel.TextSize = 20
+
+                            billboardGui.Parent = humanoidRootPart
+                            task.wait()
+                        end
                     end
                 end
             end
