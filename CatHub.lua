@@ -112,6 +112,38 @@ end
         end
     })
     
+    Extra:Button({
+        Title = "草地挑战",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-1550.49, 34.51, 87.48)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
+    Extra:Button({
+        Title = "海市蜃楼挑战",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-1414.31, 34.51, -2058.34)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
