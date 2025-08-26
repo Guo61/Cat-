@@ -111,43 +111,42 @@ Tab:Button({
     end
 })
 
--- 初始化基础服务与全局变量（需确保在脚本顶部定义）
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-local airJumpConn = nil -- 存储输入监听连接
-local airJumpCooldown = false -- 跳跃冷却标记
--- 用于存储踏空跳脚本相关的连接（关闭时断开）
-local stepAirJumpConnection
+-- 存储无限跳相关的连接和状态，用于开关控制与资源清理
+local infiniteJumpData = {
+    jumpConnection = nil,  -- 存储JumpRequest的连接
+    isEnabled = false      -- 标记无限跳是否启用
+}
 
 Tab:Toggle({
-    Title = "踏空跳",
-    Description = "从指定URL加载并执行踏空跳脚本（开关控制启停）",
-    Default = false, -- 默认处于关闭状态
-    Callback = function(isToggled)
-        if isToggled then
-            -- 开启逻辑：加载并执行踏空跳脚本
-            local success, result = pcall(function()
-                -- 从指定URL获取脚本内容
-                local scriptContent = game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true)
-                local executeFunc = loadstring(scriptContent)
-                if executeFunc then
-                    stepAirJumpConnection = executeFunc() -- 假设脚本返回可断开的连接（如事件连接）
+    Title = "无限跳",
+    Default = false,  -- 默认关闭无限跳
+    Callback = function(state)
+        infiniteJumpData.isEnabled = state  -- 同步开关状态
+        local userInputService = game:GetService("UserInputService")
+        local localPlayer = game.Players.LocalPlayer
+
+        if state then
+            -- 开启逻辑：创建跳跃请求监听
+            infiniteJumpData.jumpConnection = userInputService.JumpRequest:Connect(function()
+                -- 仅在功能启用时执行跳跃
+                if infiniteJumpData.isEnabled then
+                    local character = localPlayer.Character
+                    -- 检查角色和人形对象是否存在
+                    if character and character:FindFirstChildOfClass("Humanoid") then
+                        local humanoid = character.Humanoid
+                        -- 仅当人形处于地面时触发跳跃（避免空中重复跳逻辑冲突）
+                        if humanoid.FloorMaterial ~= Enum.Material.Air then
+                            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        end
+                    end
                 end
-                return true
             end)
-            if success then
-                print("踏空跳脚本加载并执行成功")
-            else
-                print("踏空跳脚本加载/执行失败：" .. tostring(result))
-            end
         else
-            -- 关闭逻辑：断开踏空跳脚本相关的连接
-            if stepAirJumpConnection then
-                stepAirJumpConnection:Disconnect()
-                stepAirJumpConnection = nil
+            -- 关闭逻辑：断开监听连接，停止无限跳
+            if infiniteJumpData.jumpConnection then
+                infiniteJumpData.jumpConnection:Disconnect()
+                infiniteJumpData.jumpConnection = nil  -- 清空连接，避免内存泄漏
             end
-            print("踏空跳脚本已停止")
         end
     end
 })
@@ -182,6 +181,116 @@ Tab:Toggle({
                 childChaseConnection = nil
             end
             print("子追脚本已关闭")
+        end
+    end
+})
+
+local nightVisionData = {
+    pointLight = nil,
+    changedConnection = nil
+}
+
+Tab:Toggle({
+    Title = "夜视",
+    Default = false,
+    Callback = function(isEnabled)
+        local lighting = game:GetService("Lighting")
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
+
+        if isEnabled then
+            -- 开启夜视逻辑
+            pcall(function()
+                -- 保存原始的 Lighting 属性，方便关闭时恢复
+                nightVisionData.originalAmbient = lighting.Ambient
+                nightVisionData.originalBrightness = lighting.Brightness
+                nightVisionData.originalFogEnd = lighting.FogEnd
+
+                lighting.Ambient = Color3.fromRGB(255, 255, 255)
+                lighting.Brightness = 1
+                lighting.FogEnd = 1e10
+
+                -- 禁用 Lighting 中的特效
+                for _, v in pairs(lighting:GetDescendants()) do
+                    if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
+                        v.Enabled = false
+                    end
+                end
+
+                -- 监听 Lighting 变化，保持夜视效果
+                nightVisionData.changedConnection = lighting.Changed:Connect(function()
+                    lighting.Ambient = Color3.fromRGB(255, 255, 255)
+                    lighting.Brightness = 1
+                    lighting.FogEnd = 1e10
+                end)
+
+                -- 给角色添加 PointLight
+                spawn(function()
+                    local character = localPlayer.Character
+                    repeat wait() until character ~= nil
+                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                    if not humanoidRootPart:FindFirstChildWhichIsA("PointLight") then
+                        local headlight = Instance.new("PointLight", humanoidRootPart)
+                        headlight.Brightness = 1
+                        headlight.Range = 60
+                        nightVisionData.pointLight = headlight
+                    end
+                end)
+            end)
+        else
+            -- 关闭夜视逻辑，恢复原始设置
+            if nightVisionData.originalAmbient then
+                lighting.Ambient = nightVisionData.originalAmbient
+            end
+            if nightVisionData.originalBrightness then
+                lighting.Brightness = nightVisionData.originalBrightness
+            end
+            if nightVisionData.originalFogEnd then
+                lighting.FogEnd = nightVisionData.originalFogEnd
+            end
+
+            -- 断开 Lighting 变化的连接
+            if nightVisionData.changedConnection then
+                nightVisionData.changedConnection:Disconnect()
+                nightVisionData.changedConnection = nil
+            end
+
+            -- 移除添加的 PointLight
+            if nightVisionData.pointLight and nightVisionData.pointLight.Parent then
+                nightVisionData.pointLight:Destroy()
+                nightVisionData.pointLight = nil
+            end
+        end
+    end
+})
+-- 用于存储自瞄相关的连接，方便关闭时断开
+local aimRenderSteppedConnection = nil
+-- 标记自瞄是否启用
+local aimEnabled = false
+
+Tab:Toggle({
+    Title = "[阿尔宙斯]自瞄",
+    Default = false,
+    Callback = function(state)
+        aimEnabled = state
+        if state then
+            -- 当开启自瞄时，连接 RenderStepped 事件，每一帧执行自瞄逻辑
+            aimRenderSteppedConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                -- 假设 getClosestPlayerToCursor 和 lookAt 函数已在其他地方定义
+                local closest = getClosestPlayerToCursor(aimPart, teamCheckEnabled)
+                if closest then
+                    local aimobj = closest.Character:FindFirstChild("aimPart") or closest.Character:FindFirstChild("Head")
+                    if aimobj then
+                        lookAt(workspace.CurrentCamera.CFrame.p, aimobj.Position)
+                    end
+                end
+            end)
+        else
+            -- 当关闭自瞄时，断开 RenderStepped 连接
+            if aimRenderSteppedConnection then
+                aimRenderSteppedConnection:Disconnect()
+                aimRenderSteppedConnection = nil
+            end
         end
     end
 })
@@ -412,39 +521,6 @@ Tab:Button({
     end
 })
 local aimbotConnection
-
-Tab:Toggle({
-    Title = "宙斯自瞄",
-    Description = "从GitHub加载并执行宙斯自瞄脚本（开关控制启停）",
-    Default = false, -- 默认处于关闭状态
-    Callback = function(isToggled)
-        if isToggled then
-            -- 开启逻辑：加载并执行自瞄脚本
-            local success, result = pcall(function()
-                -- 从指定URL获取脚本内容
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua")
-                -- 执行脚本（使用loadstring，需注意：在Roblox等平台，loadstring可能受限制）
-                local executeFunc = loadstring(scriptContent)
-                if executeFunc then
-                    aimbotConnection = executeFunc() -- 假设脚本会返回可断开的连接（如事件连接）
-                end
-                return true
-            end)
-            if success then
-                print("宙斯自瞄脚本加载并执行成功")
-            else
-                print("宙斯自瞄脚本加载/执行失败：" .. tostring(result))
-            end
-        else
-            -- 关闭逻辑：断开自瞄脚本相关的连接
-            if aimbotConnection then
-                aimbotConnection:Disconnect()
-                aimbotConnection = nil
-            end
-            print("宙斯自瞄脚本已停止")
-        end
-    end
-})
 
 -- Code Display
 local CodeBlock = Tab:Code({
