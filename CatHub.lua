@@ -80,7 +80,12 @@ Window:Line()
 local Tab = Window:MakeTab({"传送","cool"})
 
 Tab:AddButton({"城市",function()
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-534.38, 4.07, 437.75)
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait() -- 等待人物加载
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        humanoidRootPart.CFrame = CFrame.new(-534.38, 4.07, 437.75)
+    end
 end})
 
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
@@ -89,14 +94,28 @@ local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
         Title = "出生点",
         Desc = "单击以执行",
         Callback = function()
-            Window:Notify({
-                Title = "通知",
-                Desc = "传送成功",
-                Time = 1
-            })
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                -- 这里假设出生点坐标为(0, 10, 0)，可根据实际情况修改
+                humanoidRootPart.CFrame = CFrame.new(0, 10, 0)
+                Window:Notify({
+                    Title = "通知",
+                    Desc = "传送成功",
+                    Time = 1
+                })
+            else
+                Window:Notify({
+                    Title = "错误",
+                    Desc = "未找到HumanoidRootPart，传送失败",
+                    Time = 1
+                })
+            end
         end
     })
 end
+
 -- Final Notification
 Window:Notify({
     Title = "Cat Hub",
