@@ -144,6 +144,86 @@ end
         end
     })
     
+    Extra:Button({
+        Title = "冰霜挑战",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-2022.68, 0.88, 984.48)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
+    Extra:Button({
+        Title = "绿色水晶",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-388.38, 65.02, 17.75)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
+    Extra:Button({
+        Title = "蓝色水晶",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-581.72, 4.12, 404.72)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
+    Extra:Button({
+        Title = "紫色水晶",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-428.17, 4.12, 203.52)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
+    Extra:Button({
+        Title = "黄色水晶",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-313.23, 4.12, -375.43)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
