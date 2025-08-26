@@ -8,7 +8,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/
 local Window = Library:Window({
     Title = "Cat Hub",
     Desc = "感谢游玩",
-    Icon = 105059922903197,
+    Icon = "star",
     Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
@@ -31,7 +31,7 @@ SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 -- Tab
-local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
+local Tab = Window:Tab({Title = "主页", Icon = 105059922903197}) do
     -- Section
     Tab:Section({Title = "By Ccat\nQQ3395858053"})
 
@@ -77,7 +77,7 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "极速传奇", Icon = 105059922903197}) do
+local Extra = Window:Tab({Title = "极速传奇", Icon = "star"}) do
     Extra:Section({Title = "传送", Icon = "wrench"})
     Extra:Button({
         Title = "城市",
@@ -274,7 +274,49 @@ Extra:Button({
     end
 })
 
-local Extra = Window:Tab({Title = "力量传奇", Icon = "star"}) do
+Extra:Button({
+    Title = "自动吃红球(city)",
+    Desc = "单击以执行/停止",
+    Callback = function()
+        if not isRunning then
+            spawn(function()
+                shouldStop = false
+                while true do
+                    if shouldStop then
+                        break
+                    end
+                    local args = {
+                        "collectOrb",
+                        "Red Orb",
+                        "City"
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
+                    wait(0.5)
+                end
+                isRunning = false
+            end)
+            isRunning = true
+            Window:Notify({
+                Title = "通知",
+                Desc = "正在执行",
+                Time = 1
+            })
+        else
+            shouldStop = true
+            isRunning = false
+            Window:Notify({
+                Title = "通知",
+                Desc = "已停止执行",
+                Time = 1
+            })
+        end
+    end
+})
+-- 记得在合适的位置定义 isRunning 和 shouldStop 变量，比如在按钮代码上方
+local isRunning = false
+local shouldStop = false
+
+local Extra = Window:Tab({Title = "力量传奇", Icon = 105059922903197}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
         Title = "出生点",
