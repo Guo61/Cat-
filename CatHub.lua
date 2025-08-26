@@ -101,68 +101,58 @@ Callback = function(val)
 end
 })
 
--- 创建 ESP 控制按钮
-local ESPButton = Tab:Button({
-    Title = "Toggle ESP",
-    Callback = function()
-        espEnabled = not espEnabled
-        print("ESP 已" .. (espEnabled and "开启" or "关闭"))
-        -- 更新所有绘制对象的可见性
-        for _, obj in ipairs(drawingObjects) do
-            obj.Box.Visible = espEnabled
-            obj.NameLabel.Visible = espEnabled
-        end
-    end
-})
-
--- 以下是同服务器人物 ESP 代码
--- 引入必要的服务
+-- 1. 先引入必要服务（避免变量定义顺序问题）
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
 
--- ESP 相关配置
+-- 2. ESP核心配置（提前定义，避免回调中变量未初始化）
 local espEnabled = false
-local boxColor = Color3.fromRGB(255, 0, 0) -- 方框颜色，设为红色
-local nameColor = Color3.fromRGB(255, 255, 255) -- 名字颜色，设为白色
+local boxColor = Color3.fromRGB(255, 0, 0)   -- 方框颜色（红）
+local nameColor = Color3.fromRGB(255, 255, 255) -- 名字颜色（白）
+local drawingObjects = {} -- 存储绘制对象，方便管理
 
--- 存储绘制对象的表，方便后续管理
-local drawingObjects = {}
-
--- 绘制单个人物 ESP 的函数
+-- 3. 绘制单个人物ESP的核心函数（优化有效性判断）
 local function drawCharacterESP(character)
+    -- 跳过本地玩家、人物无效、没有人形/头部、人物死亡的情况
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local head = character:FindFirstChild("Head")
-    if not humanoid or not head or humanoid.Health <= 0 then
-        return
-    end
+    local player = Players:GetPlayerFromCharacter(character)
+    if not player or player == LocalPlayer then return end
+    if not humanoid or not head or humanoid.Health <= 0 then return end
 
-    -- 创建方框绘制对象
+    -- 创建方框（优化初始可见性，与espEnabled同步）
     local box = Drawing.new("Square")
     box.Color = boxColor
     box.Thickness = 2
     box.Filled = false
     box.Visible = espEnabled
 
-    -- 创建名字文本绘制对象
+    -- 创建名字标签（优化文本位置，避免遮挡）
     local nameLabel = Drawing.new("Text")
     nameLabel.Color = nameColor
     nameLabel.Size = 18
     nameLabel.Center = true
+    nameLabel.Text = player.Name -- 显示玩家名（原代码显示character名，可能不对）
     nameLabel.Visible = espEnabled
 
-    -- 将绘制对象存入表中
-    table.insert(drawingObjects, {Box = box, NameLabel = nameLabel, Character = character})
+    -- 存入管理表
+    table.insert(drawingObjects, {
+        Box = box,
+        NameLabel = nameLabel,
+        Character = character,
+        Connection = nil -- 存储每帧更新的连接，方便后续断开
+    })
 
-    -- 每帧更新绘制对象
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        -- 检查人物是否有效且 ESP 是否开启
+    -- 4. 每帧更新绘制位置（优化屏幕坐标判断）
+    local connection = RunService.RenderStepped:Connect(function()
+        -- 人物消失/ESP关闭时，清理资源
         if not character:IsDescendantOf(workspace) or not espEnabled then
             box:Remove()
             nameLabel:Remove()
             connection:Disconnect()
-            -- 从存储表中移除该人物的绘制对象
+            -- 从管理表中移除
             for i, obj in ipairs(drawingObjects) do
                 if obj.Character == character then
                     table.remove(drawingObjects, i)
@@ -172,55 +162,82 @@ local function drawCharacterESP(character)
             return
         end
 
-        -- 获取人物头部在屏幕上的位置
-        local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
-        if not onScreen then
+        -- 计算头部屏幕位置（判断是否在相机视野内）
+        local headScreenPos, isOnScreen = Camera:WorldToScreenPoint(head.Position)
+        if not isOnScreen then
             box.Visible = false
             nameLabel.Visible = false
             return
         end
 
-        -- 获取人物的边界框
-        local minBounds, maxBounds = character:GetBoundingBox()
-        local topPos = Camera:WorldToScreenPoint(minBounds.Position)
-        local bottomPos = Camera:WorldToScreenPoint(maxBounds.Position)
-
-        if topPos.Z > 0 and bottomPos.Z > 0 then
-            -- 计算方框尺寸
-            local width = 100 * (maxBounds.Position - minBounds.Position).Magnitude / screenPos.Z
-            local height = (bottomPos.Y - topPos.Y)
-
-            -- 更新方框属性
-            box.Position = Vector2.new(screenPos.X - width / 2, screenPos.Y - height / 2)
-            box.Size = Vector2.new(width, height)
-            box.Visible = true
-
-            -- 更新名字文本属性
-            nameLabel.Text = character.Name
-            nameLabel.Position = Vector2.new(screenPos.X, screenPos.Y - height / 2 - 20)
-            nameLabel.Visible = true
-        else
+        -- 计算人物边界框（优化尺寸计算，避免负数）
+        local minBound, maxBound = character:GetBoundingBox()
+        local topScreenPos = Camera:WorldToScreenPoint(minBound.Position)
+        local bottomScreenPos = Camera:WorldToScreenPoint(maxBound.Position)
+        
+        -- 确保坐标有效（Z>0表示在相机前方）
+        if topScreenPos.Z <= 0 or bottomScreenPos.Z <= 0 then
             box.Visible = false
             nameLabel.Visible = false
+            return
         end
+
+        -- 更新方框位置和尺寸
+        local boxWidth = 80 * (maxBound - minBound).Magnitude / headScreenPos.Z -- 优化宽度系数
+        local boxHeight = bottomScreenPos.Y - topScreenPos.Y
+        box.Position = Vector2.new(headScreenPos.X - boxWidth/2, topScreenPos.Y)
+        box.Size = Vector2.new(boxWidth, boxHeight)
+        box.Visible = true
+
+        -- 更新名字标签位置（在方框上方）
+        nameLabel.Position = Vector2.new(headScreenPos.X, topScreenPos.Y - 20)
+        nameLabel.Visible = true
     end)
+
+    -- 存储连接，方便后续清理
+    for _, obj in ipairs(drawingObjects) do
+        if obj.Character == character then
+            obj.Connection = connection
+            break
+        end
+    end
 end
 
--- 为已存在的玩家人物添加 ESP（初始不开启，点击按钮后才会生效）
-local function addExistingPlayerESP()
+-- 5. 加载已存在的玩家ESP（关键：首次开启时调用）
+local function loadExistingPlayerESP()
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= Players.LocalPlayer and player.Character then
+        if player ~= LocalPlayer and player.Character then
             drawCharacterESP(player.Character)
         end
-        -- 监听玩家人物加载完成事件
+        -- 监听玩家后续重生（人物加载）
         player.CharacterAdded:Connect(drawCharacterESP)
     end
 end
 
--- 监听新玩家加入事件
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(drawCharacterESP)
+-- 6. 监听新玩家加入（自动为新玩家添加ESP）
+Players.PlayerAdded:Connect(function(newPlayer)
+    newPlayer.CharacterAdded:Connect(drawCharacterESP)
 end)
+
+-- 7. ESP控制按钮（核心修复：首次开启时调用loadExistingPlayerESP）
+local ESPButton = Tab:Button({
+    Title = "Toggle Player ESP",
+    Callback = function()
+        espEnabled = not espEnabled
+        print("[ESP] 状态：" .. (espEnabled and "开启" or "关闭"))
+
+        -- 首次开启时，加载已存在的玩家
+        if espEnabled then
+            loadExistingPlayerESP()
+        else
+            -- 关闭时，隐藏所有绘制对象
+            for _, obj in ipairs(drawingObjects) do
+                obj.Box.Visible = false
+                obj.NameLabel.Visible = false
+            end
+        end
+    end
+})
 
 -- Code Display
 local CodeBlock = Tab:Code({
