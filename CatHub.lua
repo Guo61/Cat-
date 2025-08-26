@@ -321,17 +321,6 @@ end
 Window:Line()
 
 -- Another Tab Example
-local CodeBlock = Tab:Code({
-Title = "使用指南",
-Code = "请在极速传奇服务器中使用!\n没加服务器识别\n请勿在其他服务器中点击!"
-})
-
-    -- Simulate update
-    task.delay(5, function()
-        CodeBlock:SetCode("请在极速传奇服务器中使用!\n没加服务器识别\n请勿在其他服务器中点击!")
-    end)
-end
-
 local Extra = Window:Tab({Title = "极速传奇", Icon = 105059922903197}) do
     Extra:Section({Title = "传送", Icon = "wrench"})
     Extra:Button({
