@@ -109,58 +109,63 @@ Tab:Button({
         
         local highlight = Instance.new("Highlight")
         highlight.Name = "Highlight"
-        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 设置高亮始终在最上层显示
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 保证透视高亮始终可见
 
-        -- 为已有玩家添加高亮和名字显示
+        -- 为已有玩家添加透视和小尺寸名字
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
-                repeat
-                    task.wait()
-                until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                repeat task.wait() until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                local humanoidRootPart = player.Character.HumanoidRootPart
+                
+                -- 添加/维护透视高亮
                 if not humanoidRootPart:FindFirstChild("Highlight") then
                     local highlightClone = highlight:Clone()
                     highlightClone.Adornee = player.Character
                     highlightClone.Parent = humanoidRootPart
                 end
-                -- 创建显示名字的 BillboardGui
-                local billboardGui = Instance.new("BillboardGui")
-                billboardGui.Name = "PlayerNameDisplay"
-                billboardGui.Adornee = humanoidRootPart
-                billboardGui.Size = UDim2.new(0, 200, 0, 30) -- 调整 BillboardGui 大小以适配较小文字
-                billboardGui.StudsOffset = Vector3.new(0, 3, 0) -- 名字在人物上方的偏移
-                billboardGui.AlwaysOnTop = true
 
-                local textLabel = Instance.new("TextLabel")
-                textLabel.Parent = billboardGui
-                textLabel.Size = UDim2.new(1, 0, 1, 0)
-                textLabel.BackgroundTransparency = 1
-                textLabel.Text = player.Name
-                textLabel.TextColor3 = Color3.new(1, 1, 1)
-                textLabel.TextSize = 14 -- 将文字大小调小
+                -- 添加小尺寸名字显示（TextSize=9）
+                if not humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
+                    local billboardGui = Instance.new("BillboardGui")
+                    billboardGui.Name = "PlayerNameDisplay"
+                    billboardGui.Adornee = humanoidRootPart
+                    billboardGui.Size = UDim2.new(0, 150, 0, 20) -- 适配小文字的Gui尺寸
+                    billboardGui.StudsOffset = Vector3.new(0, 2.8, 0) -- 微调位置避免遮挡
+                    billboardGui.AlwaysOnTop = true
 
-                billboardGui.Parent = humanoidRootPart
+                    local textLabel = Instance.new("TextLabel")
+                    textLabel.Parent = billboardGui
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Text = player.Name
+                    textLabel.TextColor3 = Color3.new(1, 1, 1)
+                    textLabel.TextSize = 9 -- 名字缩小到9
+                    textLabel.TextScaled = false -- 关闭自动缩放，确保尺寸固定
+
+                    billboardGui.Parent = humanoidRootPart
+                end
             end
         end
 
-        -- 新玩家加入时添加高亮和名字显示
+        -- 新玩家加入时添加透视和名字
         game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function(character)
-                repeat
-                    task.wait()
-                until character:FindFirstChild("HumanoidRootPart")
-                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                repeat task.wait() until character:FindFirstChild("HumanoidRootPart")
+                local humanoidRootPart = character.HumanoidRootPart
+                
+                -- 透视高亮
                 if not humanoidRootPart:FindFirstChild("Highlight") then
                     local highlightClone = highlight:Clone()
                     highlightClone.Adornee = character
                     highlightClone.Parent = humanoidRootPart
                 end
-                -- 创建显示名字的 BillboardGui
+
+                -- 小尺寸名字
                 local billboardGui = Instance.new("BillboardGui")
                 billboardGui.Name = "PlayerNameDisplay"
                 billboardGui.Adornee = humanoidRootPart
-                billboardGui.Size = UDim2.new(0, 200, 0, 30)
-                billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+                billboardGui.Size = UDim2.new(0, 150, 0, 20)
+                billboardGui.StudsOffset = Vector3.new(0, 2.8, 0)
                 billboardGui.AlwaysOnTop = true
 
                 local textLabel = Instance.new("TextLabel")
@@ -169,47 +174,47 @@ Tab:Button({
                 textLabel.BackgroundTransparency = 1
                 textLabel.Text = player.Name
                 textLabel.TextColor3 = Color3.new(1, 1, 1)
-                textLabel.TextSize = 14 -- 将文字大小调小
+                textLabel.TextSize = 9 -- 名字缩小到9
+                textLabel.TextScaled = false
 
                 billboardGui.Parent = humanoidRootPart
             end)
         end)
 
-        -- 玩家离开时移除高亮和名字显示
+        -- 玩家离开时清理资源
         game.Players.PlayerRemoving:Connect(function(player)
-            if player.Character then
-                local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    if humanoidRootPart:FindFirstChild("Highlight") then
-                        humanoidRootPart.Highlight:Destroy()
-                    end
-                    if humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
-                        humanoidRootPart.PlayerNameDisplay:Destroy()
-                    end
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local humanoidRootPart = player.Character.HumanoidRootPart
+                if humanoidRootPart:FindFirstChild("Highlight") then
+                    humanoidRootPart.Highlight:Destroy()
+                end
+                if humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
+                    humanoidRootPart.PlayerNameDisplay:Destroy()
                 end
             end
         end)
 
-        -- 每帧检查并维护高亮和名字显示
+        -- 每帧维护透视和名字显示
         RunService.Heartbeat:Connect(function()
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= game.Players.LocalPlayer and player.Character then
                     local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
                     if humanoidRootPart then
-                        -- 维护高亮
+                        -- 维护透视
                         if not humanoidRootPart:FindFirstChild("Highlight") then
                             local highlightClone = highlight:Clone()
                             highlightClone.Adornee = player.Character
                             highlightClone.Parent = humanoidRootPart
                             task.wait()
                         end
-                        -- 维护名字显示
+
+                        -- 维护小尺寸名字
                         if not humanoidRootPart:FindFirstChild("PlayerNameDisplay") then
                             local billboardGui = Instance.new("BillboardGui")
                             billboardGui.Name = "PlayerNameDisplay"
                             billboardGui.Adornee = humanoidRootPart
-                            billboardGui.Size = UDim2.new(0, 200, 0, 30)
-                            billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+                            billboardGui.Size = UDim2.new(0, 150, 0, 20)
+                            billboardGui.StudsOffset = Vector3.new(0, 2.8, 0)
                             billboardGui.AlwaysOnTop = true
 
                             local textLabel = Instance.new("TextLabel")
@@ -218,7 +223,8 @@ Tab:Button({
                             textLabel.BackgroundTransparency = 1
                             textLabel.Text = player.Name
                             textLabel.TextColor3 = Color3.new(1, 1, 1)
-                            textLabel.TextSize = 14 -- 将文字大小调小
+                            textLabel.TextSize = 9 -- 名字缩小到9
+                            textLabel.TextScaled = false
 
                             billboardGui.Parent = humanoidRootPart
                             task.wait()
