@@ -78,7 +78,7 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "极速传奇", Icon = "star"}) do
+local Extra = Window:Tab({Title = "极速传奇", Icon = 105059922903197}) do
     Extra:Section({Title = "传送", Icon = "wrench"})
     Extra:Button({
         Title = "城市",
