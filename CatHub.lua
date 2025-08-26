@@ -77,52 +77,46 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Tab = Window:MakeTab({"传送","cool"})
-
-Tab:AddButton({"城市",function()
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait() -- 等待人物加载
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        humanoidRootPart.CFrame = CFrame.new(-534.38, 4.07, 437.75)
-    end
-end})
-
+local Extra = Window:Tab({Title = "极速传奇", Icon = "wrench"}) do
+    Extra:Section({Title = "传送", Icon = "wrench"})
+    Extra:Button({
+        Title = "城市",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-534.38, 4.07, 437.75)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+end
+        
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
         Title = "出生点",
         Desc = "单击以执行",
         Callback = function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                -- 这里假设出生点坐标为(0, 10, 0)，可根据实际情况修改
-                humanoidRootPart.CFrame = CFrame.new(0, 10, 0)
-                Window:Notify({
-                    Title = "通知",
-                    Desc = "传送成功",
-                    Time = 1
-                })
-            else
-                Window:Notify({
-                    Title = "错误",
-                    Desc = "未找到HumanoidRootPart，传送失败",
-                    Time = 1
-                })
-            end
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
         end
     })
 end
 
--- Final Notification
 Window:Notify({
     Title = "Cat Hub",
     Desc = "感谢您的游玩",
     Time = 5
 })
--- 连接脚本的 Destroying 信号，当脚本即将被销毁时触发回调
+
 script.Destroying:Connect(function()
     Window:Notify({
         Title = "Cat Hub",
