@@ -112,6 +112,39 @@ Tab:Button({
 })
 
 Tab:Toggle({
+    Title = "启用踏空跳",
+    Value = false, -- 初始为关闭
+    Callback = function(val)
+        isAirJumpEnabled = val
+        print("踏空跳 " .. (isAirJumpEnabled and "已开启" or "已关闭"))
+    end
+})
+
+-- 处理玩家、角色和输入监听
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local userInputService = game:GetService("UserInputService")
+
+-- 角色重生时更新引用
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+end)
+
+-- 监听跳跃输入
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then
+        return
+    end
+    -- 空格键 + 踏空跳开启时触发
+    if input.KeyCode == Enum.KeyCode.Space and isAirJumpEnabled then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+Tab:Toggle({
     Title = "穿墙",
     Flag = "NoClip", -- 用于标识该 Toggle 的状态，需确保 UI 库支持 Flag 参数
     Default = false,
