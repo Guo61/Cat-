@@ -96,6 +96,22 @@ local Extra = Window:Tab({Title = "极速传奇", Icon = "wrench"}) do
     })
 end
         
+    Extra:Button({
+        Title = "神秘洞穴",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(-9683.05, 59.25, 3136.63)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
