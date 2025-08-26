@@ -77,21 +77,12 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "极速传奇", Icon = "tag"}) do
-    Extra:Section({Title = "传送"})
-    Extra:Button({
-        Title = "传送到城市",
-        Desc = "点击",
-        Callback = function()
-            Window:Notify({
-                Title = "通知",
-                Desc = "传送成功",
-                Time = 1
-            })
-        end
-    })
-end
-Window:Line()
+local Tab = Window:MakeTab({"传送","cool"})
+
+Tab:AddButton({"城市",function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-534.38, 4.07, 437.75)
+end})
+
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
