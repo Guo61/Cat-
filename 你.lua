@@ -4,24 +4,6 @@
 -- Load UI Library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/DummyUi-leak-by-x2zu/fetching-main/Tools/Framework.luau"))()
 
-local StarterGui = game:GetService("StarterGui")
-
-StarterGui:SetCore("SendNotification", {
-    Title = "Cat Hub",
-    Text = "欢迎使用",
-    Icon = "rbxassetid://108453362719381",
-    Duration = 5
-})
-
-local StarterGui = game:GetService("StarterGui")
-
-StarterGui:SetCore("SendNotification", {
-    Title = "Cat Hub",
-    Text = "加载完毕",
-    Icon = "rbxassetid://108453362719381",
-    Duration = 8
-})
-
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
@@ -126,7 +108,7 @@ local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
 end
 -- Final Notification
 Window:Notify({
-    Title = "Cat Hub关闭",
+    Title = "Cat Hub",
     Desc = "感谢您的游玩",
-    Time = 1
+    Time = 3
 })
