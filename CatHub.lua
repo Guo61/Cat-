@@ -129,13 +129,13 @@ end
     })
     
     Extra:Button({
-        Title = "海市蜃楼挑战(概率有误)",
+        Title = "海市蜃楼挑战",
         Desc = "单击以执行",
         Callback = function()
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-1414.31, 90.44, -2058.34)
+            humanoidRootPart.CFrame = CFrame.new(1414.31, 90.44, -2058.34)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
@@ -145,13 +145,13 @@ end
     })
     
     Extra:Button({
-        Title = "冰霜挑战(概率有误)",
+        Title = "冰霜挑战",
         Desc = "单击以执行",
         Callback = function()
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-2045.63, 64.57, 993.17)
+            humanoidRootPart.CFrame = CFrame.new(2045.63, 64.57, 993.17)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
