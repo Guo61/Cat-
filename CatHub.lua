@@ -102,7 +102,7 @@ end
 })
 -- 添加飞行脚本控制按钮
 Tab:Button({
-    Title = "飞行脚本",
+    Title = "飞行",
     Description = "从GitHub加载并执行飞行脚本",
     Callback = function()
         -- 从指定URL加载并执行飞行脚本
@@ -117,61 +117,71 @@ local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local airJumpConn = nil -- 存储输入监听连接
 local airJumpCooldown = false -- 跳跃冷却标记
+-- 用于存储踏空跳脚本相关的连接（关闭时断开）
+local stepAirJumpConnection
 
--- 修复为 Tab:Toggle 形式的空中跳（AirJump）
 Tab:Toggle({
     Title = "踏空跳",
+    Description = "从指定URL加载并执行踏空跳脚本（开关控制启停）",
+    Default = false, -- 默认处于关闭状态
+    Callback = function(isToggled)
+        if isToggled then
+            -- 开启逻辑：加载并执行踏空跳脚本
+            local success, result = pcall(function()
+                -- 从指定URL获取脚本内容
+                local scriptContent = game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true)
+                local executeFunc = loadstring(scriptContent)
+                if executeFunc then
+                    stepAirJumpConnection = executeFunc() -- 假设脚本返回可断开的连接（如事件连接）
+                end
+                return true
+            end)
+            if success then
+                print("踏空跳脚本加载并执行成功")
+            else
+                print("踏空跳脚本加载/执行失败：" .. tostring(result))
+            end
+        else
+            -- 关闭逻辑：断开踏空跳脚本相关的连接
+            if stepAirJumpConnection then
+                stepAirJumpConnection:Disconnect()
+                stepAirJumpConnection = nil
+            end
+            print("踏空跳脚本已停止")
+        end
+    end
+})
+
+local childChaseConnection
+
+Tab:Toggle({
+    Title = "子追",
+    Description = "从GitHub加载并执行子追脚本（切换开关控制启停）",
     Default = false, -- 默认关闭状态
     Callback = function(isToggled)
-        -- 原 enableAirJump 逻辑（功能开启时执行）
-        local function enableAirJump()
-            -- 先断开旧连接，避免重复监听
-            if airJumpConn then airJumpConn:Disconnect() end
-            
-            -- 监听空格键触发空中跳
-            airJumpConn = UIS.InputBegan:Connect(function(input, gameProcessed)
-                -- 忽略UI操作（如聊天框按空格），避免误触
-                if gameProcessed then return end
-                
-                -- 仅响应键盘空格键，且无冷却时触发
-                if input.UserInputType == Enum.UserInputType.Keyboard 
-                    and input.KeyCode == Enum.KeyCode.Space 
-                    and not airJumpCooldown 
-                then
-                    -- 获取角色关键部件（防角色未加载/死亡）
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-                    if not hrp or not humanoid then return end
-                    
-                    -- 仅当角色在空中时（FloorMaterial为空气），触发跳跃
-                    if humanoid.FloorMaterial == Enum.Material.Air then
-                        humanoid.Jump = true
-                        airJumpCooldown = true
-                        -- 0.5秒后重置冷却，限制跳跃频率
-                        task.delay(0.5, function() airJumpCooldown = false end)
-                    end
-                end
-            end)
-            print("带冷却空中跳已开启：空中按空格跳跃（0.5秒冷却）")
-        end
-
-        -- 原 disableAirJump 逻辑（功能关闭时执行）
-        local function disableAirJump()
-            -- 断开监听连接，清理资源
-            if airJumpConn then
-                airJumpConn:Disconnect()
-                airJumpConn = nil
-            end
-            -- 重置冷却状态（避免下次开启残留冷却）
-            airJumpCooldown = false
-            print("带冷却空中跳已关闭：恢复默认跳跃逻辑")
-        end
-
-        -- Toggle 核心：根据开关状态执行对应函数
         if isToggled then
-            enableAirJump()
+            -- 开启逻辑：加载并执行脚本
+            local success, result = pcall(function()
+                -- 加载远程脚本内容
+                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/sgbs/main/%E4%B8%81%E4%B8%81%20%E6%B1%89%E5%8C%96%E8%87%AA%E7%94%B1.txt")
+                local executeFunc = loadstring(scriptContent)
+                if executeFunc then
+                    childChaseConnection = executeFunc() -- 假设脚本返回可断开的连接（如事件连接）
+                end
+                return true
+            end)
+            if success then
+                print("子追脚本加载并执行成功")
+            else
+                print("子追脚本加载/执行失败：" .. tostring(result))
+            end
         else
-            disableAirJump()
+            -- 关闭逻辑：断开脚本相关连接（若有）
+            if childChaseConnection then
+                childChaseConnection:Disconnect()
+                childChaseConnection = nil
+            end
+            print("子追脚本已关闭")
         end
     end
 })
@@ -401,6 +411,41 @@ Tab:Button({
         end
     end
 })
+local aimbotConnection
+
+Tab:Toggle({
+    Title = "宙斯自瞄",
+    Description = "从GitHub加载并执行宙斯自瞄脚本（开关控制启停）",
+    Default = false, -- 默认处于关闭状态
+    Callback = function(isToggled)
+        if isToggled then
+            -- 开启逻辑：加载并执行自瞄脚本
+            local success, result = pcall(function()
+                -- 从指定URL获取脚本内容
+                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua")
+                -- 执行脚本（使用loadstring，需注意：在Roblox等平台，loadstring可能受限制）
+                local executeFunc = loadstring(scriptContent)
+                if executeFunc then
+                    aimbotConnection = executeFunc() -- 假设脚本会返回可断开的连接（如事件连接）
+                end
+                return true
+            end)
+            if success then
+                print("宙斯自瞄脚本加载并执行成功")
+            else
+                print("宙斯自瞄脚本加载/执行失败：" .. tostring(result))
+            end
+        else
+            -- 关闭逻辑：断开自瞄脚本相关的连接
+            if aimbotConnection then
+                aimbotConnection:Disconnect()
+                aimbotConnection = nil
+            end
+            print("宙斯自瞄脚本已停止")
+        end
+    end
+})
+
 -- Code Display
 local CodeBlock = Tab:Code({
 Title = "Love Players",
