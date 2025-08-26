@@ -7,7 +7,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
-    Desc = "感谢游玩",
+    Desc = "放挂机已开启",
     Icon = "skull",
     Theme = "Dark",
     Config = {
@@ -34,7 +34,7 @@ SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 local Tab = Window:Tab({Title = "主页", Icon = 105059922903197}) do
 
     -- Section
-    Tab:Section({Title = "By Ccat\nQQ3395858053"})
+    Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
     -- Button
      Tab:Button({
@@ -237,13 +237,13 @@ Tab:Button({
 })
 -- Code Display
 local CodeBlock = Tab:Code({
-Title = "Love Code",
-Code = "-- This is a code preview\nprint('Hello world')"
+Title = "Love Players",
+Code = "感谢游玩\nQQ号:3395858053"
 })
 
     -- Simulate update
     task.delay(5, function()
-        CodeBlock:SetCode("-- Updated!\nprint('New content loaded')")
+        CodeBlock:SetCode("感谢游玩\nQQ号:3395858053")
     end)
 end
 
@@ -583,6 +583,16 @@ Extra:Button({
         end
     end
 })
+
+local hoo = Tab:AddSection("圈")
+spawn(function()
+    local plr = game:GetService("Players").LocalPlayer -- 获取本地玩家
+    while wait() do
+        pcall(function()
+            hoo:Set("圈:" .. plr.leaderstats.Hoops.Value)
+        end)
+    end
+end)
 
 local Extra = Window:Tab({Title = "力量传奇", Icon = 105059922903197}) do
     Extra:Section({Title = "传送"})
