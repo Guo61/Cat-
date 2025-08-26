@@ -110,5 +110,13 @@ end
 Window:Notify({
     Title = "Cat Hub",
     Desc = "感谢您的游玩",
-    Time = 3
+    Time = 5
 })
+-- 连接脚本的 Destroying 信号，当脚本即将被销毁时触发回调
+script.Destroying:Connect(function()
+    Window:Notify({
+        Title = "Cat Hub",
+        Desc = "关闭",
+        Time = 5
+    })
+end)
