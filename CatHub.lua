@@ -31,7 +31,7 @@ SidebarLine.Name = "SidebarLine"
 SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
 -- Tab
-local Tab = Window:Tab({Title = "主页", Icon = 105059922903197}) do
+local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 
     -- Section
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
@@ -99,6 +99,19 @@ Callback = function(val)
         print("未找到人类oid对象，无法设置跳跃高度")
     end
 end
+})
+
+Tab:Slider({
+    Title = "设置飞行速度",
+    Min = 0,
+    Max = 200, -- 飞行速度的合理范围
+    Rounding = 0,
+    Value = 50, -- 初始飞行速度
+    Callback = function(val)
+        -- 加载并执行飞行脚本
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay907692/Jay/8b94c47bd5969608438fa1ee57f34b1350789caa/飞行脚本", true))()
+        print("飞行脚本已加载，飞行速度设置为:", val)
+    end
 })
 
 Tab:Toggle({
@@ -597,6 +610,49 @@ Extra:Button({
     end
 })
 
+Extra:Button({
+    Title = "自动收集宝石(City)",
+    Desc = "单击以执行/停止",
+    Callback = function()
+        if not isRunning then
+            -- 启动新线程，避免阻塞主线程
+            spawn(function()
+                shouldStop = false
+                while true do
+                    -- 检测是否需要停止
+                    if shouldStop then
+                        break
+                    end
+                    local args = {
+                        "collectOrb",
+                        "Gem",
+                        "City"
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
+                    wait(0.5)
+                end
+                -- 执行停止后的清理，将状态设为未运行
+                isRunning = false
+            end)
+            isRunning = true
+            Window:Notify({
+                Title = "通知",
+                Desc = "正在执行自动收集宝石",
+                Time = 1
+            })
+        else
+            -- 设置停止标志
+            shouldStop = true
+            isRunning = false
+            Window:Notify({
+                Title = "通知",
+                Desc = "已停止自动收集宝石",
+                Time = 1
+            })
+        end
+    end
+})
+
 -- 定义全局变量，标记是否正在运行以及停止标志
 local isRunning = false
 local shouldStop = false
@@ -644,10 +700,10 @@ Extra:Button({
     end
 })
 
-local Extra = Window:Tab({Title = "力量传奇", Icon = 105059922903197}) do
+local Extra = Window:Tab({Title = "99夜", Icon = 105059922903197}) do
     Extra:Section({Title = "传送"})
     Extra:Button({
-        Title = "出生点",
+        Title = "篝火",
         Desc = "单击以执行",
         Callback = function()
             Window:Notify({
