@@ -106,43 +106,65 @@ Tab:Button({
     Description = "从GitHub加载并执行飞行脚本",
     Callback = function()
         -- 从指定URL加载并执行飞行脚本
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay907692/Jay/8b94c47bd5969608438fa1ee57f34b1350789caa/飞行脚本", true))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))()
         print("飞行脚本已加载并执行")
     end
 })
 
-Tab:Toggle({
-    Title = "启用踏空跳",
-    Value = false, -- 初始为关闭
-    Callback = function(val)
-        isAirJumpEnabled = val
-        print("踏空跳 " .. (isAirJumpEnabled and "已开启" or "已关闭"))
+Tab:Button({
+    Title = "踏空跳(高度递增)",
+    Callback = function()
+        -- 1. 核心状态与参数（点击切换时重置/保留关键数据）
+        local isAirJumpActive = not _G.airJumpState -- 用全局变量存状态，实现点击切换
+        _G.airJumpState = isAirJumpActive -- 更新全局状态
+        local jumpHeightIncrement = _G.airJumpIncrement or 0 -- 保留递增高度（关闭不重置）
+        local heightPerJump = 6 -- 每次跳跃额外增加的高度（可调整）
+
+        -- 2. 基础服务与对象获取
+        local Players = game:GetService("Players")
+        local UserInputService = game:GetService("UserInputService")
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        -- 3. 角色重生时更新对象引用
+        local characterAddedConn = player.CharacterAdded:Connect(function(newChar)
+            character = newChar
+            humanoid = character:WaitForChild("Humanoid")
+            humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        end)
+
+        -- 4. 跳跃输入监听（空格键触发）
+        local inputConn
+        inputConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            -- 仅在功能开启 + 按空格键时触发
+            if isAirJumpActive and input.KeyCode == Enum.KeyCode.Space then
+                -- 强制触发跳跃状态 + 累加高度
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                jumpHeightIncrement = jumpHeightIncrement + heightPerJump
+                _G.airJumpIncrement = jumpHeightIncrement -- 保存递增高度到全局
+
+                -- 施加向上冲量（结合基础跳跃力 + 递增高度）
+                local upwardForce = (humanoid.JumpPower * humanoidRootPart.AssemblyMass * 1.2) + jumpHeightIncrement
+                humanoidRootPart:ApplyImpulse(Vector3.new(0, upwardForce, 0))
+            end
+        end)
+
+        -- 5. 功能关闭时的清理逻辑
+        if not isAirJumpActive then
+            -- 断开监听连接，避免内存泄漏
+            inputConn:Disconnect()
+            characterAddedConn:Disconnect()
+            -- 可选：关闭时重置递增高度（若需要下次开启从0开始，可取消注释）
+            -- _G.airJumpIncrement = 0
+            print("踏空跳已关闭")
+        else
+            print("踏空跳已开启（按空格键空中跳跃，高度递增）")
+        end
     end
 })
-
--- 处理玩家、角色和输入监听
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local userInputService = game:GetService("UserInputService")
-
--- 角色重生时更新引用
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-end)
-
--- 监听跳跃输入
-userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then
-        return
-    end
-    -- 空格键 + 踏空跳开启时触发
-    if input.KeyCode == Enum.KeyCode.Space and isAirJumpEnabled then
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
 
 Tab:Toggle({
     Title = "穿墙",
