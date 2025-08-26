@@ -129,7 +129,7 @@ end
     })
     
     Extra:Button({
-        Title = "海市蜃楼挑战",
+        Title = "海市蜃楼挑战(概率有误)",
         Desc = "单击以执行",
         Callback = function()
             local player = game.Players.LocalPlayer
@@ -145,7 +145,7 @@ end
     })
     
     Extra:Button({
-        Title = "冰霜挑战",
+        Title = "冰霜挑战(概率有误)",
         Desc = "单击以执行",
         Callback = function()
             local player = game.Players.LocalPlayer
