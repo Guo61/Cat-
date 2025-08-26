@@ -167,7 +167,7 @@ end
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-381.00, 65.02, 20.55)
+            humanoidRootPart.CFrame = CFrame.new(385.60, 65.02, 19.00)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
