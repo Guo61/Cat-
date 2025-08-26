@@ -111,53 +111,68 @@ Tab:Button({
     end
 })
 
+-- 初始化基础服务与全局变量（需确保在脚本顶部定义）
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local airJumpConn = nil -- 存储输入监听连接
+local airJumpCooldown = false -- 跳跃冷却标记
+
+-- 修复为 Tab:Toggle 形式的空中跳（AirJump）
 Tab:Toggle({
     Title = "踏空跳",
-    Default = false,
+    Default = false, -- 默认关闭状态
     Callback = function(isToggled)
-        -- 仅在回调内定义临时变量，无外部依赖
-        local airJumpConn, airJumpCooldown
-        local Players = game:GetService("Players")
-        local UIS = game:GetService("UserInputService")
-        local player = Players.LocalPlayer
-
-        -- 开启逻辑（含原enable功能）
-        local function startAirJump()
-            -- 断开旧连接防重复监听
+        -- 原 enableAirJump 逻辑（功能开启时执行）
+        local function enableAirJump()
+            -- 先断开旧连接，避免重复监听
             if airJumpConn then airJumpConn:Disconnect() end
-
+            
+            -- 监听空格键触发空中跳
             airJumpConn = UIS.InputBegan:Connect(function(input, gameProcessed)
-                -- 忽略UI操作+判断空格键+无冷却
-                if gameProcessed or input.KeyCode ~= Enum.KeyCode.Space or airJumpCooldown then return end
-
-                -- 获取角色部件（防未加载）
-                local char = player.Character
-                local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not (humanoid and hrp) then return end
-
-                -- 仅空中触发跳跃
-                if humanoid.FloorMaterial == Enum.Material.Air then
-                    humanoid.Jump = true
-                    airJumpCooldown = true
-                    task.delay(0.5, function() airJumpCooldown = false end)
+                -- 忽略UI操作（如聊天框按空格），避免误触
+                if gameProcessed then return end
+                
+                -- 仅响应键盘空格键，且无冷却时触发
+                if input.UserInputType == Enum.UserInputType.Keyboard 
+                    and input.KeyCode == Enum.KeyCode.Space 
+                    and not airJumpCooldown 
+                then
+                    -- 获取角色关键部件（防角色未加载/死亡）
+                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+                    if not hrp or not humanoid then return end
+                    
+                    -- 仅当角色在空中时（FloorMaterial为空气），触发跳跃
+                    if humanoid.FloorMaterial == Enum.Material.Air then
+                        humanoid.Jump = true
+                        airJumpCooldown = true
+                        -- 0.5秒后重置冷却，限制跳跃频率
+                        task.delay(0.5, function() airJumpCooldown = false end)
+                    end
                 end
             end)
-            print("空中跳已开启（0.5秒冷却）")
+            print("带冷却空中跳已开启：空中按空格跳跃（0.5秒冷却）")
         end
 
-        -- 关闭逻辑（含原disable功能）
-        local function stopAirJump()
+        -- 原 disableAirJump 逻辑（功能关闭时执行）
+        local function disableAirJump()
+            -- 断开监听连接，清理资源
             if airJumpConn then
                 airJumpConn:Disconnect()
                 airJumpConn = nil
             end
-            airJumpCooldown = false -- 重置冷却
-            print("空中跳已关闭")
+            -- 重置冷却状态（避免下次开启残留冷却）
+            airJumpCooldown = false
+            print("带冷却空中跳已关闭：恢复默认跳跃逻辑")
         end
 
-        -- Toggle核心控制
-        isToggled and startAirJump() or stopAirJump()
+        -- Toggle 核心：根据开关状态执行对应函数
+        if isToggled then
+            enableAirJump()
+        else
+            disableAirJump()
+        end
     end
 })
 
