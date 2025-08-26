@@ -8,7 +8,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/
 local Window = Library:Window({
     Title = "Cat Hub",
     Desc = "感谢游玩",
-    Icon = "star",
+    Icon = "skull",
     Theme = "Dark",
     Config = {
         Keybind = Enum.KeyCode.LeftControl,
@@ -100,145 +100,73 @@ Callback = function(val)
     end
 end
 })
+-- 透视功能按钮
+Tab:Button({
+    Title = "透视",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "Highlight"
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 设置高亮始终在最上层显示
 
--- 1. 先引入必要服务（避免变量定义顺序问题）
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
-
--- 2. ESP核心配置（提前定义，避免回调中变量未初始化）
-local espEnabled = false
-local boxColor = Color3.fromRGB(255, 0, 0)   -- 方框颜色（红）
-local nameColor = Color3.fromRGB(255, 255, 255) -- 名字颜色（白）
-local drawingObjects = {} -- 存储绘制对象，方便管理
-
--- 3. 绘制单个人物ESP的核心函数（优化有效性判断）
-local function drawCharacterESP(character)
-    -- 跳过本地玩家、人物无效、没有人形/头部、人物死亡的情况
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    local head = character:FindFirstChild("Head")
-    local player = Players:GetPlayerFromCharacter(character)
-    if not player or player == LocalPlayer then return end
-    if not humanoid or not head or humanoid.Health <= 0 then return end
-
-    -- 创建方框（优化初始可见性，与espEnabled同步）
-    local box = Drawing.new("Square")
-    box.Color = boxColor
-    box.Thickness = 2
-    box.Filled = false
-    box.Visible = espEnabled
-
-    -- 创建名字标签（优化文本位置，避免遮挡）
-    local nameLabel = Drawing.new("Text")
-    nameLabel.Color = nameColor
-    nameLabel.Size = 18
-    nameLabel.Center = true
-    nameLabel.Text = player.Name -- 显示玩家名（原代码显示character名，可能不对）
-    nameLabel.Visible = espEnabled
-
-    -- 存入管理表
-    table.insert(drawingObjects, {
-        Box = box,
-        NameLabel = nameLabel,
-        Character = character,
-        Connection = nil -- 存储每帧更新的连接，方便后续断开
-    })
-
-    -- 4. 每帧更新绘制位置（优化屏幕坐标判断）
-    local connection = RunService.RenderStepped:Connect(function()
-        -- 人物消失/ESP关闭时，清理资源
-        if not character:IsDescendantOf(workspace) or not espEnabled then
-            box:Remove()
-            nameLabel:Remove()
-            connection:Disconnect()
-            -- 从管理表中移除
-            for i, obj in ipairs(drawingObjects) do
-                if obj.Character == character then
-                    table.remove(drawingObjects, i)
-                    break
+        -- 为已有玩家添加高亮
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                repeat
+                    task.wait()
+                until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if not humanoidRootPart:FindFirstChild("Highlight") then
+                    local highlightClone = highlight:Clone()
+                    highlightClone.Adornee = player.Character
+                    highlightClone.Parent = humanoidRootPart
                 end
             end
-            return
         end
 
-        -- 计算头部屏幕位置（判断是否在相机视野内）
-        local headScreenPos, isOnScreen = Camera:WorldToScreenPoint(head.Position)
-        if not isOnScreen then
-            box.Visible = false
-            nameLabel.Visible = false
-            return
-        end
+        -- 新玩家加入时添加高亮
+        game.Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                repeat
+                    task.wait()
+                until character:FindFirstChild("HumanoidRootPart")
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if not humanoidRootPart:FindFirstChild("Highlight") then
+                    local highlightClone = highlight:Clone()
+                    highlightClone.Adornee = character
+                    highlightClone.Parent = humanoidRootPart
+                end
+            end)
+        end)
 
-        -- 计算人物边界框（优化尺寸计算，避免负数）
-        local minBound, maxBound = character:GetBoundingBox()
-        local topScreenPos = Camera:WorldToScreenPoint(minBound.Position)
-        local bottomScreenPos = Camera:WorldToScreenPoint(maxBound.Position)
-        
-        -- 确保坐标有效（Z>0表示在相机前方）
-        if topScreenPos.Z <= 0 or bottomScreenPos.Z <= 0 then
-            box.Visible = false
-            nameLabel.Visible = false
-            return
-        end
-
-        -- 更新方框位置和尺寸
-        local boxWidth = 80 * (maxBound - minBound).Magnitude / headScreenPos.Z -- 优化宽度系数
-        local boxHeight = bottomScreenPos.Y - topScreenPos.Y
-        box.Position = Vector2.new(headScreenPos.X - boxWidth/2, topScreenPos.Y)
-        box.Size = Vector2.new(boxWidth, boxHeight)
-        box.Visible = true
-
-        -- 更新名字标签位置（在方框上方）
-        nameLabel.Position = Vector2.new(headScreenPos.X, topScreenPos.Y - 20)
-        nameLabel.Visible = true
-    end)
-
-    -- 存储连接，方便后续清理
-    for _, obj in ipairs(drawingObjects) do
-        if obj.Character == character then
-            obj.Connection = connection
-            break
-        end
-    end
-end
-
--- 5. 加载已存在的玩家ESP（关键：首次开启时调用）
-local function loadExistingPlayerESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            drawCharacterESP(player.Character)
-        end
-        -- 监听玩家后续重生（人物加载）
-        player.CharacterAdded:Connect(drawCharacterESP)
-    end
-end
-
--- 6. 监听新玩家加入（自动为新玩家添加ESP）
-Players.PlayerAdded:Connect(function(newPlayer)
-    newPlayer.CharacterAdded:Connect(drawCharacterESP)
-end)
-
--- 7. ESP控制按钮（核心修复：首次开启时调用loadExistingPlayerESP）
-local ESPButton = Tab:Button({
-    Title = "Toggle Player ESP",
-    Callback = function()
-        espEnabled = not espEnabled
-        print("[ESP] 状态：" .. (espEnabled and "开启" or "关闭"))
-
-        -- 首次开启时，加载已存在的玩家
-        if espEnabled then
-            loadExistingPlayerESP()
-        else
-            -- 关闭时，隐藏所有绘制对象
-            for _, obj in ipairs(drawingObjects) do
-                obj.Box.Visible = false
-                obj.NameLabel.Visible = false
+        -- 玩家离开时移除高亮
+        game.Players.PlayerRemoving:Connect(function(player)
+            if player.Character then
+                local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart and humanoidRootPart:FindFirstChild("Highlight") then
+                    humanoidRootPart.Highlight:Destroy()
+                end
             end
-        end
+        end)
+
+        -- 每帧检查并维护高亮（确保人物存在时高亮也存在）
+        RunService.Heartbeat:Connect(function()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character then
+                    local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart and not humanoidRootPart:FindFirstChild("Highlight") then
+                        local highlightClone = highlight:Clone()
+                        highlightClone.Adornee = player.Character
+                        highlightClone.Parent = humanoidRootPart
+                        task.wait()
+                    end
+                end
+            end
+        end)
     end
 })
-
 -- Code Display
 local CodeBlock = Tab:Code({
 Title = "Love Code",
