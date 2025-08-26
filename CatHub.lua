@@ -100,17 +100,14 @@ Callback = function(val)
     end
 end
 })
-
-Tab:Slider({
-    Title = "设置飞行速度",
-    Min = 0,
-    Max = 200, -- 飞行速度的合理范围
-    Rounding = 0,
-    Value = 50, -- 初始飞行速度
-    Callback = function(val)
-        -- 加载并执行飞行脚本
+-- 添加飞行脚本控制按钮
+Tab:Button({
+    Title = "飞行脚本",
+    Description = "从GitHub加载并执行飞行脚本",
+    Callback = function()
+        -- 从指定URL加载并执行飞行脚本
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay907692/Jay/8b94c47bd5969608438fa1ee57f34b1350789caa/飞行脚本", true))()
-        print("飞行脚本已加载，飞行速度设置为:", val)
+        print("飞行脚本已加载并执行")
     end
 })
 
