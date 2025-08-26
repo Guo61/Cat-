@@ -76,6 +76,31 @@ Tab:Slider({
     end
 })
 
+        Tab:Slider({
+    Title = "设置跳跃高度",
+    Min = 0,
+    Max = 200, -- 跳跃力量的合理范围，可根据需要调整
+    Rounding = 0,
+    Value = 50, -- 初始跳跃力量，Roblox 默认一般是 50 左右
+    Callback = function(val)
+        -- 获取本地玩家的人物
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character then
+            character = player.CharacterAdded:Wait() -- 等待人物加载
+        end
+        -- 获取人类oid对象
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            -- 设置人类oid的跳跃力量，从而改变跳跃高度
+            humanoid.JumpPower = val
+            print("人物跳跃力量已设置为:", val)
+        else
+            print("未找到人类oid对象，无法设置跳跃高度")
+        end
+    end
+})
+
     -- Code Display
     local CodeBlock = Tab:Code({
         Title = "Love Code",
