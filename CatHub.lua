@@ -584,12 +584,11 @@ Extra:Button({
     end
 })
 
-local hoo = Tab:AddSection("圈")
+local hoo = Tab:CreateSection("圈")
 spawn(function()
-    local plr = game:GetService("Players").LocalPlayer -- 获取本地玩家
     while wait() do
         pcall(function()
-            hoo:Set("圈:" .. plr.leaderstats.Hoops.Value)
+            hoo:Set("圈:"..game:GetService("Players")[plr].leaderstats.Hoops.Value)
         end)
     end
 end)
