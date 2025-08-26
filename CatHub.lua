@@ -77,35 +77,156 @@ Tab:Slider({
 })
 
         Tab:Slider({
-    Title = "设置跳跃高度",
-    Min = 0,
-    Max = 200, -- 跳跃力量的合理范围，可根据需要调整
-    Rounding = 0,
-    Value = 50, -- 初始跳跃力量，Roblox 默认一般是 50 左右
-    Callback = function(val)
-        -- 获取本地玩家的人物
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if not character then
-            character = player.CharacterAdded:Wait() -- 等待人物加载
-        end
-        -- 获取人类oid对象
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            -- 设置人类oid的跳跃力量，从而改变跳跃高度
-            humanoid.JumpPower = val
-            print("人物跳跃力量已设置为:", val)
-        else
-            print("未找到人类oid对象，无法设置跳跃高度")
-        end
+Title = "设置跳跃高度",
+Min = 0,
+Max = 200, -- 跳跃力量的合理范围，可根据需要调整
+Rounding = 0,
+Value = 50, -- 初始跳跃力量，Roblox 默认一般是 50 左右
+Callback = function(val)
+    -- 获取本地玩家的人物
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if not character then
+        character = player.CharacterAdded:Wait() -- 等待人物加载
     end
+    -- 获取人类oid对象
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        -- 设置人类oid的跳跃力量，从而改变跳跃高度
+        humanoid.JumpPower = val
+        print("人物跳跃力量已设置为:", val)
+    else
+        print("未找到人类oid对象，无法设置跳跃高度")
+    end
+end
 })
 
-    -- Code Display
-    local CodeBlock = Tab:Code({
-        Title = "Love Code",
-        Code = "-- This is a code preview\nprint('Hello world')"
-    })
+-- 以下是新增的同服务器人物ESP代码
+-- 引入必要的服务
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+-- ESP相关配置
+local espEnabled = true
+local boxColor = Color3.fromRGB(255, 0, 0) -- 方框颜色，设为红色
+local nameColor = Color3.fromRGB(255, 255, 255) -- 名字颜色，设为白色
+
+-- 存储绘制对象的表，方便后续管理
+local drawingObjects = {}
+
+-- 绘制单个人物ESP的函数
+local function drawCharacterESP(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local head = character:FindFirstChild("Head")
+    if not humanoid or not head or humanoid.Health <= 0 then
+        return
+    end
+
+    -- 创建方框绘制对象
+    local box = Drawing.new("Square")
+    box.Color = boxColor
+    box.Thickness = 2
+    box.Filled = false
+    box.Visible = espEnabled
+
+    -- 创建名字文本绘制对象
+    local nameLabel = Drawing.new("Text")
+    nameLabel.Color = nameColor
+    nameLabel.Size = 18
+    nameLabel.Center = true
+    nameLabel.Visible = espEnabled
+
+    -- 将绘制对象存入表中
+    table.insert(drawingObjects, {Box = box, NameLabel = nameLabel, Character = character})
+
+    -- 每帧更新绘制对象
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- 检查人物是否有效且ESP是否开启
+        if not character:IsDescendantOf(workspace) or not espEnabled then
+            box:Remove()
+            nameLabel:Remove()
+            connection:Disconnect()
+            -- 从存储表中移除该人物的绘制对象
+            for i, obj in ipairs(drawingObjects) do
+                if obj.Character == character then
+                    table.remove(drawingObjects, i)
+                    break
+                end
+            end
+            return
+        end
+
+        -- 获取人物头部在屏幕上的位置
+        local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
+        if not onScreen then
+            box.Visible = false
+            nameLabel.Visible = false
+            return
+        end
+
+        -- 获取人物的边界框
+        local minBounds, maxBounds = character:GetBoundingBox()
+        local topPos = Camera:WorldToScreenPoint(minBounds.Position)
+        local bottomPos = Camera:WorldToScreenPoint(maxBounds.Position)
+
+        if topPos.Z > 0 and bottomPos.Z > 0 then
+            -- 计算方框尺寸
+            local width = 100 * (maxBounds.Position - minBounds.Position).Magnitude / screenPos.Z
+            local height = (bottomPos.Y - topPos.Y)
+
+            -- 更新方框属性
+            box.Position = Vector2.new(screenPos.X - width / 2, screenPos.Y - height / 2)
+            box.Size = Vector2.new(width, height)
+            box.Visible = true
+
+            -- 更新名字文本属性
+            nameLabel.Text = character.Name
+            nameLabel.Position = Vector2.new(screenPos.X, screenPos.Y - height / 2 - 20)
+            nameLabel.Visible = true
+        else
+            box.Visible = false
+            nameLabel.Visible = false
+        end
+    end)
+end
+
+-- 为已存在的玩家人物添加ESP
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= Players.LocalPlayer and player.Character then
+        drawCharacterESP(player.Character)
+    end
+    -- 监听玩家人物加载完成事件
+    player.CharacterAdded:Connect(drawCharacterESP)
+end
+
+-- 监听新玩家加入事件
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(drawCharacterESP)
+end)
+
+-- 可以添加一个开关ESP的功能，比如按F键（这里示例按F键切换ESP开启/关闭）
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then
+        return
+    end
+    if input.KeyCode == Enum.KeyCode.F then
+        espEnabled = not espEnabled
+        print("ESP已" .. (espEnabled and "开启" or "关闭"))
+        -- 更新所有绘制对象的可见性
+        for _, obj in ipairs(drawingObjects) do
+            obj.Box.Visible = espEnabled
+            obj.NameLabel.Visible = espEnabled
+        end
+    end
+end)
+
+-- Code Display
+local CodeBlock = Tab:Code({
+Title = "Love Code",
+Code = "-- This is a code preview\nprint('Hello world')"
+})
 
     -- Simulate update
     task.delay(5, function()
