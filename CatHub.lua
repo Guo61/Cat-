@@ -111,58 +111,53 @@ Tab:Button({
     end
 })
 
-Tab:Button({
-    Title = "踏空跳(高度递增)",
-    Callback = function()
-        -- 1. 核心状态与参数（点击切换时重置/保留关键数据）
-        local isAirJumpActive = not _G.airJumpState -- 用全局变量存状态，实现点击切换
-        _G.airJumpState = isAirJumpActive -- 更新全局状态
-        local jumpHeightIncrement = _G.airJumpIncrement or 0 -- 保留递增高度（关闭不重置）
-        local heightPerJump = 6 -- 每次跳跃额外增加的高度（可调整）
-
-        -- 2. 基础服务与对象获取
+Tab:Toggle({
+    Title = "踏空跳",
+    Default = false,
+    Callback = function(isToggled)
+        -- 仅在回调内定义临时变量，无外部依赖
+        local airJumpConn, airJumpCooldown
         local Players = game:GetService("Players")
-        local UserInputService = game:GetService("UserInputService")
+        local UIS = game:GetService("UserInputService")
         local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
-        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-        -- 3. 角色重生时更新对象引用
-        local characterAddedConn = player.CharacterAdded:Connect(function(newChar)
-            character = newChar
-            humanoid = character:WaitForChild("Humanoid")
-            humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-        end)
+        -- 开启逻辑（含原enable功能）
+        local function startAirJump()
+            -- 断开旧连接防重复监听
+            if airJumpConn then airJumpConn:Disconnect() end
 
-        -- 4. 跳跃输入监听（空格键触发）
-        local inputConn
-        inputConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            -- 仅在功能开启 + 按空格键时触发
-            if isAirJumpActive and input.KeyCode == Enum.KeyCode.Space then
-                -- 强制触发跳跃状态 + 累加高度
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                jumpHeightIncrement = jumpHeightIncrement + heightPerJump
-                _G.airJumpIncrement = jumpHeightIncrement -- 保存递增高度到全局
+            airJumpConn = UIS.InputBegan:Connect(function(input, gameProcessed)
+                -- 忽略UI操作+判断空格键+无冷却
+                if gameProcessed or input.KeyCode ~= Enum.KeyCode.Space or airJumpCooldown then return end
 
-                -- 施加向上冲量（结合基础跳跃力 + 递增高度）
-                local upwardForce = (humanoid.JumpPower * humanoidRootPart.AssemblyMass * 1.2) + jumpHeightIncrement
-                humanoidRootPart:ApplyImpulse(Vector3.new(0, upwardForce, 0))
-            end
-        end)
+                -- 获取角色部件（防未加载）
+                local char = player.Character
+                local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not (humanoid and hrp) then return end
 
-        -- 5. 功能关闭时的清理逻辑
-        if not isAirJumpActive then
-            -- 断开监听连接，避免内存泄漏
-            inputConn:Disconnect()
-            characterAddedConn:Disconnect()
-            -- 可选：关闭时重置递增高度（若需要下次开启从0开始，可取消注释）
-            -- _G.airJumpIncrement = 0
-            print("踏空跳已关闭")
-        else
-            print("踏空跳已开启（按空格键空中跳跃，高度递增）")
+                -- 仅空中触发跳跃
+                if humanoid.FloorMaterial == Enum.Material.Air then
+                    humanoid.Jump = true
+                    airJumpCooldown = true
+                    task.delay(0.5, function() airJumpCooldown = false end)
+                end
+            end)
+            print("空中跳已开启（0.5秒冷却）")
         end
+
+        -- 关闭逻辑（含原disable功能）
+        local function stopAirJump()
+            if airJumpConn then
+                airJumpConn:Disconnect()
+                airJumpConn = nil
+            end
+            airJumpCooldown = false -- 重置冷却
+            print("空中跳已关闭")
+        end
+
+        -- Toggle核心控制
+        isToggled and startAirJump() or stopAirJump()
     end
 })
 
