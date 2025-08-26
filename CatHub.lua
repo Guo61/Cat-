@@ -36,20 +36,6 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     -- Section
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
-    -- Button
-     Tab:Button({
-        Title = "传送到极速传奇",
-        Desc = "单击以执行",
-        Callback = function()
-        print("Button clicked!")
-            Window:Notify({
-                Title = "正在运行",
-                Desc = "",
-                Time = 1
-            })
-        end
-    })
-
 -- 假设 Tab 是已经创建好的选项卡对象
 Tab:Slider({
     Title = "设置速度",
@@ -110,78 +96,180 @@ Tab:Button({
         print("飞行脚本已加载并执行")
     end
 })
-
--- 存储无限跳相关的连接和状态，用于开关控制与资源清理
-local infiniteJumpData = {
-    jumpConnection = nil,  -- 存储JumpRequest的连接
-    isEnabled = false      -- 标记无限跳是否启用
+-- 统一管理无限跳状态与连接，避免内存泄漏和状态冲突
+local infiniteJump = {
+    Connection = nil,   -- 存储输入监听连接
+    IsEnabled = false,  -- 功能启用状态标记
+    LocalPlayer = game.Players.LocalPlayer,
+    UIS = game:GetService("UserInputService"),
+    RS = game:GetService("RunService")
 }
 
 Tab:Toggle({
     Title = "无限跳",
-    Default = false,  -- 默认关闭无限跳
+    Default = false,  -- 默认关闭
     Callback = function(state)
-        infiniteJumpData.isEnabled = state  -- 同步开关状态
-        local userInputService = game:GetService("UserInputService")
-        local localPlayer = game.Players.LocalPlayer
+        -- 1. 同步功能状态
+        infiniteJump.IsEnabled = state
 
-        if state then
-            -- 开启逻辑：创建跳跃请求监听
-            infiniteJumpData.jumpConnection = userInputService.JumpRequest:Connect(function()
-                -- 仅在功能启用时执行跳跃
-                if infiniteJumpData.isEnabled then
-                    local character = localPlayer.Character
-                    -- 检查角色和人形对象是否存在
-                    if character and character:FindFirstChildOfClass("Humanoid") then
-                        local humanoid = character.Humanoid
-                        -- 仅当人形处于地面时触发跳跃（避免空中重复跳逻辑冲突）
-                        if humanoid.FloorMaterial ~= Enum.Material.Air then
-                            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                        end
-                    end
-                end
-            end)
-        else
-            -- 关闭逻辑：断开监听连接，停止无限跳
-            if infiniteJumpData.jumpConnection then
-                infiniteJumpData.jumpConnection:Disconnect()
-                infiniteJumpData.jumpConnection = nil  -- 清空连接，避免内存泄漏
+        -- 2. 关闭逻辑：断开旧连接，清理资源
+        if not state then
+            if infiniteJump.Connection then
+                infiniteJump.Connection:Disconnect()
+                infiniteJump.Connection = nil
             end
+            return  -- 关闭后无需执行后续逻辑
         end
+
+        -- 3. 开启逻辑：创建稳定的输入监听
+        infiniteJump.Connection = infiniteJump.UIS.JumpRequest:Connect(function()
+            -- 双重校验：确保功能已启用且游戏窗口有焦点
+            if not (infiniteJump.IsEnabled and infiniteJump.UIS:GetFocusedTextBox() == nil) then
+                return
+            end
+
+            -- 等待角色加载（解决“刚进游戏/重生时角色为空”问题）
+            local character = infiniteJump.LocalPlayer.Character
+            if not character then
+                character = infiniteJump.LocalPlayer.CharacterAdded:Wait()  -- 等待角色生成
+            end
+
+            -- 等待人形对象加载（避免因加载顺序导致Humanoid为nil）
+            local humanoid = character:WaitForChild("Humanoid", 10)  -- 10秒超时保护
+            if not humanoid then
+                warn("未找到角色的Humanoid对象，无限跳失效")
+                return
+            end
+
+            -- 4. 强制触发跳跃（兼容不同地面判定逻辑）
+            -- 方案A：地面时正常跳，空中补力（最常用）
+            if humanoid.FloorMaterial ~= Enum.Material.Air then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            else
+                -- 方案B：空中也能跳（按需启用，注释掉则仅地面跳）
+                -- humanoid.Velocity = Vector3.new(humanoid.Velocity.X, humanoid.JumpPower * 1.2, humanoid.Velocity.Z)
+            end
+        end)
+
+        -- 5. 额外保险：每帧同步状态（防止状态被游戏脚本篡改）
+        infiniteJump.RS.RenderStepped:Connect(function()
+            if infiniteJump.IsEnabled and infiniteJump.LocalPlayer.Character then
+                local humanoid = infiniteJump.LocalPlayer.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.JumpPower = humanoid.JumpPower  -- 刷新JumpPower，避免被重置为0
+                end
+            end
+        end)
     end
 })
 
-local childChaseConnection
-
 Tab:Toggle({
-    Title = "子追",
-    Description = "从GitHub加载并执行子追脚本（切换开关控制启停）",
-    Default = false, -- 默认关闭状态
-    Callback = function(isToggled)
-        if isToggled then
-            -- 开启逻辑：加载并执行脚本
-            local success, result = pcall(function()
-                -- 加载远程脚本内容
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/sgbs/main/%E4%B8%81%E4%B8%81%20%E6%B1%89%E5%8C%96%E8%87%AA%E7%94%B1.txt")
-                local executeFunc = loadstring(scriptContent)
-                if executeFunc then
-                    childChaseConnection = executeFunc() -- 假设脚本返回可断开的连接（如事件连接）
-                end
-                return true
-            end)
-            if success then
-                print("子追脚本加载并执行成功")
-            else
-                print("子追脚本加载/执行失败：" .. tostring(result))
+    Name = "子弹追踪",
+    Default = false,
+    Callback = function(state)
+        -- 局部存储追踪核心数据（避免全局冲突）
+        local trackData = {
+            enabled = state,
+            workspaceConn = nil,  -- 监听子弹生成的连接
+            bulletConns = {},     -- 存储单个子弹的追踪连接（用于关闭清理）
+            maxDist = 70,         -- 子弹最大追踪距离
+            force = 14,           -- 追踪推力（越大转向越灵敏）
+            localPlayer = game.Players.LocalPlayer,
+            rs = game:GetService("RunService")
+        }
+
+        -- 1. 关闭逻辑：断开所有连接，停止追踪
+        if not state then
+            -- 断开 workspace 监听
+            if trackData.workspaceConn then
+                trackData.workspaceConn:Disconnect()
+                trackData.workspaceConn = nil
             end
-        else
-            -- 关闭逻辑：断开脚本相关连接（若有）
-            if childChaseConnection then
-                childChaseConnection:Disconnect()
-                childChaseConnection = nil
+            -- 断开所有子弹的追踪连接（避免残留）
+            for _, conn in pairs(trackData.bulletConns) do
+                conn:Disconnect()
             end
-            print("子追脚本已关闭")
+            trackData.bulletConns = {}
+            return
         end
+
+        -- 2. 辅助函数：筛选当前子弹的追踪目标
+        local function getTarget(bulletPos)
+            local nearestTarget = nil
+            local nearestDist = math.huge
+
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player ~= trackData.localPlayer then
+                    local char = player.Character
+                    if char then
+                        local humanoid = char:FindFirstChildOfClass("Humanoid")
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        -- 目标需满足：存活+有根部件+在追踪距离内
+                        if humanoid and humanoid.Health > 0 and root then
+                            local dist = (bulletPos - root.Position).Magnitude
+                            if dist <= trackData.maxDist and dist < nearestDist then
+                                nearestDist = dist
+                                nearestTarget = root
+                            end
+                        end
+                    end
+                end
+            end
+            return nearestTarget
+        end
+
+        -- 3. 辅助函数：给单个子弹附加追踪逻辑（核心驱动）
+        local function attachTrack(bullet)
+            -- 校验子弹有效性（必须是部件或包含部件）
+            local bulletPart = bullet:IsA("BasePart") and bullet or bullet:FindFirstChildWhichIsA("BasePart")
+            if not bulletPart then return end
+
+            -- 确保子弹有物理控制器（BodyVelocity），否则无法转向
+            local bodyVel = bulletPart:FindFirstChildOfClass("BodyVelocity")
+            if not bodyVel then
+                bodyVel = Instance.new("BodyVelocity")
+                bodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  -- 解锁最大推力
+                bodyVel.Velocity = bulletPart.Velocity  -- 继承初始速度
+                bodyVel.Parent = bulletPart
+            end
+
+            -- 每帧更新子弹朝向（驱动追踪）
+            local bulletConn = trackData.rs.Heartbeat:Connect(function()
+                -- 终止条件：子弹消失/追踪关闭/无目标
+                if not bulletPart.Parent or not trackData.enabled then
+                    bulletConn:Disconnect()
+                    trackData.bulletConns[bulletConn] = nil  -- 清理连接
+                    return
+                end
+
+                -- 获取目标并驱动子弹追踪
+                local target = getTarget(bulletPart.Position)
+                if target then
+                    local trackDir = (target.Position - bulletPart.Position).Unit
+                    -- 保持子弹原有速度大小，只改变方向
+                    bodyVel.Velocity = trackDir * bulletPart.Velocity.Magnitude
+                    -- 同步子弹朝向（避免“子弹飞但朝向不对”的视觉问题）
+                    bulletPart.CFrame = CFrame.new(bulletPart.Position, target.Position)
+                end
+            end)
+
+            -- 存储子弹连接，便于关闭时清理
+            trackData.bulletConns[bulletConn] = true
+        end
+
+        -- 4. 开启逻辑：监听 workspace，识别本地玩家子弹并附加追踪
+        trackData.workspaceConn = workspace.ChildAdded:Connect(function(child)
+            -- 子弹识别规则（适配多数游戏）：含关键词+属于本地玩家
+            local isLocalBullet = (child.Name:lower():find("bullet") 
+                or child.Name:lower():find("projectile") 
+                or child.Name:lower():find("missile"))
+                and (child:FindFirstChild("Owner") and child.Owner.Value == trackData.localPlayer)
+
+            if isLocalBullet then
+                task.wait(0.05)  -- 等待子弹部件加载完成（避免漏追）
+                attachTrack(child)
+            end
+        end)
     end
 })
 
@@ -263,35 +351,90 @@ Tab:Toggle({
         end
     end
 })
--- 用于存储自瞄相关的连接，方便关闭时断开
-local aimRenderSteppedConnection = nil
--- 标记自瞄是否启用
-local aimEnabled = false
 
 Tab:Toggle({
-    Title = "[阿尔宙斯]自瞄",
+    Title = "自瞄",
     Default = false,
     Callback = function(state)
-        aimEnabled = state
-        if state then
-            -- 当开启自瞄时，连接 RenderStepped 事件，每一帧执行自瞄逻辑
-            aimRenderSteppedConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                -- 假设 getClosestPlayerToCursor 和 lookAt 函数已在其他地方定义
-                local closest = getClosestPlayerToCursor(aimPart, teamCheckEnabled)
-                if closest then
-                    local aimobj = closest.Character:FindFirstChild("aimPart") or closest.Character:FindFirstChild("Head")
-                    if aimobj then
-                        lookAt(workspace.CurrentCamera.CFrame.p, aimobj.Position)
+        -- 局部变量存储自瞄核心数据（避免全局冲突）
+        local aimData = {
+            isEnabled = state,
+            renderConn = nil,
+            localPlayer = game.Players.LocalPlayer,
+            camera = workspace.CurrentCamera,
+            maxDistance = 60,  -- 最大自瞄距离（可调整）
+            smoothness = 0.12  -- 自瞄平滑度（0.05-0.2区间最佳）
+        }
+
+        -- 1. 关闭自瞄：断开连接+清理状态
+        if not state then
+            if aimData.renderConn then
+                aimData.renderConn:Disconnect()
+                aimData.renderConn = nil
+            end
+            -- 恢复相机默认模式（避免关闭后视角异常）
+            if aimData.camera then
+                aimData.camera.CameraType = Enum.CameraType.Custom
+            end
+            return
+        end
+
+        -- 2. 辅助函数：筛选最近的有效目标（核心修复：解决“找不到目标”）
+        local function getValidTarget()
+            local nearestTarget = nil
+            local nearestDist = math.huge
+            local localChar = aimData.localPlayer.Character
+
+            -- 校验本地角色是否就绪（无角色则不找目标）
+            if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
+                return nil
+            end
+            local localRoot = localChar.HumanoidRootPart
+
+            -- 遍历所有玩家，筛选符合条件的目标
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player ~= aimData.localPlayer then
+                    local targetChar = player.Character
+                    if targetChar then
+                        local targetHumanoid = targetChar:FindFirstChildOfClass("Humanoid")
+                        local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+                        -- 目标需满足：存活+有根部件+在自瞄距离内
+                        if targetHumanoid and targetHumanoid.Health > 0 and targetRoot then
+                            local dist = (localRoot.Position - targetRoot.Position).Magnitude
+                            if dist <= aimData.maxDistance and dist < nearestDist then
+                                nearestDist = dist
+                                nearestTarget = targetRoot  -- 瞄准根部件（稳定不易失效，可换Head）
+                            end
+                        end
                     end
                 end
-            end)
-        else
-            -- 当关闭自瞄时，断开 RenderStepped 连接
-            if aimRenderSteppedConnection then
-                aimRenderSteppedConnection:Disconnect()
-                aimRenderSteppedConnection = nil
             end
+            return nearestTarget
         end
+
+        -- 3. 开启自瞄：每帧驱动瞄准逻辑（核心修复：解决“视角不生效”）
+        aimData.renderConn = game:GetService("RunService").RenderStepped:Connect(function()
+            -- 多重校验：确保自瞄启用+相机/角色就绪
+            if not (aimData.isEnabled and aimData.camera and aimData.localPlayer.Character) then
+                return
+            end
+
+            -- 获取目标：无目标则终止本次循环
+            local target = getValidTarget()
+            if not target then return end
+
+            -- 校验本地角色头部（作为视角基准，避免瞄准偏移）
+            local localHead = aimData.localPlayer.Character:FindFirstChild("Head")
+            if not localHead then return end
+
+            -- 计算瞄准角度（修正相机朝向逻辑）
+            local aimDir = (target.Position - localHead.Position).Unit
+            local targetCFrame = CFrame.new(localHead.Position, localHead.Position + aimDir)
+
+            -- 平滑应用角度（避免跳变被拦截）+ 解锁相机控制权（核心修复：解决“相机锁死”）
+            aimData.camera.CameraType = Enum.CameraType.Scriptable  -- 强制解锁相机
+            aimData.camera.CFrame = aimData.camera.CFrame:Lerp(targetCFrame, aimData.smoothness)
+        end)
     end
 })
 
