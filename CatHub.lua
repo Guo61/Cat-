@@ -135,7 +135,7 @@ end
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-1414.31, 34.51, -2058.34)
+            humanoidRootPart.CFrame = CFrame.new(-1414.31, 90.44, -2058.34)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
@@ -151,7 +151,7 @@ end
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-2022.68, 0.88, 984.48)
+            humanoidRootPart.CFrame = CFrame.new(-2045.63, 64.57, 993.17)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
@@ -167,7 +167,7 @@ end
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-388.38, 65.02, 17.75)
+            humanoidRootPart.CFrame = CFrame.new(-384.00, 65.02, 19.45)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
@@ -183,7 +183,7 @@ end
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-            humanoidRootPart.CFrame = CFrame.new(-581.72, 4.12, 404.72)
+            humanoidRootPart.CFrame = CFrame.new(-581.56, 4.12, 495.92)
             Window:Notify({
                 Title = "通知",
                 Desc = "传送成功",
