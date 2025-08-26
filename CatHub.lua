@@ -224,29 +224,53 @@ end
         end
     })
     
-    Extra:Section({Title = "自动", Icon = "wrench"})
+Extra:Section({Title = "自动", Icon = "wrench"})
+
+-- 状态变量，标记是否正在执行自动吃黄球
+local isRunning = false
+-- 用于在停止时退出循环的标志
+local shouldStop = false
+
 Extra:Button({
     Title = "自动吃黄球(city)",
-    Desc = "单击以执行",
+    Desc = "单击以执行/停止",
     Callback = function()
-        -- 用 spawn 创建新线程，避免阻塞
-        spawn(function()
-            while true do
-                local args = {
-                    "collectOrb",
-                    "Orange Orb",
-                    "City"
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
-                wait(0.5)
-            end
-        end)
-        -- 这部分代码会在新线程启动循环后立即执行
-        Window:Notify({
-            Title = "通知",
-            Desc = "正在执行",
-            Time = 1
-        })
+        if not isRunning then
+            -- 启动新线程，避免阻塞
+            spawn(function()
+                shouldStop = false
+                while true do
+                    -- 检测是否需要停止
+                    if shouldStop then
+                        break
+                    end
+                    local args = {
+                        "collectOrb",
+                        "Orange Orb",
+                        "City"
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
+                    wait(0.5)
+                end
+                -- 执行停止后的清理，将状态设为未运行
+                isRunning = false
+            end)
+            isRunning = true
+            Window:Notify({
+                Title = "通知",
+                Desc = "正在执行",
+                Time = 1
+            })
+        else
+            -- 设置停止标志
+            shouldStop = true
+            isRunning = false
+            Window:Notify({
+                Title = "通知",
+                Desc = "已停止执行",
+                Time = 1
+            })
+        end
     end
 })
 
