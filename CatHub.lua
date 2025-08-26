@@ -101,21 +101,35 @@ Callback = function(val)
 end
 })
 
--- 以下是新增的同服务器人物ESP代码
+-- 创建 ESP 控制按钮
+local ESPButton = Tab:Button({
+    Title = "Toggle ESP",
+    Callback = function()
+        espEnabled = not espEnabled
+        print("ESP 已" .. (espEnabled and "开启" or "关闭"))
+        -- 更新所有绘制对象的可见性
+        for _, obj in ipairs(drawingObjects) do
+            obj.Box.Visible = espEnabled
+            obj.NameLabel.Visible = espEnabled
+        end
+    end
+})
+
+-- 以下是同服务器人物 ESP 代码
 -- 引入必要的服务
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
--- ESP相关配置
-local espEnabled = true
+-- ESP 相关配置
+local espEnabled = false
 local boxColor = Color3.fromRGB(255, 0, 0) -- 方框颜色，设为红色
 local nameColor = Color3.fromRGB(255, 255, 255) -- 名字颜色，设为白色
 
 -- 存储绘制对象的表，方便后续管理
 local drawingObjects = {}
 
--- 绘制单个人物ESP的函数
+-- 绘制单个人物 ESP 的函数
 local function drawCharacterESP(character)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local head = character:FindFirstChild("Head")
@@ -143,7 +157,7 @@ local function drawCharacterESP(character)
     -- 每帧更新绘制对象
     local connection
     connection = RunService.RenderStepped:Connect(function()
-        -- 检查人物是否有效且ESP是否开启
+        -- 检查人物是否有效且 ESP 是否开启
         if not character:IsDescendantOf(workspace) or not espEnabled then
             box:Remove()
             nameLabel:Remove()
@@ -192,34 +206,20 @@ local function drawCharacterESP(character)
     end)
 end
 
--- 为已存在的玩家人物添加ESP
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= Players.LocalPlayer and player.Character then
-        drawCharacterESP(player.Character)
+-- 为已存在的玩家人物添加 ESP（初始不开启，点击按钮后才会生效）
+local function addExistingPlayerESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer and player.Character then
+            drawCharacterESP(player.Character)
+        end
+        -- 监听玩家人物加载完成事件
+        player.CharacterAdded:Connect(drawCharacterESP)
     end
-    -- 监听玩家人物加载完成事件
-    player.CharacterAdded:Connect(drawCharacterESP)
 end
 
 -- 监听新玩家加入事件
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(drawCharacterESP)
-end)
-
--- 可以添加一个开关ESP的功能，比如按F键（这里示例按F键切换ESP开启/关闭）
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then
-        return
-    end
-    if input.KeyCode == Enum.KeyCode.F then
-        espEnabled = not espEnabled
-        print("ESP已" .. (espEnabled and "开启" or "关闭"))
-        -- 更新所有绘制对象的可见性
-        for _, obj in ipairs(drawingObjects) do
-            obj.Box.Visible = espEnabled
-            obj.NameLabel.Visible = espEnabled
-        end
-    end
 end)
 
 -- Code Display
