@@ -127,7 +127,7 @@ Tab:Button({
                 local billboardGui = Instance.new("BillboardGui")
                 billboardGui.Name = "PlayerNameDisplay"
                 billboardGui.Adornee = humanoidRootPart
-                billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                billboardGui.Size = UDim2.new(0, 200, 0, 30) -- 调整 BillboardGui 大小以适配较小文字
                 billboardGui.StudsOffset = Vector3.new(0, 3, 0) -- 名字在人物上方的偏移
                 billboardGui.AlwaysOnTop = true
 
@@ -137,7 +137,7 @@ Tab:Button({
                 textLabel.BackgroundTransparency = 1
                 textLabel.Text = player.Name
                 textLabel.TextColor3 = Color3.new(1, 1, 1)
-                textLabel.TextSize = 20
+                textLabel.TextSize = 14 -- 将文字大小调小
 
                 billboardGui.Parent = humanoidRootPart
             end
@@ -159,7 +159,7 @@ Tab:Button({
                 local billboardGui = Instance.new("BillboardGui")
                 billboardGui.Name = "PlayerNameDisplay"
                 billboardGui.Adornee = humanoidRootPart
-                billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                billboardGui.Size = UDim2.new(0, 200, 0, 30)
                 billboardGui.StudsOffset = Vector3.new(0, 3, 0)
                 billboardGui.AlwaysOnTop = true
 
@@ -169,7 +169,7 @@ Tab:Button({
                 textLabel.BackgroundTransparency = 1
                 textLabel.Text = player.Name
                 textLabel.TextColor3 = Color3.new(1, 1, 1)
-                textLabel.TextSize = 20
+                textLabel.TextSize = 14 -- 将文字大小调小
 
                 billboardGui.Parent = humanoidRootPart
             end)
@@ -208,7 +208,7 @@ Tab:Button({
                             local billboardGui = Instance.new("BillboardGui")
                             billboardGui.Name = "PlayerNameDisplay"
                             billboardGui.Adornee = humanoidRootPart
-                            billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                            billboardGui.Size = UDim2.new(0, 200, 0, 30)
                             billboardGui.StudsOffset = Vector3.new(0, 3, 0)
                             billboardGui.AlwaysOnTop = true
 
@@ -218,7 +218,7 @@ Tab:Button({
                             textLabel.BackgroundTransparency = 1
                             textLabel.Text = player.Name
                             textLabel.TextColor3 = Color3.new(1, 1, 1)
-                            textLabel.TextSize = 20
+                            textLabel.TextSize = 14 -- 将文字大小调小
 
                             billboardGui.Parent = humanoidRootPart
                             task.wait()
