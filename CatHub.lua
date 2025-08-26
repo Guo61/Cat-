@@ -225,35 +225,30 @@ end
     })
     
     Extra:Section({Title = "自动", Icon = "wrench"})
-    Extra:Button({
+Extra:Button({
     Title = "自动吃黄球(city)",
     Desc = "单击以执行",
     Callback = function()
+        -- 用 spawn 创建新线程，避免阻塞
+        spawn(function()
+            while true do
+                local args = {
+                    "collectOrb",
+                    "Orange Orb",
+                    "City"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
+                wait(0.5)
+            end
+        end)
+        -- 这部分代码会在新线程启动循环后立即执行
         Window:Notify({
             Title = "通知",
             Desc = "正在执行",
             Time = 1
         })
-        while true do
-            local args = {
-                "collectOrb",
-                "Orange Orb",
-                "City"
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("orbEvent"):FireServer(unpack(args))
-            wait(0.5)
-        end
     end
 })
-
-            Window:Notify({
-                Title = "通知",
-                Desc = "正在执行",
-                Time = 1
-            })
-        end
-    })
-end
 
 local Extra = Window:Tab({Title = "力量传奇", Icon = "wrench"}) do
     Extra:Section({Title = "传送"})
