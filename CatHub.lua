@@ -33,14 +33,6 @@ SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 -- Tab
 local Tab = Window:Tab({Title = "主页", Icon = 105059922903197}) do
 
-Tab:Paragraph({
-    Title = "信息",
-    Desc = "作者：Ccat \n 作者QQ：3395858053\n 感谢支持",
-    Image = "user",
-    ImageSize = 24,
-    Color = "White"
-})
-
     -- Section
     Tab:Section({Title = "By Ccat\nQQ3395858053"})
 
