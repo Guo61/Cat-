@@ -101,7 +101,7 @@ local jumpConn
 
 local MainTab = Tab:AddTab({ Name = "核心功能面板" })
 
-MainTab:Toggle({
+Tab:Toggle({
     Title = "无限跳",
     Default = false,
     Callback = function(isEnabled)
@@ -368,7 +368,7 @@ local MainTab = Tab:AddTab({
 })
 
 -- 自瞄开关Toggle（直接对接Tab框架）
-MainTab:Toggle({
+Tab:Toggle({
     Title = "自瞄",  -- Toggle显示名称
     Default = false,    -- 默认关闭状态
     Callback = function(isToggledOn)
