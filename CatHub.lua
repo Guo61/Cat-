@@ -210,7 +210,12 @@ Tab:Slider({
     Callback = function(val)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
-        local rootPart = character:WaitForChild("HumanoidRootPart")
+        -- 确保HumanoidRootPart加载完成
+        local rootPart = character:WaitForChild("HumanoidRootPart", 10) 
+        if not rootPart then
+            print("等待HumanoidRootPart超时")
+            return
+        end
 
         -- 移除旧的个人重力
         local oldGravity = rootPart:FindFirstChild("PersonalGravity")
@@ -219,19 +224,16 @@ Tab:Slider({
         end
 
         if val ~= workspace.Gravity then
-            -- 创建个人重力效果
             local personalGravity = Instance.new("BodyForce")
             personalGravity.Name = "PersonalGravity"
 
-            -- 计算需要的力来设置有效重力为val
             local mass = rootPart:GetMass()
-            -- 正确的力计算：(目标重力 - 世界重力) * 质量，方向向上（因为重力是向下的，要抵消或增强）
-            local force = Vector3.new(0, mass * (val - workspace.Gravity), 0)
+            -- 关键修复：力的方向与重力方向相反，需用“世界重力 - 目标重力”计算
+            local force = Vector3.new(0, mass * (workspace.Gravity - val), 0)
 
             personalGravity.Force = force
             personalGravity.Parent = rootPart
-
-            print("个人重力已设置为:", val)
+            print("个人重力已设置为:", val, "，力大小：", force.Y)
         else
             print("个人重力已恢复默认")
         end
@@ -240,15 +242,16 @@ Tab:Slider({
 
 -- 角色重置时清理个人重力
 game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    local rootPart = character:WaitForChild("HumanoidRootPart")
-    -- 角色添加时，先清理可能存在的旧个人重力
-    local oldGravity = rootPart:FindFirstChild("PersonalGravity")
-    if oldGravity then
-        oldGravity:Destroy()
-        print("角色重置，旧个人重力已清理")
+    character:WaitForChild("HumanoidRootPart", 10)
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        local oldGravity = rootPart:FindFirstChild("PersonalGravity")
+        if oldGravity then
+            oldGravity:Destroy()
+            print("角色重置，旧个人重力已清理")
+        end
     end
 
-    -- 监听角色移除事件来清理重力效果
     character.DescendantRemoving:Connect(function(descendant)
         if descendant.Name == "PersonalGravity" then
             print("个人重力效果已清理")
