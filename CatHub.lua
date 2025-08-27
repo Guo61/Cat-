@@ -39,6 +39,7 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 -- 假设 Tab 是已经创建好的选项卡对象
 Tab:Slider({
     Title = "设置速度",
+    Desc = "可输入",
     Min = 0,
     Max = 520,
     Rounding = 0,
@@ -64,6 +65,7 @@ Tab:Slider({
 
         Tab:Slider({
 Title = "设置跳跃高度",
+Desc = "可输入设置",
 Min = 0,
 Max = 200, -- 跳跃力量的合理范围，可根据需要调整
 Rounding = 0,
@@ -96,6 +98,107 @@ Tab:Button({
         print("飞行脚本已加载并执行")
     end
 })
+
+-- 1. 全局核心变量（管控开关状态与功能依赖）
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character, Humanoid, HumanoidRootPart = nil, nil, nil
+local isAirJumpEnabled = false  -- 踏空跳总开关
+local jumpInputConn = nil       -- 存储输入监听，关闭时断开
+local jumpCount = 0             -- 踏空次数计数
+local MAX_JUMPS = 999             -- 最大跳跃次数（1次正常跳+2次踏空，可自定义）
+
+-- 2. 角色初始化（处理角色加载/重生）
+local function initCharacter()
+    Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    Humanoid = Character:WaitForChild("Humanoid")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+    -- 落地重置踏空次数
+    Humanoid.StateChanged:Connect(function(_, newState)
+        if newState == Enum.HumanoidStateType.Landed then
+            jumpCount = 0
+        end
+    end)
+end
+
+-- 3. 生成临时踏空平台（核心功能）
+local function createTempPlatform()
+    if not HumanoidRootPart then return end
+
+    local platform = Instance.new("Part")
+    platform.Name = "TempAirJumpPlatform"
+    platform.Size = Vector3.new(4, 0.2, 4)
+    platform.Anchored = true
+    platform.CanCollide = true
+    platform.Transparency = 1  -- 透明隐藏
+    platform.Position = HumanoidRootPart.Position - Vector3.new(0, 2, 0)
+    platform.Parent = workspace
+
+    -- 0.2秒后删除平台，避免残留
+    task.delay(0.2, function()
+        if platform and platform.Parent then
+            platform:Destroy()
+        end
+    end)
+end
+
+-- 4. 踏空跳输入监听（单独封装，供开关调用）
+local function startAirJumpListen()
+    -- 先断开旧监听，防止重复绑定
+    if jumpInputConn then
+        jumpInputConn:Disconnect()
+        jumpInputConn = nil
+    end
+
+    -- 绑定空格键输入
+    jumpInputConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not isAirJumpEnabled then return end  -- 开关关闭时直接跳过
+        if gameProcessed or input.KeyCode ~= Enum.KeyCode.Space then return end
+        if not (Humanoid and HumanoidRootPart) then initCharacter() return end
+
+        -- 空中且未达最大次数时触发踏空
+        if Humanoid:GetState() == Enum.HumanoidStateType.Freefall and jumpCount < MAX_JUMPS then
+            jumpCount += 1
+            createTempPlatform()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end)
+end
+
+Tab:Toggle({
+    Title = "启用踏空跳",  -- Toggle显示名称
+    Default = false,      -- 默认关闭
+    Callback = function(isToggledOn)
+        isAirJumpEnabled = isToggledOn  -- 更新总开关状态
+
+        -- 关闭逻辑：断开输入监听+重置计数
+        if not isToggledOn then
+            if jumpInputConn then
+                jumpInputConn:Disconnect()
+                jumpInputConn = nil
+            end
+            jumpCount = 0
+            print("踏空跳已关闭")
+            return
+        end
+
+        -- 开启逻辑：初始化角色+启动监听
+        initCharacter()
+        startAirJumpListen()
+        print("踏空跳已开启（空中按空格触发，最多" .. MAX_JUMPS .. "次跳跃）")
+    end
+})
+
+-- 6. 角色状态监听（确保角色重生后功能正常）
+RunService.RenderStepped:Connect(function()
+    if isAirJumpEnabled and (not Character or not Character.Parent) then
+        initCharacter()
+    end
+end)
 
 Tab:Toggle({
     Title = "子弹追踪",
