@@ -1134,9 +1134,9 @@ Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补�
         CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
     end)
 
-local Tab = Window:Tab({Title = "忍者传奇", Icon = "map-pin"}) do
+local NinjaTab = Window:Tab({Title = "忍者传奇", Icon = "map-pin"})
 
-    Tab:Section({Title = "By Ccat\n传送功能请勿在其他服务器执行"})
+NinjaTab:Section({Title = "By Ccat\n传送功能请勿在其他服务器执行"})
 
 Window:Notify({
     Title = "Cat Hub",
