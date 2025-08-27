@@ -37,6 +37,64 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
 Tab:Button({
+    Title = "反挂机",
+    Desc = "不要随意开启!",
+    Description = "从Github加载并执行反挂机",
+    Callback = function()
+        -- 先显示加载提示
+        Window:Notify({
+            Title = "Cat Hub",
+            Desc = "正在加载反挂机脚本...",
+            Time = 3
+        })
+        
+        print("🔄 开始加载反挂机脚本...")
+        
+        local url = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E5%8F%8D%E6%8C%82%E6%9C%BA.lua"
+        
+        -- 添加错误处理
+        local success, response = pcall(function()
+            return game:HttpGet(url, true)
+        end)
+        
+        if success and response and #response > 100 then
+            print("✅ GitHub脚本加载成功")
+            
+            -- 执行脚本
+            local executeSuccess, executeError = pcall(function()
+                loadstring(response)()
+            end)
+            
+            if executeSuccess then
+                Window:Notify({
+                    Title = "Cat Hub",
+                    Desc = "反挂机脚本加载并执行成功!",
+                    Time = 5
+                })
+                print("🎉 反挂机脚本执行成功")
+            else
+                Window:Notify({
+                    Title = "Cat Hub",
+                    Desc = "脚本执行错误: " .. tostring(executeError),
+                    Time = 5
+                })
+                warn("❌ 脚本执行失败:", executeError)
+            end
+            
+        else
+            Window:Notify({
+                Title = "Cat Hub",
+                Desc = "反挂机脚本加载失败，请检查网络",
+                Time = 5
+            })
+            warn("❌ GitHub脚本加载失败")
+        end
+        
+        print("加载完毕并执行")
+    end
+})
+
+Tab:Button({
     Title = "半隐身",
     Desc = "悬浮窗关不掉",
     Description = "从GitHub加载并执行隐身脚本",
