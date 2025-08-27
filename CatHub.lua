@@ -201,38 +201,54 @@ Tab:Slider({
 })
 
 Tab:Slider({
-    Title = "设置重力",
-    Desc = "可输入",
+    Title = "设置个人重力",
+    Desc = "默认值即为最大值",
     Min = 0,
-    Max = 5,  -- 最大5倍重力，可根据需要调整
-    Rounding = 1,  -- 保留1位小数，让数值更精细
-    Value = 1,     -- 初始值为默认重力（1.0倍）
+    Max = 196.2,
+    Rounding = 1,
+    Value = 196.2,
     Callback = function(val)
-        -- 获取本地玩家的人物
         local player = game.Players.LocalPlayer
-        local character = player.Character
-        if not character then
-            character = player.CharacterAdded:Wait() -- 等待人物加载
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+        
+        -- 移除旧的个人重力
+        local oldGravity = rootPart:FindFirstChild("PersonalGravity")
+        if oldGravity then
+            oldGravity:Destroy()
         end
-        -- 获取人类oid对象，用于控制重力
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            -- 先移除旧的自定义重力控制器（避免重复叠加）
-            local oldGravity = character:FindFirstChild("CustomGravity")
-            if oldGravity then
-                oldGravity:Destroy()
-            end
-            -- 创建BodyGravity来控制角色重力
-            local bodyGravity = Instance.new("BodyGravity")
-            bodyGravity.Name = "CustomGravity"
-            bodyGravity.GravityScale = val  -- 将滑块值设为重力缩放比例
-            bodyGravity.Parent = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
-            print("人物重力缩放已设置为:", val, "倍")
+        
+        if val ~= workspace.Gravity then
+            -- 创建个人重力效果
+            local personalGravity = Instance.new("BodyForce")
+            personalGravity.Name = "PersonalGravity"
+            
+            -- 计算需要的力来抵消或增强重力
+            local mass = rootPart:GetMass()
+            local gravityDifference = workspace.Gravity - val
+            local force = Vector3.new(0, mass * gravityDifference, 0)
+            
+            personalGravity.Force = force
+            personalGravity.Parent = rootPart
+            
+            print("个人重力已设置为:", val)
         else
-            print("未找到人类oid对象，无法设置重力")
+            print("个人重力已恢复默认")
         end
     end
 })
+
+-- 角色重置时清理个人重力
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("HumanoidRootPart")
+    
+    -- 监听角色移除事件来清理重力效果
+    character.DescendantRemoving:Connect(function(descendant)
+        if descendant.Name == "PersonalGravity" then
+            print("个人重力效果已清理")
+        end
+    end)
+end)
 
         Tab:Slider({
 Title = "设置跳跃高度",
