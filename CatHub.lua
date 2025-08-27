@@ -107,75 +107,42 @@ Tab:Button({
     end
 })
 
--- 状态变量：标记防甩飞是否启用（初始禁用）
-local isAntiFlingEnabled = false
--- 存储甩飞脚本可能创建的连接/实例（用于强制停止甩飞）
-local flingConnections = {}
-
--- 甩飞按钮：点击前先禁用防甩飞
 Tab:Button({
     Title = "甩飞",
-    Description = "从GitHub加载并执行甩飞脚本（会自动关闭防甩飞）",
+    Description = "从GitHub加载并执行甩飞脚本",
     Callback = function()
-        -- 1. 若防甩飞正在运行，先强制禁用
-        if isAntiFlingEnabled then
-            disableAntiWalkFling()
-            isAntiFlingEnabled = false
-            print("防甩飞已自动关闭（甩飞与防甩飞不可同时运行）")
-        end
-
-        -- 2. 清理旧的甩飞残留（避免多个甩飞脚本叠加）
-        for _, conn in ipairs(flingConnections) do
-            if conn and typeof(conn) == "RBXScriptConnection" then
-                conn:Disconnect()
-            end
-        end
-        flingConnections = {}
-
-        -- 3. 加载并执行甩飞脚本（捕获脚本可能返回的连接，用于后续清理）
-        local success, flingScriptResult = pcall(function()
-            return loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))()
-        end)
-        if success then
-            -- 若甩飞脚本返回了连接对象，存入列表（便于后续停止）
-            if typeof(flingScriptResult) == "RBXScriptConnection" then
-                table.insert(flingConnections, flingScriptResult)
-            end
-            print("甩飞脚本已加载并执行")
-        else
-            print("甩飞脚本加载失败：" .. flingScriptResult)
-        end
+        -- 从指定URL加载并执行甩飞脚本
+        loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))()
+        print("甩飞脚本已加载并执行")
     end
 })
 
--- 防甩飞核心逻辑（保留原功能，新增状态同步）
 local maxSafeVelocity = 100
+-- 获取本地玩家
 local player = game.Players.LocalPlayer
+
+-- 用于存储 Stepped 连接
 local antiWalkFlingConn
 
 local function enableAntiWalkFling()
     if antiWalkFlingConn then
         antiWalkFlingConn:Disconnect()
     end
-    -- 清理甩飞残留（确保防甩飞启用前，甩飞已停止）
-    for _, conn in ipairs(flingConnections) do
-        if conn and typeof(conn) == "RBXScriptConnection" then
-            conn:Disconnect()
-        end
-    end
-    flingConnections = {}
-
     local lastVelocity = Vector3.new()
     antiWalkFlingConn = game:GetService("RunService").Stepped:Connect(function()
         local character = player.Character
-        if not character then return end
-        local hrp = character:FindFirstChild("HumanoidRootPart") -- 修复原代码：FindFirstChild 缺少冒号
-        if not hrp then return end
-        
+        if not character then
+            return
+        end
+        local hrp = character.FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            return
+        end
         local currentVelocity = hrp.Velocity
         if (currentVelocity - lastVelocity).Magnitude > maxSafeVelocity then
             hrp.Velocity = lastVelocity
-            print("Anti-WalkFling activated!")
+            -- 这里用 print 提示，若有自定义 notify 函数可替换
+            print("Anti-WalkFling activated!");
         end
         lastVelocity = currentVelocity
     end)
@@ -186,37 +153,23 @@ local function disableAntiWalkFling()
         antiWalkFlingConn:Disconnect()
         antiWalkFlingConn = nil
     end
-    -- 同步状态：防甩飞禁用时，清空甩飞连接列表（双重保险）
-    flingConnections = {}
 end
 
--- 防甩飞按钮：点击时检查甩飞状态，启用前先停止甩飞
+-- 假设 Tab 是通过 UI 库创建的标签页对象
 Tab:Button({
     Title = "防甩飞",
     Desc = "不要和甩飞同时开启",
     Description = "启用/禁用反 WalkFling",
-    IsEnabled = false, -- 按钮自身状态标记
+    -- 用于标记当前是否启用
+    IsEnabled = false,
     Callback = function(self)
         if self.IsEnabled then
-            -- 禁用防甩飞
             disableAntiWalkFling()
             self.IsEnabled = false
-            isAntiFlingEnabled = false
             print("Anti-WalkFling 已禁用")
         else
-            -- 启用防甩飞前，先停止甩飞
-            for _, conn in ipairs(flingConnections) do
-                if conn and typeof(conn) == "RBXScriptConnection" then
-                    conn:Disconnect()
-                end
-            end
-            flingConnections = {}
-            print("甩飞已自动关闭（防甩飞与甩飞不可同时运行）")
-
-            -- 启用防甩飞并同步状态
             enableAntiWalkFling()
             self.IsEnabled = true
-            isAntiFlingEnabled = true
             print("Anti-WalkFling 已启用")
         end
     end
@@ -1171,10 +1124,83 @@ Extra:Button({
     end
 })
 
-local Extra = Window:Tab({Title = "99夜", Icon = 105059922903197}) do
-    Extra:Section({Title = "传送"})
+-- 自动跳圈：Button格式（支持启动/停止切换）
+-- 全局状态+线程存储（避免多线程残留）
+_G.auto_hoop = false
+local autoHoopThread = nil
+
+-- 自动跳圈核心逻辑
+local function auto_hoop()
+    while _G.auto_hoop == true do
+        task.wait() -- 优化线程调度
+        
+        -- 1. 空值校验：避免玩家/角色未加载报错
+        local localPlayer = game.Players.LocalPlayer
+        if not localPlayer then continue end
+        local character = localPlayer.Character
+        if not character then continue end
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then continue end
+        
+        -- 2. 校验跳圈文件夹：避免找不到目标报错
+        local hoopsFolder = workspace:FindFirstChild("Hoops")
+        if not hoopsFolder then continue end
+        
+        -- 3. 移动所有跳圈到玩家位置（向上偏移1.5防止卡模型）
+        for _, child in ipairs(hoopsFolder:GetChildren()) do
+            if child.Name == "Hoop" and child:IsA("Model") then
+                -- 确保模型有PrimaryPart才能移动（Model必备条件）
+                if child.PrimaryPart then
+                    local targetCFrame = humanoidRootPart.CFrame + Vector3.new(0, 1.5, 0)
+                    child:SetPrimaryPartCFrame(targetCFrame)
+                end
+            end
+        end
+    end
+end
+
+-- Button按钮：集成到Tab（主页标签页）
+Tab:Button({
+    Title = "自动跳圈",
+    Desc = "单击启动/单击停止",
+    Description = "将所有Hoop跳圈移动到自身位置",
+    Callback = function()
+        -- 切换功能状态
+        _G.auto_hoop = not _G.auto_hoop
+        
+        if _G.auto_hoop then
+            -- 启动逻辑：新建线程（避免阻塞UI）
+            if not autoHoopThread or autoHoopThread.Status == "dead" then
+                autoHoopThread = task.spawn(auto_hoop)
+            end
+            -- 通知启动成功
+            Window:Notify({
+                Title = "自动跳圈",
+                Desc = "已启动，跳圈将跟随你移动",
+                Time = 2
+            })
+            print("自动跳圈功能已启动")
+        else
+            -- 停止逻辑：终止线程+清理状态
+            if autoHoopThread then
+                task.cancel(autoHoopThread)
+                autoHoopThread = nil
+            end
+            -- 通知停止成功
+            Window:Notify({
+                Title = "自动跳圈",
+                Desc = "已停止，跳圈不再跟随",
+                Time = 2
+            })
+            print("自动跳圈功能已停止")
+        end
+    end
+})
+
+local Extra = Window:Tab({Title = "墨水游戏", Icon = 105059922903197}) do
+    Extra:Section({Title = "木头人"})
     Extra:Button({
-        Title = "篝火",
+        Title = "传送终点",
         Desc = "单击以执行",
         Callback = function()
             Window:Notify({
