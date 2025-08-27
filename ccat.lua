@@ -1137,21 +1137,32 @@ Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补�
         CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
     end)
 local NinjaTab = Window:Tab({Title = "忍者传奇", Icon = 105059922903197})
-NinjaTab:Toggle({
-    Title = "自动赚取忍者",
-    Default = true,
-    Callback = function(Default)
-        local args = {"swingKatana"}
-        while Default do
-            game:GetService("Players").LocalPlayer:WaitForChild("ninjaEvent"):FireServer(unpack(args))
-            wait(0.3)  -- 添加延迟防止游戏崩溃
-            if Default == false then
-                print("循环结束")
-                break
+NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿在其他服务器执行"})
+
+    NinjaTab:Toggle({
+        Title = "自动挥剑",
+        Default = false,
+        Callback = function(ATHW)
+            getgenv().autoswing = ATHW
+            while getgenv().autoswing do
+                if not getgenv().autoswing then return end
+                
+                -- 检查背包中的工具
+                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if tool:FindFirstChild("ninjitsuGain") then
+                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+                        break
+                    end
+                end
+                
+                -- 挥舞剑
+                local A_1 = "swingKatana"
+                game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(A_1)
+                wait()
             end
         end
-    end
-})
+    })
+
     NinjaTab:Toggle({
         Title = "自动售卖",
         Default = false,
@@ -1314,9 +1325,6 @@ NinjaTab:Toggle({
             end
         })
     end
-
-NinjaTab:Section({Title = "By Ccat\n传送功能请勿在其他服务器执行"})
-
 
 Window:Notify({
     Title = "Cat Hub",
