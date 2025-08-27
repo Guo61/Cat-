@@ -37,7 +37,8 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
 Tab:Button({
-    Title = "隐身",
+    Title = "半隐身",
+    Desc = "悬浮窗关不掉",
     Description = "从GitHub加载并执行隐身脚本",
     Callback = function()
         -- 从指定URL加载并执行隐身脚本
@@ -63,6 +64,63 @@ Tab:Button({
         -- 从指定URL加载并执行甩飞脚本
         loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBEi"))()
         print("甩飞脚本已加载并执行")
+    end
+})
+
+local maxSafeVelocity = 100
+-- 获取本地玩家
+local player = game.Players.LocalPlayer
+-- 用于存储 Stepped 连接
+local antiWalkFlingConn
+
+local function enableAntiWalkFling()
+    if antiWalkFlingConn then
+        antiWalkFlingConn:Disconnect()
+    end
+    local lastVelocity = Vector3.new()
+    antiWalkFlingConn = game:GetService("RunService").Stepped:Connect(function()
+        local character = player.Character
+        if not character then
+            return
+        end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            return
+        end
+        local currentVelocity = hrp.Velocity
+        if (currentVelocity - lastVelocity).Magnitude > maxSafeVelocity then
+            hrp.Velocity = lastVelocity
+            -- 这里用 print 提示，若有自定义 notify 函数可替换
+            print("Anti-WalkFling activated!")
+        end
+        lastVelocity = currentVelocity
+    end)
+end
+
+local function disableAntiWalkFling()
+    if antiWalkFlingConn then
+        antiWalkFlingConn:Disconnect()
+        antiWalkFlingConn = nil
+    end
+end
+
+-- 假设 Tab 是通过 UI 库创建的标签页对象
+Tab:Button({
+    Title = "Anti-WalkFling",
+    Desc = "不要和甩飞同时开启",
+    Description = "启用/禁用反 WalkFling",
+    -- 用于标记当前是否启用
+    IsEnabled = false,
+    Callback = function(self)
+        if self.IsEnabled then
+            disableAntiWalkFling()
+            self.IsEnabled = false
+            print("Anti-WalkFling 已禁用")
+        else
+            enableAntiWalkFling()
+            self.IsEnabled = true
+            print("Anti-WalkFling 已启用")
+        end
     end
 })
 
