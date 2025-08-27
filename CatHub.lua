@@ -1141,7 +1141,7 @@ end
 
 -- 添加自动重生的 Toggle
 Tab:Toggle({
-    Name = "自动重生",
+    Title = "自动重生",
     Description = "无限制重生",
     Default = false,
     Callback = function(Value)
@@ -1195,7 +1195,7 @@ end
 
 -- Tab:Toggle 格式的开关控件
 Tab:Toggle({
-    Name = "自动跳圈",
+    Title = "自动跳圈",
     Default = false, -- 与全局变量初始状态一致
     Callback = function(Value)
         -- 更新全局状态
@@ -1215,6 +1215,21 @@ Tab:Toggle({
         end
     end
 })
+
+cal CodeBlock = Tab:Code({
+Title = "Love Players",
+Code = "传送功能请勿在其他服务器执行\n感谢游玩"
+})
+
+    -- Simulate update
+    task.delay(5, function()
+        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n感谢游玩")
+    end)
+end
+
+local Tab = Window:Tab({Title = "忍者传奇", Icon = "map-pin"}) do
+
+    Tab:Section({Title = "By Ccat\n传送功能请勿在其他服务器执行"})
 
 Window:Notify({
     Title = "Cat Hub",
