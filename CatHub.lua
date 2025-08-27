@@ -105,7 +105,7 @@ local function disableAntiWalkFling()
 end
 
 -- 假设 Tab 是通过 UI 库创建的标签页对象
-Tab:Toggle({
+Tab:Button({
     Title = "防甩飞",
     Desc = "不要和甩飞同时开启",
     Description = "启用/禁用反 WalkFling",
