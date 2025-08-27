@@ -70,10 +70,34 @@ Tab:Button({
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+-- 等待玩家和角色加载
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:WaitForChild("Humanoid")
+local character = player.Character
+if not character then
+    character = player.CharacterAdded:Wait()
+end
+
+-- 安全地获取部件
+local function safeWaitForChild(parent, childName, timeout)
+    timeout = timeout or 5
+    local startTime = tick()
+    while tick() - startTime < timeout do
+        local child = parent:FindFirstChild(childName)
+        if child then
+            return child
+        end
+        RunService.Heartbeat:Wait()
+    end
+    return nil
+end
+
+local humanoidRootPart = safeWaitForChild(character, "HumanoidRootPart")
+local humanoid = safeWaitForChild(character, "Humanoid")
+
+if not humanoidRootPart or not humanoid then
+    warn("防甩飞脚本: 无法找到必要部件")
+    return
+end
 
 -- 防护状态变量
 local isAntiThrowEnabled = true
@@ -133,7 +157,7 @@ local function stabilizeCharacter()
         
         -- 短暂延迟后重置
         delay(0.3, function()
-            if antiForce then
+            if antiForce and antiForce.Parent then
                 antiForce.Velocity = Vector3.new(0, 0, 0)
             end
         end)
@@ -142,101 +166,135 @@ local function stabilizeCharacter()
     end
 end
 
+-- 安全执行函数
+local function safeCall(func)
+    local success, err = pcall(func)
+    if not success then
+        warn("防甩飞脚本错误: " .. tostring(err))
+    end
+end
+
 -- 每帧更新
 local connection
 connection = RunService.Heartbeat:Connect(function()
-    if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
-        pcall(stabilizeCharacter)
-    else
-        -- 角色死亡或不存在时断开连接
-        connection:Disconnect()
-    end
+    safeCall(function()
+        if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
+            stabilizeCharacter()
+        else
+            -- 角色死亡或不存在时断开连接
+            connection:Disconnect()
+        end
+    end)
 end)
 
 -- 角色重新生成时重新初始化
 player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
-    humanoid = newCharacter:WaitForChild("Humanoid")
-    
-    -- 重新创建防护力
-    if antiForce then antiForce:Destroy() end
-    if gyro then gyro:Destroy() end
-    
-    antiForce = Instance.new("BodyVelocity")
-    antiForce.MaxForce = Vector3.new(40000, 40000, 40000)
-    antiForce.Velocity = Vector3.new(0, 0, 0)
-    antiForce.P = 1000
-    antiForce.Name = "AntiThrowForce"
-    antiForce.Parent = humanoidRootPart
-    
-    gyro = Instance.new("BodyGyro")
-    gyro.MaxTorque = Vector3.new(40000, 40000, 40000)
-    gyro.P = 1000
-    gyro.D = 100
-    gyro.Name = "AntiThrowGyro"
-    gyro.Parent = humanoidRootPart
-    
-    -- 重新连接每帧更新
-    connection = RunService.Heartbeat:Connect(function()
-        if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
-            pcall(stabilizeCharacter)
+    safeCall(function()
+        character = newCharacter
+        humanoidRootPart = safeWaitForChild(newCharacter, "HumanoidRootPart")
+        humanoid = safeWaitForChild(newCharacter, "Humanoid")
+        
+        if not humanoidRootPart or not humanoid then
+            warn("防甩飞脚本: 新角色缺少必要部件")
+            return
         end
+        
+        -- 重新创建防护力
+        if antiForce then 
+            pcall(function() antiForce:Destroy() end) 
+        end
+        if gyro then 
+            pcall(function() gyro:Destroy() end) 
+        end
+        
+        antiForce = Instance.new("BodyVelocity")
+        antiForce.MaxForce = Vector3.new(40000, 40000, 40000)
+        antiForce.Velocity = Vector3.new(0, 0, 0)
+        antiForce.P = 1000
+        antiForce.Name = "AntiThrowForce"
+        antiForce.Parent = humanoidRootPart
+        
+        gyro = Instance.new("BodyGyro")
+        gyro.MaxTorque = Vector3.new(40000, 40000, 40000)
+        gyro.P = 1000
+        gyro.D = 100
+        gyro.Name = "AntiThrowGyro"
+        gyro.Parent = humanoidRootPart
+        
+        -- 重新连接每帧更新
+        if connection then
+            connection:Disconnect()
+        end
+        connection = RunService.Heartbeat:Connect(function()
+            safeCall(function()
+                if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
+                    stabilizeCharacter()
+                end
+            end)
+        end)
     end)
 end)
 
 -- Tab:Toggle 格式的函数
 local function CreateAntiThrowToggle(Tab)
-    local AntiThrowToggle = 
-    Tab:Toggle({
+    if not Tab or type(Tab.Toggle) ~= "function" then
+        warn("防甩飞脚本: 无效的Tab对象")
+        return nil
+    end
+    
+    local AntiThrowToggle = Tab:Toggle({
         Title = "防甩飞系统",
         Default = true,
         Flag = "AntiThrowToggle",
         Callback = function(Value)
             isAntiThrowEnabled = Value
-            if not Value then
+            if not Value and antiForce and antiForce.Parent then
                 antiForce.Velocity = Vector3.new(0, 0, 0)
             end
         end
     })
     
     -- 添加滑块控制最大允许速度
-    Tab:Slider({
-        Title = "速度检测阈值",
-        Default = 50,
-        Min = 30,
-        Max = 100,
-        Flag = "VelocityThresholdSlider",
-        Callback = function(Value)
-            maxAllowedVelocity = Value
-        end
-    })
-    
-    -- 添加滑块控制检测频率
-    Tab:Slider({
-        Title = "检测频率",
-        Default = 0.5,
-        Min = 0.1,
-        Max = 1.0,
-        Precision = 0.1,
-        Flag = "CheckFrequencySlider",
-        Callback = function(Value)
-            velocityCheckCooldown = Value
-        end
-    })
+    if Tab.Slider then
+        Tab:Slider({
+            Title = "速度检测阈值",
+            Default = 50,
+            Min = 30,
+            Max = 100,
+            Flag = "VelocityThresholdSlider",
+            Callback = function(Value)
+                maxAllowedVelocity = Value
+            end
+        })
+        
+        -- 添加滑块控制检测频率
+        Tab:Slider({
+            Title = "检测频率",
+            Default = 0.5,
+            Min = 0.1,
+            Max = 1.0,
+            Precision = 0.1,
+            Flag = "CheckFrequencySlider",
+            Callback = function(Value)
+                velocityCheckCooldown = Value
+            end
+        })
+    end
     
     -- 添加按钮快速重置
-    Tab:Button({
-        Title = "重置防护系统",
-        Callback = function()
-            if antiForce then
-                antiForce.Velocity = Vector3.new(0, 0, 0)
+    if Tab.Button then
+        Tab:Button({
+            Title = "重置防护系统",
+            Callback = function()
+                if antiForce and antiForce.Parent then
+                    antiForce.Velocity = Vector3.new(0, 0, 0)
+                end
+                if gyro and gyro.Parent then
+                    gyro.CFrame = humanoidRootPart.CFrame
+                end
             end
-            if gyro then
-                gyro.CFrame = humanoidRootPart.CFrame
-            end
-        end
-    })
+        })
+    end
     
     return AntiThrowToggle
 end
@@ -245,7 +303,11 @@ end
 return {
     CreateToggle = CreateAntiThrowToggle,
     IsEnabled = function() return isAntiThrowEnabled end,
-    SetEnabled = function(value) isAntiThrowEnabled = value end,
+    SetEnabled = function(value) 
+        if type(value) == "boolean" then
+            isAntiThrowEnabled = value 
+        end
+    end,
     GetSettings = function()
         return {
             MaxVelocity = maxAllowedVelocity,
