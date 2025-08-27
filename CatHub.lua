@@ -1139,93 +1139,15 @@ local function autoNobs()
     end
 end
 
--- 添加自动重生的 Toggle
-Tab:Toggle({
-    Title = "自动重生",
-    Description = "无限制重生",
-    Default = false,
-    Callback = function(Value)
-        _G.auto_nobs = Value
-        if _G.auto_nobs then
-            -- 启动新线程，避免阻塞主线程
-            if not autoNobsThread or autoNobsThread.Status == "dead" then
-                autoNobsThread = task.spawn(autoNobs)
-            end
-        else
-            -- 停止自动重生
-            if autoNobsThread then
-                task.cancel(autoNobsThread)
-                autoNobsThread = nil
-            end
-        end
-    end
-})
--- 全局状态变量（默认关闭，避免初始误触发）
-_G.auto_hoop = false
--- 存储自动跳圈线程，用于启停管理
-local autoHoopThread = nil
-
--- 自动跳圈核心逻辑
-local function autoHoop()
-    -- 循环执行，直到状态关闭
-    while _G.auto_hoop do
-        task.wait() -- 替换原wait()，符合Roblox现代线程规范
-        
-        -- 1. 检查关键实例是否存在（避免空引用报错）
-        local localPlayer = game.Players.LocalPlayer
-        local character = localPlayer and localPlayer.Character
-        local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-        local hoopsFolder = workspace:FindFirstChild("Hoops")
-
-        if not (humanoidRootPart and hoopsFolder) then
-            continue -- 若关键部件缺失，跳过本次循环
-        end
-
-        -- 2. 遍历所有圈并移动到角色位置
-        for _, child in ipairs(hoopsFolder:GetChildren()) do
-            if child.Name == "Hoop" then
-                -- 安全设置CFrame（避免因部件锁定导致报错）
-                pcall(function()
-                    child.CFrame = humanoidRootPart.CFrame
-                end)
-            end
-        end
-    end
-end
-
--- Tab:Toggle 格式的开关控件
-Tab:Toggle({
-    Title = "自动跳圈",
-    Default = false, -- 与全局变量初始状态一致
-    Callback = function(Value)
-        -- 更新全局状态
-        _G.auto_hoop = Value
-
-        if Value then
-            -- 开启时：创建新线程（避免阻塞UI）
-            if not autoHoopThread or autoHoopThread.Status == "dead" then
-                autoHoopThread = task.spawn(autoHoop)
-            end
-        else
-            -- 关闭时：取消线程（释放资源，避免内存泄漏）
-            if autoHoopThread then
-                task.cancel(autoHoopThread)
-                autoHoopThread = nil
-            end
-        end
-    end
-})
-
-cal CodeBlock = Tab:Code({
+lcal CodeBlock = Tab:Code({
 Title = "Love Players",
-Code = "传送功能请勿在其他服务器执行\n感谢游玩"
+Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补全"
 })
 
     -- Simulate update
     task.delay(5, function()
-        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n感谢游玩")
+        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
     end)
-end
 
 local Tab = Window:Tab({Title = "忍者传奇", Icon = "map-pin"}) do
 
