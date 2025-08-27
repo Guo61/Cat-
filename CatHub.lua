@@ -1123,94 +1123,98 @@ Extra:Button({
         end
     end
 })
+-- 定义全局变量标记自动重生状态
+_G.auto_nobs = false
+-- 存储自动重生的线程，用于停止时销毁
+local autoNobsThread = nil
 
--- 自动跳圈：Button格式（支持启动/停止切换）
--- 全局状态+线程存储（避免多线程残留）
+-- 自动重生的核心逻辑
+local function autoNobs()
+    while _G.auto_nobs do
+        task.wait()
+        local rebirthRemote = game:GetService("ReplicatedStorage"):FindFirstChild("rEvents"):FindFirstChild("rebirthRemote")
+        if rebirthRemote then
+            rebirthRemote:InvokeServer("rebirthRequest")
+        end
+    end
+end
+
+-- 添加自动重生的 Toggle
+Tab:Toggle({
+    Name = "自动重生",
+    Description = "无限制重生",
+    Default = false,
+    Callback = function(Value)
+        _G.auto_nobs = Value
+        if _G.auto_nobs then
+            -- 启动新线程，避免阻塞主线程
+            if not autoNobsThread or autoNobsThread.Status == "dead" then
+                autoNobsThread = task.spawn(autoNobs)
+            end
+        else
+            -- 停止自动重生
+            if autoNobsThread then
+                task.cancel(autoNobsThread)
+                autoNobsThread = nil
+            end
+        end
+    end
+})
+-- 全局状态变量（默认关闭，避免初始误触发）
 _G.auto_hoop = false
+-- 存储自动跳圈线程，用于启停管理
 local autoHoopThread = nil
 
 -- 自动跳圈核心逻辑
-local function auto_hoop()
-    while _G.auto_hoop == true do
-        task.wait() -- 优化线程调度
+local function autoHoop()
+    -- 循环执行，直到状态关闭
+    while _G.auto_hoop do
+        task.wait() -- 替换原wait()，符合Roblox现代线程规范
         
-        -- 1. 空值校验：避免玩家/角色未加载报错
+        -- 1. 检查关键实例是否存在（避免空引用报错）
         local localPlayer = game.Players.LocalPlayer
-        if not localPlayer then continue end
-        local character = localPlayer.Character
-        if not character then continue end
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if not humanoidRootPart then continue end
-        
-        -- 2. 校验跳圈文件夹：避免找不到目标报错
+        local character = localPlayer and localPlayer.Character
+        local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
         local hoopsFolder = workspace:FindFirstChild("Hoops")
-        if not hoopsFolder then continue end
-        
-        -- 3. 移动所有跳圈到玩家位置（向上偏移1.5防止卡模型）
+
+        if not (humanoidRootPart and hoopsFolder) then
+            continue -- 若关键部件缺失，跳过本次循环
+        end
+
+        -- 2. 遍历所有圈并移动到角色位置
         for _, child in ipairs(hoopsFolder:GetChildren()) do
-            if child.Name == "Hoop" and child:IsA("Model") then
-                -- 确保模型有PrimaryPart才能移动（Model必备条件）
-                if child.PrimaryPart then
-                    local targetCFrame = humanoidRootPart.CFrame + Vector3.new(0, 1.5, 0)
-                    child:SetPrimaryPartCFrame(targetCFrame)
-                end
+            if child.Name == "Hoop" then
+                -- 安全设置CFrame（避免因部件锁定导致报错）
+                pcall(function()
+                    child.CFrame = humanoidRootPart.CFrame
+                end)
             end
         end
     end
 end
 
--- Button按钮：集成到Tab（主页标签页）
-Tab:Button({
-    Title = "自动跳圈",
-    Desc = "单击启动/单击停止",
-    Description = "将所有Hoop跳圈移动到自身位置",
-    Callback = function()
-        -- 切换功能状态
-        _G.auto_hoop = not _G.auto_hoop
-        
-        if _G.auto_hoop then
-            -- 启动逻辑：新建线程（避免阻塞UI）
+-- Tab:Toggle 格式的开关控件
+Tab:Toggle({
+    Name = "自动跳圈",
+    Default = false, -- 与全局变量初始状态一致
+    Callback = function(Value)
+        -- 更新全局状态
+        _G.auto_hoop = Value
+
+        if Value then
+            -- 开启时：创建新线程（避免阻塞UI）
             if not autoHoopThread or autoHoopThread.Status == "dead" then
-                autoHoopThread = task.spawn(auto_hoop)
+                autoHoopThread = task.spawn(autoHoop)
             end
-            -- 通知启动成功
-            Window:Notify({
-                Title = "自动跳圈",
-                Desc = "已启动，跳圈将跟随你移动",
-                Time = 2
-            })
-            print("自动跳圈功能已启动")
         else
-            -- 停止逻辑：终止线程+清理状态
+            -- 关闭时：取消线程（释放资源，避免内存泄漏）
             if autoHoopThread then
                 task.cancel(autoHoopThread)
                 autoHoopThread = nil
             end
-            -- 通知停止成功
-            Window:Notify({
-                Title = "自动跳圈",
-                Desc = "已停止，跳圈不再跟随",
-                Time = 2
-            })
-            print("自动跳圈功能已停止")
         end
     end
 })
-
-local Extra = Window:Tab({Title = "墨水游戏", Icon = 105059922903197}) do
-    Extra:Section({Title = "木头人"})
-    Extra:Button({
-        Title = "传送终点",
-        Desc = "单击以执行",
-        Callback = function()
-            Window:Notify({
-                Title = "通知",
-                Desc = "传送成功",
-                Time = 1
-            })
-        end
-    })
-end
 
 Window:Notify({
     Title = "Cat Hub",
