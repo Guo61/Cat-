@@ -211,26 +211,26 @@ Tab:Slider({
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local rootPart = character:WaitForChild("HumanoidRootPart")
-        
+
         -- 移除旧的个人重力
         local oldGravity = rootPart:FindFirstChild("PersonalGravity")
         if oldGravity then
             oldGravity:Destroy()
         end
-        
+
         if val ~= workspace.Gravity then
             -- 创建个人重力效果
             local personalGravity = Instance.new("BodyForce")
             personalGravity.Name = "PersonalGravity"
-            
-            -- 计算需要的力来抵消或增强重力
+
+            -- 计算需要的力来设置有效重力为val
             local mass = rootPart:GetMass()
-            local gravityDifference = workspace.Gravity - val
-            local force = Vector3.new(0, mass * gravityDifference, 0)
-            
+            -- 正确的力计算：(目标重力 - 世界重力) * 质量，方向向上（因为重力是向下的，要抵消或增强）
+            local force = Vector3.new(0, mass * (val - workspace.Gravity), 0)
+
             personalGravity.Force = force
             personalGravity.Parent = rootPart
-            
+
             print("个人重力已设置为:", val)
         else
             print("个人重力已恢复默认")
@@ -240,8 +240,14 @@ Tab:Slider({
 
 -- 角色重置时清理个人重力
 game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    character:WaitForChild("HumanoidRootPart")
-    
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    -- 角色添加时，先清理可能存在的旧个人重力
+    local oldGravity = rootPart:FindFirstChild("PersonalGravity")
+    if oldGravity then
+        oldGravity:Destroy()
+        print("角色重置，旧个人重力已清理")
+    end
+
     -- 监听角色移除事件来清理重力效果
     character.DescendantRemoving:Connect(function(descendant)
         if descendant.Name == "PersonalGravity" then
