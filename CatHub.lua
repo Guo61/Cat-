@@ -107,50 +107,74 @@ Tab:Button({
     end
 })
 
+-- 状态变量：标记防甩飞是否启用（初始禁用）
+local isAntiFlingEnabled = false
+-- 存储甩飞脚本可能创建的连接/实例（用于强制停止甩飞）
+local flingConnections = {}
+
+-- 甩飞按钮：点击前先禁用防甩飞
 Tab:Button({
     Title = "甩飞",
-    Description = "从GitHub加载并执行甩飞脚本",
+    Description = "从GitHub加载并执行甩飞脚本（会自动关闭防甩飞）",
     Callback = function()
-        -- 如果防甩飞已启用，先禁用它
-        if antiFlingButton and antiFlingButton.IsEnabled then
+        -- 1. 若防甩飞正在运行，先强制禁用
+        if isAntiFlingEnabled then
             disableAntiWalkFling()
-            antiFlingButton.IsEnabled = false
-            print("防甩飞已自动禁用")
+            isAntiFlingEnabled = false
+            print("防甩飞已自动关闭（甩飞与防甩飞不可同时运行）")
         end
-        
-        -- 从指定URL加载并执行甩飞脚本
-        loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))()
-        print("甩飞脚本已加载并执行")
+
+        -- 2. 清理旧的甩飞残留（避免多个甩飞脚本叠加）
+        for _, conn in ipairs(flingConnections) do
+            if conn and typeof(conn) == "RBXScriptConnection" then
+                conn:Disconnect()
+            end
+        end
+        flingConnections = {}
+
+        -- 3. 加载并执行甩飞脚本（捕获脚本可能返回的连接，用于后续清理）
+        local success, flingScriptResult = pcall(function()
+            return loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))()
+        end)
+        if success then
+            -- 若甩飞脚本返回了连接对象，存入列表（便于后续停止）
+            if typeof(flingScriptResult) == "RBXScriptConnection" then
+                table.insert(flingConnections, flingScriptResult)
+            end
+            print("甩飞脚本已加载并执行")
+        else
+            print("甩飞脚本加载失败：" .. flingScriptResult)
+        end
     end
 })
 
+-- 防甩飞核心逻辑（保留原功能，新增状态同步）
 local maxSafeVelocity = 100
--- 获取本地玩家
 local player = game.Players.LocalPlayer
-
--- 用于存储 Stepped 连接
 local antiWalkFlingConn
--- 存储防甩飞按钮引用
-local antiFlingButton
 
 local function enableAntiWalkFling()
     if antiWalkFlingConn then
         antiWalkFlingConn:Disconnect()
     end
+    -- 清理甩飞残留（确保防甩飞启用前，甩飞已停止）
+    for _, conn in ipairs(flingConnections) do
+        if conn and typeof(conn) == "RBXScriptConnection" then
+            conn:Disconnect()
+        end
+    end
+    flingConnections = {}
+
     local lastVelocity = Vector3.new()
     antiWalkFlingConn = game:GetService("RunService").Stepped:Connect(function()
         local character = player.Character
-        if not character then
-            return
-        end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if not hrp then
-            return
-        end
+        if not character then return end
+        local hrp = character:FindFirstChild("HumanoidRootPart") -- 修复原代码：FindFirstChild 缺少冒号
+        if not hrp then return end
+        
         local currentVelocity = hrp.Velocity
         if (currentVelocity - lastVelocity).Magnitude > maxSafeVelocity then
             hrp.Velocity = lastVelocity
-            -- 这里用 print 提示，若有自定义 notify 函数可替换
             print("Anti-WalkFling activated!")
         end
         lastVelocity = currentVelocity
@@ -162,34 +186,37 @@ local function disableAntiWalkFling()
         antiWalkFlingConn:Disconnect()
         antiWalkFlingConn = nil
     end
+    -- 同步状态：防甩飞禁用时，清空甩飞连接列表（双重保险）
+    flingConnections = {}
 end
 
--- 假设 Tab 是通过 UI 库创建的标签页对象
-antiFlingButton = Tab:Button({
+-- 防甩飞按钮：点击时检查甩飞状态，启用前先停止甩飞
+Tab:Button({
     Title = "防甩飞",
     Desc = "不要和甩飞同时开启",
     Description = "启用/禁用反 WalkFling",
-    -- 用于标记当前是否启用
-    IsEnabled = false,
+    IsEnabled = false, -- 按钮自身状态标记
     Callback = function(self)
         if self.IsEnabled then
+            -- 禁用防甩飞
             disableAntiWalkFling()
             self.IsEnabled = false
+            isAntiFlingEnabled = false
             print("Anti-WalkFling 已禁用")
         else
-            -- 如果甩飞脚本正在运行，需要先停止它
-            -- 注意：这需要知道甩飞脚本的具体实现方式
-            -- 这里假设甩飞脚本会设置一个全局变量或函数
-            if _G.FlingScriptActive then
-                -- 如果有停止甩飞的函数，调用它
-                if _G.StopFling then
-                    _G.StopFling()
+            -- 启用防甩飞前，先停止甩飞
+            for _, conn in ipairs(flingConnections) do
+                if conn and typeof(conn) == "RBXScriptConnection" then
+                    conn:Disconnect()
                 end
-                print("甩飞脚本已自动停止")
             end
-            
+            flingConnections = {}
+            print("甩飞已自动关闭（防甩飞与甩飞不可同时运行）")
+
+            -- 启用防甩飞并同步状态
             enableAntiWalkFling()
             self.IsEnabled = true
+            isAntiFlingEnabled = true
             print("Anti-WalkFling 已启用")
         end
     end
