@@ -7,7 +7,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/
 -- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
-    Desc = "防挂机已开启",
+    Desc = "需要时开启反挂机",
     Icon = "skull",
     Theme = "Dark",
     Config = {
@@ -37,6 +37,67 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
 -- 假设 Tab 是已经创建好的选项卡对象
+local vu = game:GetService("VirtualUser")
+    local isAntiAFKEnabled = true -- 用于控制反挂机功能的开关状态
+
+    -- 创建一个开关按钮来控制反挂机功能
+    Tab:Toggle({
+        Title = "反挂机",
+        Value = isAntiAFKEnabled,
+        Callback = function(value)
+            isAntiAFKEnabled = value
+            if isAntiAFKEnabled then
+                print("反挂机功能已开启")
+            else
+                print("反挂机功能已关闭")
+            end
+        end
+    })
+
+    -- 反挂机逻辑循环
+    spawn(function()
+        while true do
+            wait(10) -- 每隔10秒执行一次反挂机操作，可根据需要调整时间间隔
+            if isAntiAFKEnabled then
+                vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                wait(0.5)
+                vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                print("执行反挂机操作")
+            end
+        end
+    end)
+end
+
+Tab:Button({
+    Title = "隐身",
+    Description = "从GitHub加载并执行隐身脚本",
+    Callback = function()
+        -- 从指定URL加载并执行隐身脚本
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invisible-35376"))()
+        print("隐身脚本已加载并执行")
+    end
+})
+
+Tab:Button({
+    Title = "玩家入退提示",
+    Description = "从GitHub加载并执行提示脚本",
+    Callback = function()
+        -- 从指定URL加载并执行提示脚本
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))()
+        print("提示脚本已加载并执行")
+    end
+})
+
+Tab:Button({
+    Title = "甩飞",
+    Description = "从GitHub加载并执行甩飞脚本",
+    Callback = function()
+        -- 从指定URL加载并执行甩飞脚本
+        loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBEi"))()
+        print("甩飞脚本已加载并执行")
+    end
+})
+
 Tab:Slider({
     Title = "设置速度",
     Desc = "可输入",
@@ -98,67 +159,26 @@ Tab:Button({
         print("飞行脚本已加载并执行")
     end
 })
--- 1. 补充核心服务与玩家对象（原代码依赖项）
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer  -- 确保获取本地玩家
 
--- 2. 原有全局变量（保留）
-local airJumpConn = nil
-local airJumpCooldown = false
-
--- 3. 原有启用踏空跳函数（核心逻辑不变）
-local function enableAirJump()
-	if airJumpConn then airJumpConn:Disconnect() end
-	airJumpConn = UIS.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Keyboard 
-			and input.KeyCode == Enum.KeyCode.Space 
-			and not airJumpCooldown 
-		then
-			local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-			if not hrp or not humanoid then return end
-			if humanoid.FloorMaterial == Enum.Material.Air then
-				humanoid.Jump = true
-				airJumpCooldown = true
-				task.delay(0.5, function() airJumpCooldown = false end)
-			end
-		end
-	end)
-end
-
--- 4. 原有禁用踏空跳函数（核心逻辑不变）
-local function disableAirJump()
-	if airJumpConn then
-		airJumpConn:Disconnect()
-		airJumpConn = nil
-	end
-end
-
--- 5. 核心：直接绑定Tab:Toggle（无MainTab，简化结构）
-Tab:Toggle({
-    Title = "踏空跳",  -- Toggle开关显示名称
-    Default = false,      -- 默认关闭状态
-    Callback = function(isToggledOn)
-        if isToggledOn then
-            -- 开启逻辑：执行启用函数+提示
-            enableAirJump()
-            print("踏空跳已开启（空中按空格，0.5秒冷却）")
-        else
-            -- 关闭逻辑：执行禁用函数+重置冷却
-            disableAirJump()
-            airJumpCooldown = false  -- 避免下次开启残留冷却
-            print("踏空跳已关闭")
-        end
+Tab:Button({
+    Title = "无限跳",
+    Desc = "概率关不了",
+    Description = "从GitHub加载并执行无限跳脚本",
+    Callback = function()
+       loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))()
+        print("无限跳已加载并执行")
     end
 })
 
--- 6. 角色重生适配（补充稳定性，避免重生后功能失效）
-player.CharacterAdded:Connect(function()
-    if airJumpConn then  -- 若已开启，重生后重新绑定监听
-        enableAirJump()
+Tab:Button({
+    Title = "自瞄",
+    Desc = "宙斯自瞄",
+    Description = "从GitHub加载并执行自瞄脚本",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua"))()
+        print("自瞄已加载并执行")
     end
-end)
+})
 
 Tab:Toggle({
     Title = "子弹追踪",
