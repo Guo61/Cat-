@@ -1,10 +1,5 @@
---[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
--- Load UI Library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/DummyUi-leak-by-x2zu/fetching-main/Tools/Framework.luau"))()
 
--- Create Main Window
 local Window = Library:Window({
     Title = "Cat Hub",
     Desc = "需要时开启反挂机",
@@ -20,7 +15,6 @@ local Window = Library:Window({
     }
 })
 
--- Sidebar Vertical Separator
 local SidebarLine = Instance.new("Frame")
 SidebarLine.Size = UDim2.new(0, 1, 1, 0)
 SidebarLine.Position = UDim2.new(0, 140, 0, 0) -- adjust if needed
@@ -28,12 +22,10 @@ SidebarLine.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 SidebarLine.BorderSizePixel = 0
 SidebarLine.ZIndex = 5
 SidebarLine.Name = "SidebarLine"
-SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
+SidebarLine.Parent = game:GetService("CoreGui")
 
--- Tab
 local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 
-    -- Section
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
 Tab:Button({  
@@ -41,7 +33,7 @@ Tab:Button({
     Desc = "不要随意开启!",  
     Description = "从Github加载并执行反挂机",  
     Callback = function()  
-        -- 先显示加载提示  
+       
         Window:Notify({  
             Title = "Cat Hub",  
             Desc = "正在加载反挂机脚本...",  
@@ -204,6 +196,40 @@ Tab:Slider({
             print("人物行走速度已设置为:", val)
         else
             print("未找到人类oid对象，无法设置速度")
+        end
+    end
+})
+
+Tab:Slider({
+    Title = "设置重力",
+    Desc = "可输入",
+    Min = 0,
+    Max = 5,  -- 最大5倍重力，可根据需要调整
+    Rounding = 1,  -- 保留1位小数，让数值更精细
+    Value = 1,     -- 初始值为默认重力（1.0倍）
+    Callback = function(val)
+        -- 获取本地玩家的人物
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character then
+            character = player.CharacterAdded:Wait() -- 等待人物加载
+        end
+        -- 获取人类oid对象，用于控制重力
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            -- 先移除旧的自定义重力控制器（避免重复叠加）
+            local oldGravity = character:FindFirstChild("CustomGravity")
+            if oldGravity then
+                oldGravity:Destroy()
+            end
+            -- 创建BodyGravity来控制角色重力
+            local bodyGravity = Instance.new("BodyGravity")
+            bodyGravity.Name = "CustomGravity"
+            bodyGravity.GravityScale = val  -- 将滑块值设为重力缩放比例
+            bodyGravity.Parent = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+            print("人物重力缩放已设置为:", val, "倍")
+        else
+            print("未找到人类oid对象，无法设置重力")
         end
     end
 })
@@ -696,7 +722,7 @@ end
 Window:Line()
 
 -- Another Tab Example
-local Extra = Window:Tab({Title = "极速传奇", Icon = 105059922903197}) do
+local Extra = Window:Tab({Title = "极速传奇", Icon = "zap"}) do
     Extra:Section({Title = "传送(请勿在其他服务器中执行!)", Icon = "wrench"})
     Extra:Button({
         Title = "城市",
@@ -1092,11 +1118,3 @@ Window:Notify({
     Desc = "感谢您的游玩",
     Time = 5
 })
-
-script.Destroying:Connect(function()
-    Window:Notify({
-        Title = "Cat Hub",
-        Desc = "关闭",
-        Time = 5
-    })
-end)
