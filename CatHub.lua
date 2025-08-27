@@ -96,37 +96,34 @@ Tab:Button({
         print("飞行脚本已加载并执行")
     end
 })
-
 Tab:Toggle({
     Title = "无限跳",
-    Default = false,  -- 默认关闭，避免误触发
+    Default = false,
     Callback = function(isEnabled)
-        -- 局部存储核心状态（避免全局变量冲突，便于开关管理）
-        local jumpState = {
-            isActive = isEnabled,
-            jumpConn = nil  -- 存储跳跃输入监听连接，用于关闭时断开
-        }
+        -- 关键：全局存储跳跃监听连接（确保每次操作同一连接）
+        local jumpConn
+        local UIS = game:GetService("UserInputService")
+        local localPlayer = game.Players.LocalPlayer
 
-        -- 1. 关闭逻辑：停止无限跳+清理监听
+        -- 关闭逻辑：断开连接+清空变量
         if not isEnabled then
-            jumpState.isActive = false  -- 禁用跳跃触发
-            -- 断开输入监听，避免关闭后仍响应跳跃请求
-            if jumpState.jumpConn then
-                jumpState.jumpConn:Disconnect()
-                jumpState.jumpConn = nil
+            if jumpConn then
+                jumpConn:Disconnect()
+                jumpConn = nil  -- 断后清空，避免残留
             end
             return
         end
 
-        -- 2. 开启逻辑：启用无限跳+监听跳跃输入（复用原逻辑）
-        jumpState.isActive = true
-        -- 监听玩家跳跃请求（按下空格等触发）
-        jumpState.jumpConn = game.UserInputService.JumpRequest:Connect(function()
-            -- 仅在开启状态下执行跳跃
-            if not jumpState.isActive then return end
-            
-            -- 原跳跃逻辑：校验角色和人形部件，触发跳跃状态
-            local character = game.Players.LocalPlayer.Character
+        -- 开启前先断旧连接（防止多连接叠加）
+        if jumpConn then
+            jumpConn:Disconnect()
+            jumpConn = nil
+        end
+
+        -- 监听跳跃请求（仅1个有效连接）
+        jumpConn = UIS.JumpRequest:Connect(function()
+            -- 仅在开启状态+角色就绪时触发跳跃
+            local character = localPlayer.Character
             if character and character:FindFirstChildOfClass("Humanoid") then
                 character.Humanoid:ChangeState("Jumping")
             end
@@ -322,50 +319,50 @@ Tab:Toggle({
         end
     end
 })
+
 Tab:Toggle({
     Title = "自瞄",
-    Default = false,  -- 默认关闭状态
+    Desc = "概率关不了",
+    Default = false,
     Callback = function(isEnabled)
-        -- 局部存储自瞄核心数据（避免全局变量冲突，方便开关清理）
-        local aimSystem = {
-            isActive = isEnabled,
-            renderConn = nil,  -- 自瞄帧循环连接
-            localPlayer = game.Players.LocalPlayer,
-            camera = workspace.CurrentCamera,
-            maxAimDist = 65,   -- 最大自瞄距离（可调整）
-            smoothFactor = 0.13-- 自瞄平滑度（0.05-0.2区间最佳）
-        }
+        -- 存储自瞄核心数据（确保连接唯一，避免残留）
+        local aimConn  -- 单独存储帧循环连接，方便全局管理
+        local localPlayer = game.Players.LocalPlayer
+        local camera = workspace.CurrentCamera
 
-        -- 1. 关闭自瞄逻辑：断开连接+恢复相机默认状态
+        -- 关闭逻辑：断开连接+恢复相机
         if not isEnabled then
-            -- 断开帧循环，停止自瞄计算
-            if aimSystem.renderConn then
-                aimSystem.renderConn:Disconnect()
-                aimSystem.renderConn = nil
+            if aimConn then
+                aimConn:Disconnect()
+                aimConn = nil
             end
-            -- 恢复相机为玩家可控模式，避免关闭后视角异常
-            if aimSystem.camera then
-                aimSystem.camera.CameraType = Enum.CameraType.Custom
+            -- 恢复相机为玩家可控模式
+            if camera then
+                camera.CameraType = Enum.CameraType.Custom
             end
-            aimSystem.isActive = false
             return
         end
 
-        -- 2. 辅助函数：筛选最近的有效目标（解决“找不到目标”问题）
+        -- 开启前先清理旧连接（防重复叠加）
+        if aimConn then
+            aimConn:Disconnect()
+            aimConn = nil
+        end
+
+        -- 辅助函数：筛选最近有效目标
         local function getNearestTarget()
             local nearestTarget = nil
             local nearestDist = math.huge
-            local localChar = aimSystem.localPlayer.Character
+            local localChar = localPlayer.Character
 
-            -- 校验本地角色是否就绪（无角色则不找目标）
             if not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
                 return nil
             end
             local localRoot = localChar.HumanoidRootPart
 
-            -- 遍历所有玩家，筛选“存活+在射程内+有核心部件”的目标
+            -- 遍历筛选存活、在射程内的敌方
             for _, player in ipairs(game.Players:GetPlayers()) do
-                if player ~= aimSystem.localPlayer then
+                if player ~= localPlayer then
                     local targetChar = player.Character
                     if targetChar then
                         local targetHumanoid = targetChar:FindFirstChildOfClass("Humanoid")
@@ -373,9 +370,9 @@ Tab:Toggle({
                         
                         if targetHumanoid and targetHumanoid.Health > 0 and targetRoot then
                             local dist = (localRoot.Position - targetRoot.Position).Magnitude
-                            if dist <= aimSystem.maxAimDist and dist < nearestDist then
+                            if dist <= 65 and dist < nearestDist then  -- 最大射程65 studs
                                 nearestDist = dist
-                                nearestTarget = targetRoot  -- 瞄准根部件（比头部更稳定）
+                                nearestTarget = targetRoot  -- 瞄准根部件（稳定）
                             end
                         end
                     end
@@ -384,29 +381,26 @@ Tab:Toggle({
             return nearestTarget
         end
 
-        -- 3. 开启自瞄逻辑：每帧驱动瞄准（解决“视角不生效”问题）
-        aimSystem.isActive = true
-        aimSystem.renderConn = game:GetService("RunService").RenderStepped:Connect(function()
-            -- 多重校验：确保自瞄启用+相机/角色就绪
-            if not (aimSystem.isActive and aimSystem.camera and aimSystem.localPlayer.Character) then
+        -- 开启自瞄：每帧驱动瞄准
+        aimConn = game:GetService("RunService").RenderStepped:Connect(function()
+            -- 双重校验：确保开启状态+核心部件就绪
+            if not (isEnabled and camera and localPlayer.Character) then
                 return
             end
 
-            -- 获取目标：无目标则终止本次瞄准
             local target = getNearestTarget()
-            if not target then return end
+            local localHead = localPlayer.Character:FindFirstChild("Head")
+            if not target or not localHead then
+                return
+            end
 
-            -- 校验本地角色头部（作为视角基准，避免瞄准偏移）
-            local localHead = aimSystem.localPlayer.Character:FindFirstChild("Head")
-            if not localHead then return end
-
-            -- 计算瞄准角度+平滑应用（避免视角跳变）
-            local aimDirection = (target.Position - localHead.Position).Unit
-            local targetCFrame = CFrame.new(localHead.Position, localHead.Position + aimDirection)
+            -- 计算平滑瞄准角度
+            local aimDir = (target.Position - localHead.Position).Unit
+            local targetCFrame = CFrame.new(localHead.Position, localHead.Position + aimDir)
             
-            -- 强制解锁相机控制权+平滑转向（核心：解决“相机锁死无法瞄准”）
-            aimSystem.camera.CameraType = Enum.CameraType.Scriptable
-            aimSystem.camera.CFrame = aimSystem.camera.CFrame:Lerp(targetCFrame, aimSystem.smoothFactor)
+            -- 应用瞄准（强制解锁相机）
+            camera.CameraType = Enum.CameraType.Scriptable
+            camera.CFrame = camera.CFrame:Lerp(targetCFrame, 0.13)  -- 平滑度0.13
         end)
     end
 })
