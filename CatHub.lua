@@ -67,62 +67,192 @@ Tab:Button({
     end
 })
 
-local maxSafeVelocity = 100
--- 获取本地玩家
-local player = game.Players.LocalPlayer
--- 用于存储 Stepped 连接
-local antiWalkFlingConn
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-local function enableAntiWalkFling()
-    if antiWalkFlingConn then
-        antiWalkFlingConn:Disconnect()
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+
+-- 防护状态变量
+local isAntiThrowEnabled = true
+local lastVelocityCheck = 0
+local velocityCheckCooldown = 0.5
+local maxAllowedVelocity = 50 -- 最大允许速度阈值
+
+-- 创建防护力
+local antiForce = Instance.new("BodyVelocity")
+antiForce.MaxForce = Vector3.new(40000, 40000, 40000)
+antiForce.Velocity = Vector3.new(0, 0, 0)
+antiForce.P = 1000
+antiForce.Name = "AntiThrowForce"
+antiForce.Parent = humanoidRootPart
+
+-- 可选：创建陀螺仪稳定器
+local gyro = Instance.new("BodyGyro")
+gyro.MaxTorque = Vector3.new(40000, 40000, 40000)
+gyro.P = 1000
+gyro.D = 100
+gyro.Name = "AntiThrowGyro"
+gyro.Parent = humanoidRootPart
+
+-- 检测异常速度的函数
+local function checkAbnormalVelocity()
+    local currentTime = tick()
+    if currentTime - lastVelocityCheck < velocityCheckCooldown then
+        return false
     end
-    local lastVelocity = Vector3.new()
-    antiWalkFlingConn = game:GetService("RunService").Stepped:Connect(function()
-        local character = player.Character
-        if not character then
-            return
+    
+    lastVelocityCheck = currentTime
+    
+    local currentVelocity = humanoidRootPart.Velocity
+    local speed = currentVelocity.Magnitude
+    
+    -- 如果速度异常高，可能是被甩飞了
+    if speed > maxAllowedVelocity and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+        return true
+    end
+    
+    return false
+end
+
+-- 稳定角色的函数
+local function stabilizeCharacter()
+    if not isAntiThrowEnabled or humanoid.Health <= 0 then
+        return
+    end
+    
+    -- 更新陀螺仪以保持当前朝向
+    gyro.CFrame = humanoidRootPart.CFrame
+    
+    -- 如果检测到异常速度，施加反向力
+    if checkAbnormalVelocity() then
+        local counterVelocity = -humanoidRootPart.Velocity * 0.7
+        antiForce.Velocity = counterVelocity
+        
+        -- 短暂延迟后重置
+        delay(0.3, function()
+            if antiForce then
+                antiForce.Velocity = Vector3.new(0, 0, 0)
+            end
+        end)
+    else
+        antiForce.Velocity = Vector3.new(0, 0, 0)
+    end
+end
+
+-- 每帧更新
+local connection
+connection = RunService.Heartbeat:Connect(function()
+    if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
+        pcall(stabilizeCharacter)
+    else
+        -- 角色死亡或不存在时断开连接
+        connection:Disconnect()
+    end
+end)
+
+-- 角色重新生成时重新初始化
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
+    humanoid = newCharacter:WaitForChild("Humanoid")
+    
+    -- 重新创建防护力
+    if antiForce then antiForce:Destroy() end
+    if gyro then gyro:Destroy() end
+    
+    antiForce = Instance.new("BodyVelocity")
+    antiForce.MaxForce = Vector3.new(40000, 40000, 40000)
+    antiForce.Velocity = Vector3.new(0, 0, 0)
+    antiForce.P = 1000
+    antiForce.Name = "AntiThrowForce"
+    antiForce.Parent = humanoidRootPart
+    
+    gyro = Instance.new("BodyGyro")
+    gyro.MaxTorque = Vector3.new(40000, 40000, 40000)
+    gyro.P = 1000
+    gyro.D = 100
+    gyro.Name = "AntiThrowGyro"
+    gyro.Parent = humanoidRootPart
+    
+    -- 重新连接每帧更新
+    connection = RunService.Heartbeat:Connect(function()
+        if character and humanoidRootPart and humanoid and humanoid.Health > 0 then
+            pcall(stabilizeCharacter)
         end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if not hrp then
-            return
-        end
-        local currentVelocity = hrp.Velocity
-        if (currentVelocity - lastVelocity).Magnitude > maxSafeVelocity then
-            hrp.Velocity = lastVelocity
-            -- 这里用 print 提示，若有自定义 notify 函数可替换
-            print("Anti-WalkFling activated!")
-        end
-        lastVelocity = currentVelocity
     end)
-end
+end)
 
-local function disableAntiWalkFling()
-    if antiWalkFlingConn then
-        antiWalkFlingConn:Disconnect()
-        antiWalkFlingConn = nil
-    end
-end
-
--- 假设 Tab 是通过 UI 库创建的标签页对象
-Tab:Button({
-    Title = "Anti-WalkFling",
-    Desc = "不要和甩飞同时开启",
-    Description = "启用/禁用反 WalkFling",
-    -- 用于标记当前是否启用
-    IsEnabled = false,
-    Callback = function(self)
-        if self.IsEnabled then
-            disableAntiWalkFling()
-            self.IsEnabled = false
-            print("Anti-WalkFling 已禁用")
-        else
-            enableAntiWalkFling()
-            self.IsEnabled = true
-            print("Anti-WalkFling 已启用")
+-- Tab:Toggle 格式的函数
+local function CreateAntiThrowToggle(Tab)
+    local AntiThrowToggle = 
+    Tab:Toggle({
+        Title = "防甩飞系统",
+        Default = true,
+        Flag = "AntiThrowToggle",
+        Callback = function(Value)
+            isAntiThrowEnabled = Value
+            if not Value then
+                antiForce.Velocity = Vector3.new(0, 0, 0)
+            end
         end
+    })
+    
+    -- 添加滑块控制最大允许速度
+    Tab:Slider({
+        Title = "速度检测阈值",
+        Default = 50,
+        Min = 30,
+        Max = 100,
+        Flag = "VelocityThresholdSlider",
+        Callback = function(Value)
+            maxAllowedVelocity = Value
+        end
+    })
+    
+    -- 添加滑块控制检测频率
+    Tab:Slider({
+        Title = "检测频率",
+        Default = 0.5,
+        Min = 0.1,
+        Max = 1.0,
+        Precision = 0.1,
+        Flag = "CheckFrequencySlider",
+        Callback = function(Value)
+            velocityCheckCooldown = Value
+        end
+    })
+    
+    -- 添加按钮快速重置
+    Tab:Button({
+        Title = "重置防护系统",
+        Callback = function()
+            if antiForce then
+                antiForce.Velocity = Vector3.new(0, 0, 0)
+            end
+            if gyro then
+                gyro.CFrame = humanoidRootPart.CFrame
+            end
+        end
+    })
+    
+    return AntiThrowToggle
+end
+
+-- 返回创建函数供外部调用
+return {
+    CreateToggle = CreateAntiThrowToggle,
+    IsEnabled = function() return isAntiThrowEnabled end,
+    SetEnabled = function(value) isAntiThrowEnabled = value end,
+    GetSettings = function()
+        return {
+            MaxVelocity = maxAllowedVelocity,
+            CheckCooldown = velocityCheckCooldown
+        }
     end
-})
+}
 
 Tab:Slider({
     Title = "设置速度",
@@ -152,7 +282,7 @@ Tab:Slider({
 
         Tab:Slider({
 Title = "设置跳跃高度",
-Desc = "可输入设置",
+Desc = "可输入",
 Min = 0,
 Max = 200, -- 跳跃力量的合理范围，可根据需要调整
 Rounding = 0,
