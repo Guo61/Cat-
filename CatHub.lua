@@ -40,7 +40,7 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
 Tab:Slider({
     Title = "设置速度",
     Min = 0,
-    Max = 100,
+    Max = 520,
     Rounding = 0,
     Value = 25,
     Callback = function(val)
@@ -94,42 +94,6 @@ Tab:Button({
         -- 从指定URL加载并执行飞行脚本
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))()
         print("飞行脚本已加载并执行")
-    end
-})
-
-local jumpConn
-
-local MainTab = Tab:AddTab({ Name = "核心功能面板" })
-
-Tab:Toggle({
-    Title = "无限跳",
-    Default = false,
-    Callback = function(isEnabled)
-        local UIS = game:GetService("UserInputService")
-        local localPlayer = game.Players.LocalPlayer
-
-        -- 关闭逻辑（现在操作的是全局 jumpConn，能断干净）
-        if not isEnabled then
-            if jumpConn then
-                jumpConn:Disconnect()
-                jumpConn = nil  -- 断后清空，防止残留
-            end
-            return
-        end
-
-        -- 开启前清旧连接（同样操作全局变量）
-        if jumpConn then
-            jumpConn:Disconnect()
-            jumpConn = nil
-        end
-
-        -- 监听跳跃（连接存到全局 jumpConn）
-        jumpConn = UIS.JumpRequest:Connect(function()
-            local character = localPlayer.Character
-            if character and character:FindFirstChildOfClass("Humanoid") then
-                character.Humanoid:ChangeState("Jumping")
-            end
-        end)
     end
 })
 
@@ -319,85 +283,6 @@ Tab:Toggle({
                 nightVisionData.pointLight = nil
             end
         end
-    end
-})
--- 1. 全局核心变量（必须在最顶层，确保开关操作同一对象）
-local isAimActive = false  -- 自瞄状态开关
-local aimRenderLoop = nil  -- 存储自瞄循环，用于关闭时终止
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local LocalPlayer = game.Players.LocalPlayer
-
--- 2. 自瞄核心逻辑（单独封装，供Toggle调用）
-local function handleAimLogic()
-    -- 基础校验：角色/状态异常时不执行
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-    if not (RootPart and Humanoid and Humanoid.Health > 0) then return end
-
-    -- 【自瞄核心：锁定最近敌人（可根据游戏逻辑修改）】
-    local NearestTarget = nil
-    local MinDistance = math.huge
-
-    -- 遍历所有玩家，筛选可瞄准目标
-    for _, Player in ipairs(game.Players:GetPlayers()) do
-        if Player ~= LocalPlayer and Player.Character then
-            local TargetRoot = Player.Character:FindFirstChild("HumanoidRootPart")
-            local TargetHumanoid = Player.Character:FindFirstChildOfClass("Humanoid")
-            if TargetRoot and TargetHumanoid and TargetHumanoid.Health > 0 then
-                -- 计算距离，锁定最近目标
-                local Distance = (RootPart.Position - TargetRoot.Position).Magnitude
-                if Distance < MinDistance then
-                    MinDistance = Distance
-                    NearestTarget = TargetRoot
-                end
-            end
-        end
-    end
-
-    -- 执行瞄准：让角色朝向目标
-    if NearestTarget then
-        RootPart.CFrame = CFrame.new(RootPart.Position, Vector3.new(NearestTarget.Position.X, RootPart.Position.Y, NearestTarget.Position.Z))
-    end
-end
-
--- 3. Tab面板与Toggle控件（核心：开关逻辑绑定）
-local MainTab = Tab:AddTab({
-    Title = "自瞄功能面板"  -- 面板名称，可自定义
-})
-
--- 自瞄开关Toggle（直接对接Tab框架）
-Tab:Toggle({
-    Title = "自瞄",  -- Toggle显示名称
-    Default = false,    -- 默认关闭状态
-    Callback = function(isToggledOn)
-        -- 1. 更新自瞄状态
-        isAimActive = isToggledOn
-
-        -- 2. 关闭逻辑：终止旧循环，避免残留
-        if not isToggledOn then
-            if aimRenderLoop then
-                aimRenderLoop:Disconnect()
-                aimRenderLoop = nil  -- 清空变量，防止重复断连报错
-            end
-            print("自瞄已关闭")  -- 控制台提示，方便确认
-            return
-        end
-
-        -- 3. 开启逻辑：启动新循环（先清旧循环，防止叠加）
-        if aimRenderLoop then
-            aimRenderLoop:Disconnect()
-            aimRenderLoop = nil
-        end
-
-        -- 每帧执行自瞄逻辑（RenderStepped确保瞄准流畅）
-        aimRenderLoop = RunService.RenderStepped:Connect(function()
-            if isAimActive then  -- 双重校验，确保关闭时立即停止
-                handleAimLogic()
-            end
-        end)
-        print("自瞄已开启")  -- 控制台提示
     end
 })
 
