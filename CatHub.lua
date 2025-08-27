@@ -111,8 +111,15 @@ Tab:Button({
     Title = "甩飞",
     Description = "从GitHub加载并执行甩飞脚本",
     Callback = function()
+        -- 如果防甩飞已启用，先禁用它
+        if antiFlingButton and antiFlingButton.IsEnabled then
+            disableAntiWalkFling()
+            antiFlingButton.IsEnabled = false
+            print("防甩飞已自动禁用")
+        end
+        
         -- 从指定URL加载并执行甩飞脚本
-        loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBEi"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))()
         print("甩飞脚本已加载并执行")
     end
 })
@@ -120,8 +127,11 @@ Tab:Button({
 local maxSafeVelocity = 100
 -- 获取本地玩家
 local player = game.Players.LocalPlayer
+
 -- 用于存储 Stepped 连接
 local antiWalkFlingConn
+-- 存储防甩飞按钮引用
+local antiFlingButton
 
 local function enableAntiWalkFling()
     if antiWalkFlingConn then
@@ -155,7 +165,7 @@ local function disableAntiWalkFling()
 end
 
 -- 假设 Tab 是通过 UI 库创建的标签页对象
-Tab:Button({
+antiFlingButton = Tab:Button({
     Title = "防甩飞",
     Desc = "不要和甩飞同时开启",
     Description = "启用/禁用反 WalkFling",
@@ -167,6 +177,17 @@ Tab:Button({
             self.IsEnabled = false
             print("Anti-WalkFling 已禁用")
         else
+            -- 如果甩飞脚本正在运行，需要先停止它
+            -- 注意：这需要知道甩飞脚本的具体实现方式
+            -- 这里假设甩飞脚本会设置一个全局变量或函数
+            if _G.FlingScriptActive then
+                -- 如果有停止甩飞的函数，调用它
+                if _G.StopFling then
+                    _G.StopFling()
+                end
+                print("甩飞脚本已自动停止")
+            end
+            
             enableAntiWalkFling()
             self.IsEnabled = true
             print("Anti-WalkFling 已启用")
