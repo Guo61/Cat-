@@ -36,38 +36,6 @@ local Tab = Window:Tab({Title = "主页", Icon = "star"}) do
     -- Section
     Tab:Section({Title = "By Ccat\n脚本免费 请勿倒卖"})
 
--- 假设 Tab 是已经创建好的选项卡对象
-local vu = game:GetService("VirtualUser")
-    local isAntiAFKEnabled = true -- 用于控制反挂机功能的开关状态
-
-    -- 创建一个开关按钮来控制反挂机功能
-    Tab:Toggle({
-        Title = "反挂机",
-        Value = isAntiAFKEnabled,
-        Callback = function(value)
-            isAntiAFKEnabled = value
-            if isAntiAFKEnabled then
-                print("反挂机功能已开启")
-            else
-                print("反挂机功能已关闭")
-            end
-        end
-    })
-
-    -- 反挂机逻辑循环
-    spawn(function()
-        while true do
-            wait(10) -- 每隔10秒执行一次反挂机操作，可根据需要调整时间间隔
-            if isAntiAFKEnabled then
-                vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-                wait(0.5)
-                vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-                print("执行反挂机操作")
-            end
-        end
-    end)
-end
-
 Tab:Button({
     Title = "隐身",
     Description = "从GitHub加载并执行隐身脚本",
