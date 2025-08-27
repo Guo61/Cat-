@@ -1123,23 +1123,8 @@ Extra:Button({
         end
     end
 })
--- 定义全局变量标记自动重生状态
-_G.auto_nobs = false
--- 存储自动重生的线程，用于停止时销毁
-local autoNobsThread = nil
 
--- 自动重生的核心逻辑
-local function autoNobs()
-    while _G.auto_nobs do
-        task.wait()
-        local rebirthRemote = game:GetService("ReplicatedStorage"):FindFirstChild("rEvents"):FindFirstChild("rebirthRemote")
-        if rebirthRemote then
-            rebirthRemote:InvokeServer("rebirthRequest")
-        end
-    end
-end
-
-lcal CodeBlock = Tab:Code({
+local CodeBlock = Tab:Code({
 Title = "Love Players",
 Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补全"
 })
