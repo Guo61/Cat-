@@ -8927,17 +8927,17 @@ an:CreateTopbarButton("Close","x",function()
 ag(an.UIElements.Main,0.35,{Position=UDim2.new(0.5,0,0.5,0)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 an:Dialog{
 
-Title="Close Window",
-Content="Do you want to close this window? You will not be able to open it again.",
+Title="关闭窗口",
+Content="是否要关闭该窗口,关闭后无法再次打开",
 Buttons={
 {
-Title="Cancel",
+Title="否",
 
 Callback=function()end,
 Variant="Secondary",
 },
 {
-Title="Close Window",
+Title="是",
 
 Callback=function()an:Close():Destroy()end,
 Variant="Primary",
