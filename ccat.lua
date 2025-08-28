@@ -900,6 +900,30 @@ end
     
 Extra:Section({Title = "自动", Icon = "wrench"})
 
+Extra:Toggle({
+    Title = "自动重生",
+    Desc = "ARS",
+    Default = false, -- 初始状态为关闭
+    Callback = function(ARS)
+        if ARS then
+            _G.rebirthLoop = true
+            while _G.rebirthLoop and task.wait() do
+                game:GetService("ReplicatedStorage").rEvents.rebirthEvent:FireServer("rebirthRequest")
+            end
+        else
+            _G.rebirthLoop = false
+        end
+    end
+})
+
+Extra:Button({
+    Title = "自动重生和自动刷等级",
+    Desc = "单击执行",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/T9wTL150"))()
+    end
+})
+
 -- 状态变量，标记是否正在执行自动吃黄球
 local isRunning = false
 -- 用于在停止时退出循环的标志
