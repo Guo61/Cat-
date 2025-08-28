@@ -56,26 +56,10 @@ Tabs.Home:Button({
     Title = "反挂机",
     Desc = "从GitHub加载并执行反挂机",
     Callback = function()
-        Window:Notify({
-            Title = "Cat Hub",
-            Desc = "正在加载反挂机脚本...",
-            Time = 3
-        })
         pcall(function()
             local response = game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E5%8F%8D%E6%8C%82%E6%9C%BA.lua", true)
             if response and #response > 100 then
                 loadstring(response)()
-                Window:Notify({
-                    Title = "Cat Hub",
-                    Desc = "反挂机脚本加载并执行成功!",
-                    Time = 5
-                })
-            else
-                Window:Notify({
-                    Title = "Cat Hub",
-                    Desc = "反挂机脚本加载失败，请检查网络",
-                    Time = 5
-                })
             end
         end)
     end
@@ -179,7 +163,6 @@ Tabs.Home:Button({
     Desc = "从GitHub加载并执行隐身脚本",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invisible-35376"))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "隐身脚本已加载并执行", Time = 3 })
     end
 })
 Tabs.Home:Button({
@@ -187,15 +170,25 @@ Tabs.Home:Button({
     Desc = "从GitHub加载并执行提示脚本",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "提示脚本已加载并执行", Time = 3 })
     end
 })
 Tabs.Home:Button({
     Title = "甩飞",
-    Desc = "从GitHub加载并执行甩飞脚本",
+    Desc = "修复后的甩飞功能",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/GnvPVBE"))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "甩飞脚本已加载并执行", Time = 3 })
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character then return end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        local target = hrp.CFrame.lookVector * 1000 + Vector3.new(0, 500, 0)
+        local flingForce = Instance.new("BodyVelocity")
+        flingForce.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        flingForce.Velocity = target
+        flingForce.Parent = hrp
+
+        game:GetService("Debris"):AddItem(flingForce, 0.5)
     end
 })
 
@@ -282,7 +275,6 @@ Tabs.Home:Button({
     Desc = "从GitHub加载并执行飞行脚本",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "飞行脚本已加载并执行", Time = 3 })
     end
 })
 Tabs.Home:Button({
@@ -290,7 +282,6 @@ Tabs.Home:Button({
     Desc = "从GitHub加载并执行无限跳脚本",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "无限跳脚本已加载并执行", Time = 3 })
     end
 })
 Tabs.Home:Button({
@@ -298,7 +289,6 @@ Tabs.Home:Button({
     Desc = "宙斯自瞄",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua"))() end)
-        Window:Notify({ Title = "Cat Hub", Desc = "自瞄脚本已加载并执行", Time = 3 })
     end
 })
 
@@ -441,6 +431,85 @@ Tabs.Home:Toggle({
     end
 })
 
+-- 人物透视 (ESP) 功能
+local espEnabled = false
+local espConnections = {}
+local espBoxes = {}
+local function createESPBox(player)
+    if espBoxes[player] then return end
+    local char = player.Character or player.CharacterAdded:Wait()
+    local espBox = Instance.new("BoxHandleAdornment")
+    espBox.Adornee = char.HumanoidRootPart
+    espBox.Size = Vector3.new(3, 7, 3)
+    espBox.Color3 = Color3.new(1, 0, 0)
+    espBox.AlwaysOnTop = true
+    espBox.ZIndex = 1
+    espBox.Parent = char
+    espBoxes[player] = espBox
+    
+    local nameTag = Instance.new("BillboardGui")
+    nameTag.Size = UDim2.new(0, 100, 0, 20)
+    nameTag.StudsOffset = Vector3.new(0, 4, 0)
+    nameTag.AlwaysOnTop = true
+    nameTag.Parent = char.HumanoidRootPart
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = player.Name
+    textLabel.TextColor3 = Color3.new(1, 0, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 14
+    textLabel.Parent = nameTag
+end
+
+local function removeESPBox(player)
+    if espBoxes[player] then
+        espBoxes[player]:Destroy()
+        espBoxes[player] = nil
+    end
+    local char = player.Character
+    if char then
+        local nameTag = char:FindFirstChildOfClass("BillboardGui")
+        if nameTag then
+            nameTag:Destroy()
+        end
+    end
+end
+
+local function toggleESP(state)
+    espEnabled = state
+    if state then
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                createESPBox(player)
+            end
+        end
+        espConnections.playerAdded = game.Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Wait()
+            createESPBox(player)
+        end)
+        espConnections.playerRemoving = game.Players.PlayerRemoving:Connect(function(player)
+            removeESPBox(player)
+        end)
+    else
+        if espConnections.playerAdded then espConnections.playerAdded:Disconnect() end
+        if espConnections.playerRemoving then espConnections.playerRemoving:Disconnect() end
+        for player, _ in pairs(espBoxes) do
+            removeESPBox(player)
+        end
+    end
+end
+
+Tabs.Home:Button({
+    Title = "人物透视 (ESP)",
+    Desc = "显示其他玩家的透视框。",
+    Callback = function()
+        espEnabled = not espEnabled
+        toggleESP(espEnabled)
+    end
+})
+
 --- 极速传奇 Tab ---
 Tabs.LegendsOfSpeed:Code({
     Title = "提示!!!",
@@ -468,8 +537,6 @@ for _, teleport in ipairs(legendOfSpeedTeleports) do
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
             humanoidRootPart.CFrame = teleport[2]
-            -- Fix: Correctly call the Notify method on the Window object
-            Window:Notify({ Title = "通知", Desc = "传送成功", Time = 1 })
         end
     })
 end
@@ -494,7 +561,6 @@ Tabs.LegendsOfSpeed:Button({
     Desc = "从Pastebin加载并执行",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/T9wTL150"))() end)
-        Window:Notify({ Title = "通知", Desc = "脚本已加载", Time = 1 })
     end
 })
 
@@ -582,7 +648,6 @@ Tabs.NinjaLegends:Button({
             end
         end
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalCFrame
-        Window:Notify({ Title = "通知", Desc = "已尝试解锁所有岛屿", Time = 3 })
     end
 })
 
@@ -618,8 +683,6 @@ for _, teleport in ipairs(ninjaTeleports) do
         Callback = function()
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             character:WaitForChild("HumanoidRootPart").CFrame = teleport[2]
-            -- Fix: Correctly call the Notify method on the Window object
-            Window:Notify({ Title = "传送成功", Desc = "已传送到" .. teleport[1], Time = 2 })
         end
     })
 end
@@ -740,8 +803,6 @@ for _, teleport in ipairs(strengthTeleports) do
         Callback = function()
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             character:WaitForChild("HumanoidRootPart").CFrame = teleport[2]
-            -- Fix: Correctly call the Notify method on the Window object
-            Window:Notify({ Title = "传送成功", Desc = "已传送到" .. teleport[1], Time = 2 })
         end
     })
 end
@@ -754,10 +815,4 @@ Tabs.Misc:Paragraph({
 Tabs.Misc:Code({
     Title = "Love Players",
     Code = "感谢游玩\nQQ号:3395858053"
-})
-
-Window:Notify({
-    Title = "Cat Hub",
-    Desc = "感谢您的游玩",
-    Time = 5
 })
