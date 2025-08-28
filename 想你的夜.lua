@@ -1,4 +1,21 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
+
+local Confirmed = false
+
+WindUI:Popup({
+    Title = "Cat Hub v1.0",
+    Icon = "rbxassetid://129260712070622",
+    IconThemed = true,
+    Content = "By:Ccat\nQQ:3395858053 感谢使用",
+    Buttons = {
+        {
+            Title = "进入脚盆。",
+            Icon = "arrow-right",
+            Callback = function() Confirmed = true end,
+            Variant = "Primary",
+        }
+    }
+})
 
 -- 修复后的代码将所有功能整合到一个统一的 WindUI 窗口中
 local Window = WindUI:CreateWindow({
