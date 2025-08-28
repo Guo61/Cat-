@@ -202,26 +202,75 @@ Tabs.Home:Button({
         pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))() end)
     end
 })
-Tabs.Home:Button({
+-- 在 Tabs.Home:Section 中添加甩飞功能
+Tabs.Home:Section({ Title = "移动功能", Icon = "move" })
+
+-- 甩飞功能 (修复版)
+Tabs.Home:Toggle({
     Title = "甩飞",
-    Desc = "修复后的甩飞功能",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if not character then return end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-
-        local target = hrp.CFrame.lookVector * 1000 + Vector3.new(0, 500, 0)
-        local flingForce = Instance.new("BodyVelocity")
-        flingForce.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        flingForce.Velocity = target
-        flingForce.Parent = hrp
-
-        game:GetService("Debris"):AddItem(flingForce, 0.5)
+    Desc = "开启后会使角色高速移动",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- 启动甩飞
+            local walkflinging = true
+            local LocalPlayer = game:GetService("Players").LocalPlayer
+            local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local Root = Character:WaitForChild("HumanoidRootPart")
+            local Humanoid = Character:WaitForChild("Humanoid")
+            
+            -- 监听角色死亡
+            Humanoid.Died:Connect(function()
+                walkflinging = false
+            end)
+            
+            -- 设置初始状态
+            Root.CanCollide = false
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            
+            -- 甩飞循环
+            task.spawn(function()
+                while walkflinging and Root and Root.Parent do
+                    game:GetService("RunService").Heartbeat:Wait()
+                    local vel = Root.Velocity
+                    Root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+                    game:GetService("RunService").RenderStepped:Wait()
+                    Root.Velocity = vel
+                    game:GetService("RunService").Stepped:Wait()
+                    Root.Velocity = vel + Vector3.new(0, 0.1, 0)
+                    
+                    -- 短暂延迟防止卡顿
+                    task.wait(0.01)
+                end
+            end)
+            
+            -- 存储引用以便后续关闭
+            autoLoops["walkFling"] = {stop = function() walkflinging = false end}
+        else
+            -- 停止甩飞
+            if autoLoops["walkFling"] then
+                autoLoops["walkFling"].stop()
+                autoLoops["walkFling"] = nil
+                
+                -- 恢复角色正常状态
+                local LocalPlayer = game:GetService("Players").LocalPlayer
+                if LocalPlayer.Character then
+                    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    local Root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    
+                    if Humanoid then
+                        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                    end
+                    
+                    if Root then
+                        Root.Velocity = Vector3.new(0, 0, 0)
+                        Root.CanCollide = true
+                    end
+                end
+            end
+        end
     end
 })
-
 -- 防甩飞 (Toggle)
 local antiWalkFlingConn
 Tabs.Home:Toggle({
@@ -864,6 +913,254 @@ Tabs.StrengthLegends:Toggle({
             end, 0.5)
         else
             stopLoop("autoRebirth")
+        end
+    end
+})
+
+Tabs.StrengthLegends:Section({ Title = "自动打石头", Icon = "dumbbell" })
+
+-- 辅助函数：执行打石头操作
+local function punchRock(cframe)
+    local character = game.Players.LocalPlayer.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    
+    -- 装备拳套
+    for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if v:IsA("Tool") and v.Name == "Punch" then
+            humanoid:EquipTool(v)
+            break
+        end
+    end
+
+    -- 激活拳套
+    task.wait(0.1)
+    for _, h in pairs(character:GetChildren()) do
+        if h:IsA("Tool") and h.Name == "Punch" then
+            h:Activate()
+        end
+    end
+end
+
+-- 石头0
+Tabs.StrengthLegends:Toggle({
+    Title = "石头0",
+    Desc = "自动打耐久度0的石头",
+    Default = false,
+    Callback = function(state)
+        if state then
+            startLoop("RK0", function()
+                punchRock(CFrame.new(7.60643005, 4.02632904, 2104.54004, -0.23040159, -8.53662385e-08, -0.973095655, -4.68743764e-08, 1, -7.66279342e-08, 0.973095655, 2.79580536e-08, -0.23040159))
+            end, 0.5)
+        else
+            stopLoop("RK0")
+            -- 停止时取消装备工具
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头10
+Tabs.StrengthLegends:Toggle({
+    Title = "石头10",
+    Desc = "需要耐久度≥10",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 10 then
+                startLoop("RK10", function()
+                    punchRock(CFrame.new(-157.680908, 3.72453046, 434.871185, 0.923298299, -1.81774684e-09, -0.384083599, 3.45247031e-09, 1, 3.56670582e-09, 0.384083599, -4.61917082e-09, 0.923298299))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足10!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头10"):Set(false)
+            end
+        else
+            stopLoop("RK10")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头100
+Tabs.StrengthLegends:Toggle({
+    Title = "石头100",
+    Desc = "需要耐久度≥100",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 100 then
+                startLoop("RK100", function()
+                    punchRock(CFrame.new(162.233673, 3.66615629, -164.686783, -0.921312928, -1.80826774e-07, -0.38882193, -9.13036544e-08, 1, -2.48719346e-07, 0.38882193, -1.93647494e-07, -0.921312928))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足100!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头100"):Set(false)
+            end
+        else
+            stopLoop("RK100")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头5000
+Tabs.StrengthLegends:Toggle({
+    Title = "石头5000",
+    Desc = "需要耐久度≥5000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 5000 then
+                startLoop("RK5000", function()
+                    punchRock(CFrame.new(329.831482, 3.66450214, -618.48407, -0.806075394, -8.67358096e-08, 0.591812849, -1.05715522e-07, 1, 2.57029176e-09, -0.591812849, -6.04919563e-08, -0.806075394))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足5000!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头5000"):Set(false)
+            end
+        else
+            stopLoop("RK5000")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头150000
+Tabs.StrengthLegends:Toggle({
+    Title = "石头150000",
+    Desc = "需要耐久度≥150000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 150000 then
+                startLoop("RK150000", function()
+                    punchRock(CFrame.new(-2566.78076, 3.97019577, -277.503235, -0.923934579, -4.11600105e-08, -0.382550538, -3.38838042e-08, 1, -2.57576183e-08, 0.382550538, -1.08360858e-08, -0.923934579))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足150000!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头150000"):Set(false)
+            end
+        else
+            stopLoop("RK150000")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头400000
+Tabs.StrengthLegends:Toggle({
+    Title = "石头400000",
+    Desc = "需要耐久度≥400000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 400000 then
+                startLoop("RK400000", function()
+                    punchRock(CFrame.new(2155.61743, 3.79830337, 1227.06482, -0.551303148, -9.16796949e-09, -0.834304988, -5.61318245e-08, 1, 2.61027839e-08, 0.834304988, 6.12216127e-08, -0.551303148))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足400000!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头400000"):Set(false)
+            end
+        else
+            stopLoop("RK400000")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头750000
+Tabs.StrengthLegends:Toggle({
+    Title = "石头750000",
+    Desc = "需要耐久度≥750000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 750000 then
+                startLoop("RK750000", function()
+                    punchRock(CFrame.new(-7285.6499, 3.66624784, -1228.27417, 0.857643783, -1.58175091e-08, -0.514244199, -1.22581563e-08, 1, -5.12025977e-08, 0.514244199, 5.02172774e-08, 0.857643783))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足750000!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头750000"):Set(false)
+            end
+        else
+            stopLoop("RK750000")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头100万
+Tabs.StrengthLegends:Toggle({
+    Title = "石头100万",
+    Desc = "需要耐久度≥1000000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 1000000 then
+                startLoop("RK1M", function()
+                    punchRock(CFrame.new(4160.87109, 987.829102, -4136.64502, -0.893115997, 1.25481356e-05, 0.44982639, 5.02490684e-06, 1, -1.79187136e-05, -0.44982639, -1.37431543e-05, -0.893115997))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足100万!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头100万"):Set(false)
+            end
+        else
+            stopLoop("RK1M")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+})
+
+-- 石头500万
+Tabs.StrengthLegends:Toggle({
+    Title = "石头500万",
+    Desc = "需要耐久度≥5000000",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if game.Players.LocalPlayer.Durability.Value >= 5000000 then
+                startLoop("RK5M", function()
+                    punchRock(CFrame.new(-8957.54395, 5.53625107, -6126.90186, -0.803919137, 6.6065212e-08, 0.594738603, -8.93136143e-09, 1, -1.23155459e-07, -0.594738603, -1.04318865e-07, -0.803919137))
+                end, 0.5)
+            else
+                WindUI:Notify({Title = "错误", Content = "耐久度不足500万!", Duration = 3})
+                Tabs.StrengthLegends:GetToggle("石头500万"):Set(false)
+            end
+        else
+            stopLoop("RK5M")
+            local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
         end
     end
 })
