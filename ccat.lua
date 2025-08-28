@@ -26,6 +26,10 @@ SidebarLine.Parent = game:GetService("CoreGui")
 
 local ranks = {"Rank 1", "Rank 2", "Rank 3", "Rank 4", "Rank 5", "Rank 6", "Rank 7", "Rank 8", "Rank 9", "Rank 10"}
 
+_G.Stepped = nil
+_G.Clipon = false
+_G.rebirthLoop = false
+_G.autoBrawl = false
 
 local Tab = Window:Tab({Title = "主页", Icon = "crown"}) do
 
@@ -257,7 +261,7 @@ local function enableAntiWalkFling()
         if not character then
             return
         end
-        local hrp = character.FindFirstChild("HumanoidRootPart")
+        local hrp = character:FindFirstChild("HumanoidRootPart")
         if not hrp then
             return
         end
