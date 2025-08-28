@@ -898,6 +898,22 @@ end
         end
     })
     
+     Extra:Button({
+        Title = "欧米茄水晶",
+        Desc = "单击以执行",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = CFrame.new(4532.49, 74.45, 6398.68)
+            Window:Notify({
+                Title = "通知",
+                Desc = "传送成功",
+                Time = 1
+            })
+        end
+    })
+    
 Extra:Section({Title = "自动", Icon = "wrench"})
 
 Extra:Toggle({
