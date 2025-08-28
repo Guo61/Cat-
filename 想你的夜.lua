@@ -6,7 +6,7 @@ WindUI:Popup({
     Title = "Cat Hub v1.0",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 感谢使用",
+    Content = "By:Ccat\nQQ:3395858053 欢迎使用",
     Buttons = {
         {
             Title = "进入脚盆。",
@@ -17,12 +17,13 @@ WindUI:Popup({
     }
 })
 
+repeat wait() until Confirmed
 -- 修复后的代码将所有功能整合到一个统一的 WindUI 窗口中
 local Window = WindUI:CreateWindow({
     Title = "Cat Hub",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Author = "Ccat",
+    Author = "感谢游玩",
     Folder = "CatHub",
     Size = UDim2.fromOffset(580, 340),
     Transparent = true,
