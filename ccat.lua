@@ -90,6 +90,126 @@ Tab:Button({
 })
 
 Tab:Button({
+    Title = "显示FPS",
+    Description = "在屏幕上显示当前FPS",
+    Callback = function()
+        local FpsGui = Instance.new("ScreenGui") 
+        local FpsXS = Instance.new("TextLabel") 
+        FpsGui.Name = "FPSGui" 
+        FpsGui.ResetOnSpawn = false 
+        FpsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling 
+        FpsXS.Name = "FpsXS" 
+        FpsXS.Size = UDim2.new(0, 100, 0, 50) 
+        FpsXS.Position = UDim2.new(0, 10, 0, 10) 
+        FpsXS.BackgroundTransparency = 1 
+        FpsXS.Font = Enum.Font.SourceSansBold 
+        FpsXS.Text = "FPS: 0" 
+        FpsXS.TextSize = 20 
+        FpsXS.TextColor3 = Color3.new(1, 1, 1) 
+        FpsXS.Parent = FpsGui 
+        
+        local function updateFpsXS()
+            local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
+            FpsXS.Text = "FPS: " .. fps
+        end 
+        
+        game:GetService("RunService").RenderStepped:Connect(updateFpsXS) 
+        FpsGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        
+        Window:Notify({
+            Title = "Cat Hub",
+            Desc = "FPS显示已开启",
+            Time = 3
+        })
+    end
+})
+
+-- 范围功能
+Tab:Button({
+    Title = "范围",
+    Description = "显示玩家范围",
+    Callback = function()
+        _G.HeadSize = 20
+        _G.Disabled = true
+        
+        local function updatePlayerRanges()
+            if _G.Disabled then
+                for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+                    if player.Name ~= game:GetService("Players").LocalPlayer.Name and player.Character then
+                        pcall(function()
+                            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                humanoidRootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                                humanoidRootPart.Transparency = 0.7
+                                humanoidRootPart.BrickColor = BrickColor.new("Really blue")
+                                humanoidRootPart.Material = "Neon"
+                                humanoidRootPart.CanCollide = false
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+        
+        -- 初始设置
+        updatePlayerRanges()
+        
+        -- 监听新玩家加入
+        game:GetService("Players").PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                if _G.Disabled then
+                    wait(1) -- 等待角色完全加载
+                    pcall(function()
+                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        if humanoidRootPart then
+                            humanoidRootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                            humanoidRootPart.Transparency = 0.7
+                            humanoidRootPart.BrickColor = BrickColor.new("Really blue")
+                            humanoidRootPart.Material = "Neon"
+                            humanoidRootPart.CanCollide = false
+                        end
+                    end)
+                end
+            end)
+        end)
+        
+        -- 添加关闭按钮
+        Tab:Button({
+            Title = "关闭范围",
+            Description = "关闭玩家范围显示",
+            Callback = function()
+                _G.Disabled = false
+                for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+                    if player.Name ~= game:GetService("Players").LocalPlayer.Name and player.Character then
+                        pcall(function()
+                            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                humanoidRootPart.Size = Vector3.new(2, 2, 1)
+                                humanoidRootPart.Transparency = 0
+                                humanoidRootPart.BrickColor = BrickColor.new("Medium stone grey")
+                                humanoidRootPart.Material = "Plastic"
+                                humanoidRootPart.CanCollide = true
+                            end
+                        end)
+                    end
+                end
+                Window:Notify({
+                    Title = "Cat Hub",
+                    Desc = "范围显示已关闭",
+                    Time = 3
+                })
+            end
+        })
+        
+        Window:Notify({
+            Title = "Cat Hub",
+            Desc = "范围显示已开启",
+            Time = 3
+        })
+    end
+})
+
+Tab:Button({
     Title = "半隐身",
     Desc = "悬浮窗关不掉",
     Description = "从GitHub加载并执行隐身脚本",
@@ -1369,7 +1489,6 @@ NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿
     end
 
 local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "muscle"})
-NinjaTab:Section({Title = "传送功能请勿在其他服务器执行"})
 
 Tab:Toggle({
     Title = "自动比赛开关",
