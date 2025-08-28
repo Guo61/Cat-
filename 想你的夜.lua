@@ -17,7 +17,7 @@ local Window = WindUI:CreateWindow({
 
 -- 创建指定的大类（作为标签页）
 local Tabs = {
-    Home = Window:Tab({ Title = "主页", Icon = "home" }),
+    Home = Window:Tab({ Title = "主页", Icon = "crown" }),
     LegendsOfSpeed = Window:Tab({ Title = "极速传奇", Icon = "zap" }),
     NinjaLegends = Window:Tab({ Title = "忍者传奇", Icon = "user" }),
     StrengthLegends = Window:Tab({ Title = "力量传奇", Icon = "dumbbell" }),
@@ -468,6 +468,7 @@ for _, teleport in ipairs(legendOfSpeedTeleports) do
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
             humanoidRootPart.CFrame = teleport[2]
+            -- Fix: Correctly call the Notify method on the Window object
             Window:Notify({ Title = "通知", Desc = "传送成功", Time = 1 })
         end
     })
@@ -617,6 +618,7 @@ for _, teleport in ipairs(ninjaTeleports) do
         Callback = function()
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             character:WaitForChild("HumanoidRootPart").CFrame = teleport[2]
+            -- Fix: Correctly call the Notify method on the Window object
             Window:Notify({ Title = "传送成功", Desc = "已传送到" .. teleport[1], Time = 2 })
         end
     })
@@ -738,6 +740,7 @@ for _, teleport in ipairs(strengthTeleports) do
         Callback = function()
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             character:WaitForChild("HumanoidRootPart").CFrame = teleport[2]
+            -- Fix: Correctly call the Notify method on the Window object
             Window:Notify({ Title = "传送成功", Desc = "已传送到" .. teleport[1], Time = 2 })
         end
     })
