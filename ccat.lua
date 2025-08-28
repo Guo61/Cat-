@@ -1488,8 +1488,18 @@ NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿
         })
     end
 
-local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "muscle"})
+local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "zap"})
 
+local CodeBlock = Ninja:Code({
+Title = "提示!!!",
+Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补全"
+})
+
+    -- Simulate update
+    task.delay(5, function()
+        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
+    end)
+    
 NinjaTab:Toggle({
     Title = "自动比赛开关",
     Default = false,
@@ -1698,6 +1708,131 @@ NinjaTab:Toggle({
         end
     end
 })
+
+NinjaTab:Section({Title = "传送"})
+
+ NinjaTab:Toggle({
+        Title = "X-安全地方",
+        Desc = "切换安全位置",
+        Default = false,
+        Callback = function(Place)
+            if Place then
+                getgenv().place = true
+                while getgenv().place do
+                    wait()
+                    game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = 
+                    CFrame.new(-51.6716728, 32.2157211, 1290.41211, 0.9945544, 1.23613528e-08, 
+                    0.104218982, -7.58742402e-09, 1, 4.62031657e-08, 0.104218982, 
+                    4.51608102e-08, 0.9945544)
+                end
+            else
+                getgenv().place = false
+                wait()
+                game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = 
+                CFrame.new(-34.1635208, 3.67689133, 219.640869, 0.599920511, 
+                2.24152163e-09, 0.800059617, 4.46125981e-09, 1, -5.43559087e-10, 
+                0.800059617, 3.89536625e-09, 0.599920511)
+            end
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到出生点",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(7, 3, 108)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到出生点",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到冰霜健身房",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2543, 13, -410)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到冰霜健身房",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到神话健身房",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2177, 13, 1070)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到神话健身房",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到永恒健身房",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-6686, 13, -1284)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到永恒健身房",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到传说健身房",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(4676, 997, -3915)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到传说健身房",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到肌肉之王健身房",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-8554, 22, -5642)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到肌肉之王健身房",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到安全岛",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-39, 10, 1838)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到安全岛",
+                Time = 2
+            })
+        end
+    })
+    
+    NinjaTab:Button({
+        Title = "传送到幸运抽奖区域",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2606, -2, 5753)
+            Window:Notify({
+                Title = "传送成功",
+                Desc = "已传送到幸运抽奖区域",
+                Time = 2
+            })
+        end
+    })
+end
+
 
 Window:Notify({
     Title = "Cat Hub",
