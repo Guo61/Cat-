@@ -1371,6 +1371,215 @@ NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿
 local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "muscle"})
 NinjaTab:Section({Title = "传送功能请勿在其他服务器执行"})
 
+Tab:Toggle({
+    Title = "自动比赛开关",
+    Default = false,
+    Callback = function(AR)
+        _G.autoBrawl = AR
+        while _G.autoBrawl do
+            wait(2)
+            game:GetService("ReplicatedStorage").Events.brawlEvent:FireServer("joinBrawl")
+        end
+    end
+})
+
+-- 自动举哑铃
+Tab:Toggle({
+    Title = "自动举哑铃",
+    Default = false,
+    Callback = function(ATYL)
+        _G.autoWeight = ATYL
+        if ATYL then
+            local part = Instance.new("Part", workspace)
+            part.Size = Vector3.new(500, 20, 530.1)
+            part.Position = Vector3.new(0, 100000, 133.15)
+            part.CanCollide = true
+            part.Anchored = true
+            part.Transparency = 1
+            _G.weightPart = part
+        else
+            if _G.weightPart then
+                _G.weightPart:Destroy()
+                _G.weightPart = nil
+            end
+        end
+        
+        while _G.autoWeight do
+            wait()
+            if _G.weightPart then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = _G.weightPart.CFrame + Vector3.new(0, 50, 0)
+                for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and v.Name == "Weight" then
+                        v.Parent = game.Players.LocalPlayer.Character
+                    end
+                end
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+            end
+        end
+    end
+})
+
+-- 自动俯卧撑
+Tab:Toggle({
+    Title = "自动俯卧撑",
+    Default = false,
+    Callback = function(ATFWC)
+        _G.autoPushups = ATFWC
+        if ATFWC then
+            local part = Instance.new("Part", workspace)
+            part.Size = Vector3.new(500, 20, 530.1)
+            part.Position = Vector3.new(0, 100000, 133.15)
+            part.CanCollide = true
+            part.Anchored = true
+            part.Transparency = 1
+            _G.pushupsPart = part
+        else
+            if _G.pushupsPart then
+                _G.pushupsPart:Destroy()
+                _G.pushupsPart = nil
+            end
+        end
+        
+        while _G.autoPushups do
+            wait()
+            if _G.pushupsPart then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = _G.pushupsPart.CFrame + Vector3.new(0, 50, 0)
+                for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and v.Name == "Pushups" then
+                        v.Parent = game.Players.LocalPlayer.Character
+                    end
+                end
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+            end
+        end
+    end
+})
+
+-- 自动仰卧起坐
+Tab:Toggle({
+    Title = "自动仰卧起坐",
+    Default = false,
+    Callback = function(ATYWQZ)
+        _G.autoSitups = ATYWQZ
+        if ATYWQZ then
+            local part = Instance.new("Part", workspace)
+            part.Size = Vector3.new(500, 20, 530.1)
+            part.Position = Vector3.new(0, 100000, 133.15)
+            part.CanCollide = true
+            part.Anchored = true
+            part.Transparency = 1
+            _G.situpsPart = part
+        else
+            if _G.situpsPart then
+                _G.situpsPart:Destroy()
+                _G.situpsPart = nil
+            end
+        end
+        
+        while _G.autoSitups do
+            wait()
+            if _G.situpsPart then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = _G.situpsPart.CFrame + Vector3.new(0, 50, 0)
+                for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and v.Name == "Situps" then
+                        v.Parent = game.Players.LocalPlayer.Character
+                    end
+                end
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+            end
+        end
+    end
+})
+
+-- 自动倒立身体
+Tab:Toggle({
+    Title = "自动倒立身体",
+    Default = false,
+    Callback = function(ATDL)
+        _G.autoHandstands = ATDL
+        if ATDL then
+            local part = Instance.new("Part", workspace)
+            part.Size = Vector3.new(500, 20, 530.1)
+            part.Position = Vector3.new(0, 100000, 133.15)
+            part.CanCollide = true
+            part.Anchored = true
+            part.Transparency = 1
+            _G.handstandsPart = part
+        else
+            if _G.handstandsPart then
+                _G.handstandsPart:Destroy()
+                _G.handstandsPart = nil
+            end
+        end
+        
+        while _G.autoHandstands do
+            wait()
+            if _G.handstandsPart then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = _G.handstandsPart.CFrame + Vector3.new(0, 50, 0)
+                for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and v.Name == "Handstands" then
+                        v.Parent = game.Players.LocalPlayer.Character
+                    end
+                end
+                game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+            end
+        end
+    end
+})
+
+-- 自动锻炼
+Tab:Toggle({
+    Title = "自动锻炼",
+    Default = false,
+    Callback = function(ATAAA)
+        _G.autoTrain = ATAAA
+        if ATAAA then
+            local part = Instance.new("Part", workspace)
+            part.Size = Vector3.new(500, 20, 530.1)
+            part.Position = Vector3.new(0, 100000, 133.15)
+            part.CanCollide = true
+            part.Anchored = true
+            part.Transparency = 1
+            _G.trainPart = part
+        else
+            if _G.trainPart then
+                _G.trainPart:Destroy()
+                _G.trainPart = nil
+            end
+        end
+        
+        while _G.autoTrain do
+            wait()
+            if _G.trainPart then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = _G.trainPart.CFrame + Vector3.new(0, 50, 0)
+                for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and (v.Name == "Handstands" or v.Name == "Situps" or v.Name == "Pushups" or v.Name == "Weight") then
+                        if v:FindFirstChildOfClass("NumberValue") then
+                            v:FindFirstChildOfClass("NumberValue").Value = 0
+                        end
+                        repeat wait() until game.Players.LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+                        game.Players.LocalPlayer.Character:WaitForChild("Humanoid"):EquipTool(v)
+                        game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+                    end
+                end
+            end
+        end
+    end
+})
+
+-- 自动重生
+Tab:Toggle({
+    Title = "自动重生",
+    Default = false,
+    Callback = function(ATRE)
+        _G.autoRebirth = ATRE
+        while _G.autoRebirth do
+            wait()
+            game:GetService("ReplicatedStorage").Events.rebirthRemote:InvokeServer("rebirthRequest")
+        end
+    end
+})
+
 Window:Notify({
     Title = "Cat Hub",
     Desc = "感谢您的游玩",
