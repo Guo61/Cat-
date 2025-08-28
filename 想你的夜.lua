@@ -269,6 +269,40 @@ Tabs.Home:Slider({
     end
 })
 
+local playersDropdown = Tabs.Home:Dropdown({
+    Title = "选择要传送的玩家",
+    Values = {}, -- 初始为空
+})
+
+Tabs.Home:Button({
+    Title = "传送至玩家",
+    Desc = "传送到选中的玩家",
+    Callback = function()
+        local selectedPlayerName = playersDropdown.Value
+        local targetPlayer = game.Players:FindFirstChild(selectedPlayerName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            humanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        end
+    end
+})
+
+game.Players.PlayerAdded:Connect(function(player)
+    playersDropdown:Add({ player.Name })
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    playersDropdown:Remove({ player.Name })
+end)
+
+-- 初始填充下拉列表
+for _, player in ipairs(game.Players:GetPlayers()) do
+    if player ~= game.Players.LocalPlayer then
+        playersDropdown:Add({ player.Name })
+    end
+end
+
 -- 飞行, 无限跳, 自瞄, 子弹追踪, 夜视, 穿墙
 Tabs.Home:Button({
     Title = "飞行",
@@ -279,7 +313,7 @@ Tabs.Home:Button({
 })
 Tabs.Home:Button({
     Title = "无限跳",
-    Desc = "从GitHub加载并执行无限跳脚本",
+    Desc = "开启后无法关闭",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))() end)
     end
@@ -434,80 +468,92 @@ Tabs.Home:Toggle({
 -- 人物透视 (ESP) 功能
 local espEnabled = false
 local espConnections = {}
-local espBoxes = {}
-local function createESPBox(player)
-    if espBoxes[player] then return end
+local espHighlights = {}
+local espNameTags = {}
+
+local function createESP(player)
     local char = player.Character or player.CharacterAdded:Wait()
-    local espBox = Instance.new("BoxHandleAdornment")
-    espBox.Adornee = char.HumanoidRootPart
-    espBox.Size = Vector3.new(3, 7, 3)
-    espBox.Color3 = Color3.new(1, 0, 0)
-    espBox.AlwaysOnTop = true
-    espBox.ZIndex = 1
-    espBox.Parent = char
-    espBoxes[player] = espBox
-    
+    local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    -- Create Highlight
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "WindUI_ESP"
+    highlight.Adornee = char
+    highlight.FillColor = Color3.new(1, 0, 0)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = char
+    espHighlights[player] = highlight
+
+    -- Create Name Tag
     local nameTag = Instance.new("BillboardGui")
-    nameTag.Size = UDim2.new(0, 100, 0, 20)
-    nameTag.StudsOffset = Vector3.new(0, 4, 0)
+    nameTag.Name = "WindUI_NameTag"
+    nameTag.Adornee = humanoidRootPart
+    nameTag.Size = UDim2.new(0, 150, 0, 20)
+    nameTag.StudsOffset = Vector3.new(0, 2.8, 0)
     nameTag.AlwaysOnTop = true
-    nameTag.Parent = char.HumanoidRootPart
+    nameTag.Parent = humanoidRootPart
     
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, 0, 1, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = player.Name
-    textLabel.TextColor3 = Color3.new(1, 0, 0)
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
     textLabel.Font = Enum.Font.SourceSansBold
     textLabel.TextSize = 14
+    textLabel.TextScaled = false
     textLabel.Parent = nameTag
+    espNameTags[player] = nameTag
 end
 
-local function removeESPBox(player)
-    if espBoxes[player] then
-        espBoxes[player]:Destroy()
-        espBoxes[player] = nil
+local function removeESP(player)
+    if espHighlights[player] and espHighlights[player].Parent then
+        espHighlights[player]:Destroy()
+        espHighlights[player] = nil
     end
-    local char = player.Character
-    if char then
-        local nameTag = char:FindFirstChildOfClass("BillboardGui")
-        if nameTag then
-            nameTag:Destroy()
-        end
+    if espNameTags[player] and espNameTags[player].Parent then
+        espNameTags[player]:Destroy()
+        espNameTags[player] = nil
     end
 end
 
 local function toggleESP(state)
     espEnabled = state
     if state then
+        -- Add ESP for all current players
         for _, player in ipairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
-                createESPBox(player)
+                pcall(createESP, player)
             end
         end
+
+        -- Connect events for new players
         espConnections.playerAdded = game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Wait()
-            createESPBox(player)
+            pcall(createESP, player)
         end)
         espConnections.playerRemoving = game.Players.PlayerRemoving:Connect(function(player)
-            removeESPBox(player)
+            removeESP(player)
         end)
     else
+        -- Clean up existing ESP and disconnect events
         if espConnections.playerAdded then espConnections.playerAdded:Disconnect() end
         if espConnections.playerRemoving then espConnections.playerRemoving:Disconnect() end
-        for player, _ in pairs(espBoxes) do
-            removeESPBox(player)
+        for player, _ in pairs(espHighlights) do
+            removeESP(player)
         end
+        espHighlights = {}
+        espNameTags = {}
     end
 end
 
-Tabs.Home:Button({
+Tabs.Home:Toggle({
     Title = "人物透视 (ESP)",
-    Desc = "显示其他玩家的透视框。",
-    Callback = function()
-        espEnabled = not espEnabled
-        toggleESP(espEnabled)
-    end
+    Desc = "显示其他玩家的透视框和名字。",
+    Default = false,
+    Callback = toggleESP,
 })
 
 --- 极速传奇 Tab ---
@@ -809,7 +855,7 @@ end
 
 --- 杂项 Tab ---
 Tabs.Misc:Paragraph({
-    Title = "杂项功能",
+    Title = "UI设置",
     Desc = "这里存放一些不属于特定游戏的功能。"
 })
 Tabs.Misc:Code({
