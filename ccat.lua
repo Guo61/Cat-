@@ -1490,7 +1490,7 @@ NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿
 
 local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "muscle"})
 
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动比赛开关",
     Default = false,
     Callback = function(AR)
@@ -1503,7 +1503,7 @@ Tab:Toggle({
 })
 
 -- 自动举哑铃
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动举哑铃",
     Default = false,
     Callback = function(ATYL)
@@ -1539,7 +1539,7 @@ Tab:Toggle({
 })
 
 -- 自动俯卧撑
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动俯卧撑",
     Default = false,
     Callback = function(ATFWC)
@@ -1575,7 +1575,7 @@ Tab:Toggle({
 })
 
 -- 自动仰卧起坐
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动仰卧起坐",
     Default = false,
     Callback = function(ATYWQZ)
@@ -1611,7 +1611,7 @@ Tab:Toggle({
 })
 
 -- 自动倒立身体
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动倒立身体",
     Default = false,
     Callback = function(ATDL)
@@ -1647,7 +1647,7 @@ Tab:Toggle({
 })
 
 -- 自动锻炼
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动锻炼",
     Default = false,
     Callback = function(ATAAA)
@@ -1687,7 +1687,7 @@ Tab:Toggle({
 })
 
 -- 自动重生
-Tab:Toggle({
+NinjaTab:Toggle({
     Title = "自动重生",
     Default = false,
     Callback = function(ATRE)
