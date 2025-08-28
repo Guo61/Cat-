@@ -33,6 +33,18 @@ local Window = WindUI:CreateWindow({
     ScrollBarEnabled = true,
 })
 
+Window:Tag({
+        Title = "v1.0",
+        Color = Color3.fromHex("#30ff6a")
+    })
+    Window:Tag({
+        Title = "测试版", 
+        Color = Color3.fromHex("#315dff")
+    })
+    local TimeTag = Window:Tag({
+        Title = "正在开发更多服务器",
+        Color = Color3.fromHex("#000000")
+    })
 -- 创建指定的大类（作为标签页）
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
