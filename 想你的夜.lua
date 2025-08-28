@@ -288,20 +288,28 @@ Tabs.Home:Button({
     end
 })
 
+-- 获取当前玩家列表并创建值列表
+local function getPlayerNames()
+    local names = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            table.insert(names, player.Name)
+        end
+    end
+    return names
+end
+
+-- 修复后的部分，使用 Update 方法
 game.Players.PlayerAdded:Connect(function(player)
-    playersDropdown:Add({ player.Name })
+    playersDropdown:Update(getPlayerNames())
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
-    playersDropdown:Remove({ player.Name })
+    playersDropdown:Update(getPlayerNames())
 end)
 
 -- 初始填充下拉列表
-for _, player in ipairs(game.Players:GetPlayers()) do
-    if player ~= game.Players.LocalPlayer then
-        playersDropdown:Add({ player.Name })
-    end
-end
+playersDropdown:Update(getPlayerNames())
 
 -- 飞行, 无限跳, 自瞄, 子弹追踪, 夜视, 穿墙
 Tabs.Home:Button({
