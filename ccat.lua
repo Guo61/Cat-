@@ -752,7 +752,18 @@ Window:Line()
 
 -- Another Tab Example
 local Extra = Window:Tab({Title = "极速传奇", Icon = "zap"}) do
-    Extra:Section({Title = "传送(请勿在其他服务器中执行!)", Icon = "wrench"})
+
+local CodeBlock = Extra:Code({
+Title = "提示!!!",
+Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补全"
+})
+
+    -- Simulate update
+    task.delay(5, function()
+        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
+    end)
+    
+    Extra:Section({Title = "传送", Icon = "wrench"})
     Extra:Button({
         Title = "城市",
         Desc = "单击以执行",
@@ -1167,15 +1178,6 @@ Extra:Button({
     end
 })
 
-local CodeBlock = Extra:Code({
-Title = "提示!!!",
-Code = "传送功能请勿在其他服务器执行\n该服务器功能暂未补全"
-})
-
-    -- Simulate update
-    task.delay(5, function()
-        CodeBlock:SetCode("传送功能请勿在其他服务器执行\n该服务器功能暂未补全")
-    end)
 local NinjaTab = Window:Tab({Title = "忍者传奇", Icon = 105059922903197})
 NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿在其他服务器执行"})
 
@@ -1365,6 +1367,9 @@ NinjaTab:Section({Title = "执行以下功能时请手持剑\n传送功能请勿
             end
         })
     end
+
+local NinjaTab = Window:Tab({Title = "力量传奇", Icon = "muscle"})
+NinjaTab:Section({Title = "传送功能请勿在其他服务器执行"})
 
 Window:Notify({
     Title = "Cat Hub",
