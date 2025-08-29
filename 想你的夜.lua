@@ -81,6 +81,14 @@ Tabs.Home:Paragraph({
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
 
+Tabs.Home:Paragraph({
+    Title = "大78",
+    Desc = "更吊",
+    Image = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnIGixb7sgLfNEQNkpXMUqSA_Kwuc0AAIoGgAC1AOQVYD-LQ3HikWtNgQ.png",
+    ImageSize = 42,
+    Thumbnail = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnIGixb7sgLfNEQNkpXMUqSA_Kwuc0AAIoGgAC1AOQVYD-LQ3HikWtNgQ.png",
+    ThumbnailSize = 120
+})
 -- 反挂机 (通过外部链接加载)
 Tabs.Home:Button({
     Title = "反挂机",
