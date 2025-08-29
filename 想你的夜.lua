@@ -81,9 +81,9 @@ Tabs.Home:Paragraph({
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
 
-Tabs.Home:Paragraph({
+ParagraphTab:Paragraph({
     Title = "666这么帅",
-    Image = "https://c-ssl.duitang.com/uploads/blog/202310/21/oVS4gnBVIg4A1yJ.jpg",
+    Image = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnUWixd_0eyiMPT7Vg32gRLZwLkBnGAAJ8GgAC1AOQVT5Yd9Q1Sq0iNgQ.png",
     ImageSize = 42,
     Thumbnail = "https://c-ssl.duitang.com/uploads/blog/202103/27/20210327131203_74b6b.jpg",
     ThumbnailSize = 120
@@ -364,6 +364,45 @@ local function getPlayerNames()
     return names
 end
 
+-- 创建一个函数来刷新下拉菜单
+local function refreshPlayerDropdown()
+    local currentValues = playersDropdown:GetValues()
+    local newValues = getPlayerNames()
+    local added = {}
+    local removed = {}
+    
+    local newSet = {}
+    for _, name in ipairs(newValues) do
+        newSet[name] = true
+    end
+    
+    for _, name in ipairs(currentValues) do
+        if not newSet[name] then
+            table.insert(removed, name)
+        end
+    end
+    
+    local currentSet = {}
+    for _, name in ipairs(currentValues) do
+        currentSet[name] = true
+    end
+    
+    for _, name in ipairs(newValues) do
+        if not currentSet[name] then
+            table.insert(added, name)
+        end
+    end
+    
+    for _, name in ipairs(removed) do
+        playersDropdown:RemoveValue(name)
+    end
+    
+    for _, name in ipairs(added) do
+        playersDropdown:AddValue(name)
+    end
+end
+
+
 local playersDropdown = Tabs.Home:Dropdown({
     Title = "选择要传送的玩家",
     Values = getPlayerNames(), -- 初始填充
@@ -383,14 +422,9 @@ Tabs.Home:Button({
     end
 })
 
--- 修复后的部分，使用 Update 方法
-game.Players.PlayerAdded:Connect(function(player)
-    playersDropdown:Update(getPlayerNames())
-end)
-
-game.Players.PlayerRemoving:Connect(function(player)
-    playersDropdown:Update(getPlayerNames())
-end)
+-- 修复后的部分，使用 AddValue 和 RemoveValue 方法来更新
+game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
+game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
 
 
 -- 飞行, 无限跳, 自瞄, 子弹追踪, 夜视, 穿墙
@@ -889,7 +923,7 @@ Tabs.StrengthLegends:Toggle({
                 part.Transparency = 1
                 
                 local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-                character:WaitForChild("HumanoidRootPart").CFrame = part.CFrame + Vector3.new(0, 50, 0)
+                character:WaitForChild("HumanoidRootPart").CFrame = part.Cframe + Vector3.new(0, 50, 0)
                 
                 local exercises = {"Weight", "Pushups", "Situps", "Handstands"}
                 for _, exerciseName in ipairs(exercises) do
