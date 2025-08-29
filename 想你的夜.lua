@@ -79,9 +79,9 @@ end
 Tabs.Home:Paragraph({
     Title = "666这么帅",
     Desc = "必须帅",
-    Image = "https://raw.githubusercontent.com/DUKECCB1337/PigGod/839e3ef641e2a8f3a56d7fd96352d87174dbec0c/1756457861236.jpg",
+    Image = "https://i.postimg.cc/fLmB0Qp3/IMG-20250821-130711.jpg",
     ImageSize = 42,
-    Thumbnail = "https://raw.githubusercontent.com/DUKECCB1337/PigGod/839e3ef641e2a8f3a56d7fd96352d87174dbec0c/1756457861236.jpg",
+    Thumbnail = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/BQACAgUAAyEGAASHRsPbAALnUWixd_0eyiMPT7Vg32gRLZwLkBnGAAJ8GgAC1AOQVT5Yd9Q1Sq0i-1.png",
     ThumbnailSize = 120
 })
 
@@ -89,7 +89,6 @@ Tabs.Home:Paragraph({
     Title = "欢迎",
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
-
 -- 反挂机 (通过外部链接加载)
 Tabs.Home:Button({
     Title = "反挂机",
