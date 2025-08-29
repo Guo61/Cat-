@@ -76,18 +76,20 @@ local function stopLoop(name)
 end
 
 --- 主页 Tab ---
+Home:Paragraph({
+    Title = "666这么帅",
+    Desc = "必须帅",
+    Image = "https://c-ssl.duitang.com/uploads/blog/202310/21/oVS4gnBVIg4A1yJ.jpg",
+    ImageSize = 42,
+    Thumbnail = "https://c-ssl.duitang.com/uploads/blog/202103/27/20210327131203_74b6b.jpg",
+    ThumbnailSize = 120
+})
+
 Tabs.Home:Paragraph({
     Title = "欢迎",
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
 
-Tabs.Home:Paragraph({
-    Title = "666这么帅",
-    Image = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnUWixd_0eyiMPT7Vg32gRLZwLkBnGAAJ8GgAC1AOQVT5Yd9Q1Sq0iNgQ.png",
-    ImageSize = 42,
-    Thumbnail = "https://c-ssl.duitang.com/uploads/blog/202103/27/20210327131203_74b6b.jpg",
-    ThumbnailSize = 120
-})
 -- 反挂机 (通过外部链接加载)
 Tabs.Home:Button({
     Title = "反挂机",
