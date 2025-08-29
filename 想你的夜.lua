@@ -79,9 +79,9 @@ end
 Tabs.Home:Paragraph({
     Title = "666这么帅",
     Desc = "必须帅",
-    Image = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/BQACAgUAAyEGAASHRsPbAALnUWixd_0eyiMPT7Vg32gRLZwLkBnGAAJ8GgAC1AOQVT5Yd9Q1Sq0i-1.png",
+    Image = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/1756468599211.png",
     ImageSize = 42,
-    Thumbnail = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/Image_1756467987971.jpg",
+    Thumbnail = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/1756468641440.jpg",
     ThumbnailSize = 120
 })
 
