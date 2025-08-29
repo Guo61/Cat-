@@ -355,7 +355,6 @@ Tabs.Home:Slider({
     end
 })
 
--- 获取当前玩家列表并创建值列表
 local function getPlayerNames()
     local names = {}
     for _, player in ipairs(game.Players:GetPlayers()) do
@@ -368,6 +367,9 @@ end
 
 -- 创建一个函数来刷新下拉菜单
 local function refreshPlayerDropdown()
+    -- 增加了一个检查，确保playersDropdown存在
+    if not playersDropdown then return end
+
     local currentValues = playersDropdown:GetValues()
     local newValues = getPlayerNames()
     local added = {}
@@ -404,7 +406,7 @@ local function refreshPlayerDropdown()
     end
 end
 
-
+-- **将下拉菜单的创建代码保持在此处，这是原始代码中的位置**
 local playersDropdown = Tabs.Home:Dropdown({
     Title = "选择要传送的玩家",
     Values = getPlayerNames(), -- 初始填充
@@ -423,6 +425,10 @@ Tabs.Home:Button({
         end
     end
 })
+
+-- **修复：将事件连接代码移动到这里，确保playersDropdown已经创建**
+game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
+game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
 
 -- 修复后的部分，使用 AddValue 和 RemoveValue 方法来更新
 game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
