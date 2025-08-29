@@ -1076,28 +1076,22 @@ RunService.Heartbeat:Connect(function()
     end
 
     -- 自动砍树
-    if Features.AutoChop and now - lastAutoChop >= 0.7 then
-        lastAutoChop = now
-        if Character and Character:FindFirstChild("ToolHandle") then
-            local tool = Character.ToolHandle.OriginalItem.Value
-            if tool and ({["Old Axe"] = true, ["Stone Axe"] = true, ["Iron Axe"] = true})[tool.Name] then
-                local function ChopTree(path)
-                    for _, tree in next, path:GetChildren() do
-                        task.wait(.1)
-                        if tree:IsA("Model") and ({["Small Tree"] = true, ["TreeBig1"] = true, ["TreeBig2"] = true, ["TreeBig3"] = true})[tree.Name] and tree:FindFirstChild("HitRegisters") then
-                            local trunk = tree:FindFirstChild("Trunk") or tree:FindFirstChild("HumanoidRootPart") or tree.PrimaryPart
-                            if trunk and (Character.HumanoidRootPart.Position - trunk.Position).Magnitude <= 100 then
-                                ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("ToolDamageObject"):InvokeServer(tree, tool, true, Character.HumanoidRootPart.CFrame)
-                            end
-                        end
-                    end
-                end
-                ChopTree(Workspace.Map.Foliage)
-                ChopTree(Workspace.Map.Landmarks)
+local function AutoChop()
+    local ToolHandle = Character:FindFirstChild("ToolHandle")
+    if not ToolHandle then return end
+    local Tool = ToolHandle.OriginalItem.Value
+    if Tool.Name ~= "Old Axe" and Tool.Name ~= "Stone Axe" then return end
+
+    for _, Tree in ipairs(Workspace.Trees:GetChildren()) do
+        local TreePart = Tree:FindFirstChild("Trunk") or Tree.PrimaryPart
+        if TreePart then
+            local Dist = (Character.HumanoidRootPart.Position - TreePart.Position).Magnitude
+            if Dist <= 100 then
+                ReplicatedStorage.RemoteEvents.ToolDamageObject:InvokeServer(Tree, Tool, true, Character.HumanoidRootPart.CFrame)
             end
         end
     end
-
+end
     -- 自动进食
     if Features.AutoEat and now - lastAutoEat >= 10 then
         lastAutoEat = now
@@ -1139,7 +1133,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
 
 --- Main Functions Tab ---
 Tabs.LegendsOfSpeed:Toggle({
