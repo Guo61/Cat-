@@ -76,7 +76,7 @@ local function stopLoop(name)
 end
 
 --- 主页 Tab ---
-Home:Paragraph({
+Tabs.Home:Paragraph({
     Title = "666这么帅",
     Desc = "必须帅",
     Image = "https://c-ssl.duitang.com/uploads/blog/202310/21/oVS4gnBVIg4A1yJ.jpg",
