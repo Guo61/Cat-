@@ -81,7 +81,7 @@ Tabs.Home:Paragraph({
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
 
-ParagraphTab:Paragraph({
+Tabs.Home:Paragraph({
     Title = "666这么帅",
     Image = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnUWixd_0eyiMPT7Vg32gRLZwLkBnGAAJ8GgAC1AOQVT5Yd9Q1Sq0iNgQ.png",
     ImageSize = 42,
