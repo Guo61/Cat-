@@ -1177,7 +1177,7 @@ for _, teleport in ipairs(strengthTeleports) do
 end
 
 Tabs.Misc:Paragraph({
-    Title = "敬请期待",
+    Title = "无",
     Desc = "这里存放一些不属于特定游戏的功能。"
 })
 Tabs.Misc:Code({
