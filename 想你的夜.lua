@@ -38,7 +38,7 @@ Window:Tag({
         Color = Color3.fromHex("#30ff6a")
     })
     Window:Tag({
-        Title = "测试版", 
+        Title = "三传奇", 
         Color = Color3.fromHex("#315dff")
     })
     local TimeTag = Window:Tag({
