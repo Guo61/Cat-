@@ -3,10 +3,10 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Cat脚盆 v1.0",
+    Title = "Cat脚盆 v1.10",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 欢迎使用99夜",
+    Content = "By:Ccat\nQQ群:1061490197 欢迎使用99夜",
     Buttons = {
         {
             Title = "进入脚盆。",
@@ -679,6 +679,74 @@ Tabs.Home:Toggle({
     Callback = toggleESP,
 })
 
+Tabs.Home:Button({
+    Title = "切换服务器",
+    Desc = "切换到相同游戏的另一个服务器",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = game.PlaceId
+        
+        TeleportService:Teleport(placeId, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "重新加入服务器",
+    Desc = "尝试重新加入当前服务器",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        
+        TeleportService:TeleportToPlaceInstance(placeId, jobId, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "复制服务器邀请链接",
+    Desc = "复制当前服务器的邀请链接到剪贴板",
+    Callback = function()
+        local inviteLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+        setclipboard(inviteLink)
+        WindUI:Notify({
+            Title = "邀请链接已复制",
+            Content = "链接已复制到剪贴板",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.Home:Button({
+    Title = "复制服务器ID",
+    Desc = "复制当前服务器的Job ID到剪贴板",
+    Callback = function()
+        setclipboard(game.JobId)
+        WindUI:Notify({
+            Title = "服务器ID已复制",
+            Content = "Job ID: " .. game.JobId,
+            Duration = 3
+        })
+    end
+})
+
+Tabs.Home:Button({
+    Title = "服务器信息",
+    Desc = "显示当前服务器的信息",
+    Callback = function()
+        local players = game.Players:GetPlayers()
+        local maxPlayers = game.Players.MaxPlayers
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        local serverType = game:GetService("RunService"):IsStudio() and "Studio" or "Live"
+        
+        WindUI:Notify({
+            Title = "服务器信息",
+            Content = string.format("玩家数量: %d/%d\nPlace ID: %d\nJob ID: %s\n服务器类型: %s", #players, maxPlayers, placeId, jobId, serverType),
+            Duration = 10
+        })
+    end
+})
+
 --- Start of migrated functions from 99夜.lua ---
 
 -- 全局服务引用
@@ -767,16 +835,16 @@ local function TryEatFood(food)
         return
     end
 
-    WindUI:Notify({Title = "AlienX", Content = "➡️ 正在尝试吃下" .. food.Name, Duration = 5})
+    WindUI:Notify({Title = "AlienX", Content = "正在尝试吃下" .. food.Name, Duration = 5})
     food.Parent = ReplicatedStorage.TempStorage
     local success, result = pcall(function()
         return remote:InvokeServer(food)
     end)
 
     if success and result and result.Success then
-        WindUI:Notify({Title = "AlienX", Content = "✅成功吃下 " .. food.Name, Duration = 5})
+        WindUI:Notify({Title = "AlienX", Content = "成功吃下 " .. food.Name, Duration = 5})
     else
-        WindUI:Notify({Title = "AlienX", Content = "❌️进食失败", Duration = 5})
+        WindUI:Notify({Title = "AlienX", Content = "进食失败", Duration = 5})
     end
 end
 
@@ -1046,10 +1114,10 @@ RunService.Heartbeat:Connect(function()
                 end
             end
             if not foundFood then
-                WindUI:Notify({Title = "AlienX", Content = "🔍25米范围内无食物", Duration = 5})
+                WindUI:Notify({Title = "AlienX", Content = "25米范围内无食物", Duration = 5})
             end
         else
-            WindUI:Notify({Title = "AlienX", Content = "⏳等待玩家加载", Duration = 5})
+            WindUI:Notify({Title = "AlienX", Content = "等待玩家加载", Duration = 5})
         end
     end
 
@@ -1154,6 +1222,44 @@ Tabs.NinjaLegends:Button({
             end
         end
         WindUI:Notify({Title = "提示", Content = "已清除所有透视", Duration = 2})
+    end
+})
+
+Tabs.NinjaLegends:Button({
+    Title = "自杀",
+    Desc = "让角色死亡",
+    Callback = function()
+        Character:BreakJoints()
+        WindUI:Notify({Title = "99夜", Content = "角色已死亡", Duration = 3})
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "重新出生",
+    Desc = "让角色重新出生",
+    Callback = function()
+        ReplicatedStorage.RemoteEvents.ResetCharacter:FireServer()
+        WindUI:Notify({Title = "99夜", Content = "角色已重新出生", Duration = 3})
+    end
+})
+
+local infiniteStamina = false
+Tabs.NinjaLegends:Toggle({
+    Title = "无限耐力",
+    Desc = "角色不会消耗耐力",
+    Callback = function(state)
+        infiniteStamina = state
+        if state then
+            WindUI:Notify({Title = "99夜", Content = "开启无限耐力", Duration = 3})
+            startLoop("InfiniteStamina", function()
+                if Character and Character:FindFirstChild("Stamina") then
+                    Character.Stamina.Value = 100
+                end
+            end, 0.1)
+        else
+            WindUI:Notify({Title = "99夜", Content = "关闭无限耐力", Duration = 3})
+            stopLoop("InfiniteStamina")
+        end
     end
 })
 
