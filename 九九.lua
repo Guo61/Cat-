@@ -1033,7 +1033,7 @@ local function toggleESP(itemName, displayName, color)
     
     WindUI:Notify({
         Title = "提示", 
-        Content = "已开启"..displayName.."透视 ("..#items.."个)", 
+        Content = "已开启"..#items.."个"..displayName.."透视", 
         Duration = 2
     })
 end
@@ -1082,7 +1082,6 @@ if Features.AutoChop and now - lastAutoChop >= 0.7 then
         if tool and ({["Old Axe"] = true, ["Stone Axe"] = true, ["Iron Axe"] = true})[tool.Name] then
             local function ChopTree(path)
                 for _, tree in next, path:GetChildren() do
-                    task.wait(.1)
                     if tree:IsA("Model") and ({["Small Tree"] = true, ["TreeBig1"] = true, ["TreeBig2"] = true, ["TreeBig3"] = true})[tree.Name] and tree:FindFirstChild("HitRegisters") then
                         local trunk = tree:FindFirstChild("Trunk") or tree:FindFirstChild("HumanoidRootPart") or tree.PrimaryPart
                         if trunk and (Character.HumanoidRootPart.Position - trunk.Position).Magnitude <= 50 then
