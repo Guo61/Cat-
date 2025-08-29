@@ -6,7 +6,7 @@ WindUI:Popup({
     Title = "Cat脚盆 v1.0",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 欢迎使用",
+    Content = "By:Ccat\nQQ群:1061490197 欢迎使用",
     Buttons = {
         {
             Title = "进入脚盆。",
