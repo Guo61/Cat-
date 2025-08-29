@@ -687,6 +687,75 @@ Tabs.Home:Toggle({
     Callback = toggleESP,
 })
 
+Tabs.Home:Button({
+    Title = "切换服务器",
+    Desc = "切换到相同游戏的另一个服务器",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = game.PlaceId
+        
+        TeleportService:Teleport(placeId, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "重新加入服务器",
+    Desc = "尝试重新加入当前服务器",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        
+        TeleportService:TeleportToPlaceInstance(placeId, jobId, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "复制服务器邀请链接",
+    Desc = "复制当前服务器的邀请链接到剪贴板",
+    Callback = function()
+        local inviteLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+        setclipboard(inviteLink)
+        WindUI:Notify({
+            Title = "邀请链接已复制",
+            Content = "链接已复制到剪贴板",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.Home:Button({
+    Title = "复制服务器ID",
+    Desc = "复制当前服务器的Job ID到剪贴板",
+    Callback = function()
+        setclipboard(game.JobId)
+        WindUI:Notify({
+            Title = "服务器ID已复制",
+            Content = "Job ID: " .. game.JobId,
+            Duration = 3
+        })
+    end
+})
+
+
+Tabs.Home:Button({
+    Title = "服务器信息",
+    Desc = "显示当前服务器的信息",
+    Callback = function()
+        local players = game.Players:GetPlayers()
+        local maxPlayers = game.Players.MaxPlayers
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        local serverType = game:GetService("RunService"):IsStudio() and "Studio" or "Live"
+        
+        WindUI:Notify({
+            Title = "服务器信息",
+            Content = string.format("玩家数量: %d/%d\nPlace ID: %d\nJob ID: %s\n服务器类型: %s", #players, maxPlayers, placeId, jobId, serverType),
+            Duration = 10
+        })
+    end
+})
+
 --- 极速传奇 Tab ---
 Tabs.LegendsOfSpeed:Code({
     Title = "提示!!!",
