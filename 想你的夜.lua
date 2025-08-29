@@ -82,11 +82,10 @@ Tabs.Home:Paragraph({
 })
 
 Tabs.Home:Paragraph({
-    Title = "大78",
-    Desc = "更吊",
-    Image = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnIGixb7sgLfNEQNkpXMUqSA_Kwuc0AAIoGgAC1AOQVYD-LQ3HikWtNgQ.png",
+    Title = "666这么帅",
+    Image = "https://c-ssl.duitang.com/uploads/blog/202310/21/oVS4gnBVIg4A1yJ.jpg",
     ImageSize = 42,
-    Thumbnail = "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALnIGixb7sgLfNEQNkpXMUqSA_Kwuc0AAIoGgAC1AOQVYD-LQ3HikWtNgQ.png",
+    Thumbnail = "https://c-ssl.duitang.com/uploads/blog/202103/27/20210327131203_74b6b.jpg",
     ThumbnailSize = 120
 })
 -- 反挂机 (通过外部链接加载)
