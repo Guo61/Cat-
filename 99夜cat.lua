@@ -257,9 +257,9 @@ Window:Tag({
 -- 创建指定的大类（作为标签页）
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
-    LegendsOfSpeed = Window:Tab({ Title = "主要功能", Icon = 6026568198 }),
-    NinjaLegends = Window:Tab({ Title = "传送", Icon = 7040410130 }),
-    StrengthLegends = Window:Tab({ Title = "透视", Icon = "star" }),
+    LegendsOfSpeed = Window:Tab({ Title = "主要功能", Icon = "zap" }),
+    NinjaLegends = Window:Tab({ Title = "传送", Icon = "user" }),
+    StrengthLegends = Window:Tab({ Title = "透视", Icon = "dumbbell" }),
     Misc = Window:Tab({ Title = "其他", Icon = "settings" })
 }
 
@@ -945,6 +945,11 @@ Tabs.Home:Button({
     end
 })
 
+Tabs.Home:Paragraph({
+    Title = "提示",
+    Desc = "以下功能小心使用!!!",
+})
+
 Tabs.Home:Button({
     Title = "重新加入服务器",
     Desc = "尝试重新加入当前服务器",
@@ -1000,38 +1005,6 @@ Tabs.Home:Button({
             Content = table.concat(playerList, "\n"),
             Duration = 10
         })
-    end
-})
-
-Tabs.Home:Button({
-    Title = "隐藏界面",
-    Desc = "隐藏/显示Cat Hub界面",
-    Callback = function()
-        local mainUI = game:GetService("CoreGui"):FindFirstChild("WindUI")
-        if mainUI then
-            mainUI.Enabled = not mainUI.Enabled
-            WindUI:Notify({
-                Title = "界面已" .. (mainUI.Enabled and "显示" or "隐藏"),
-                Content = "按右Shift键可以重新打开",
-                Duration = 3
-            })
-        end
-    end
-})
-
-Tabs.Home:Button({
-    Title = "销毁界面",
-    Desc = "完全销毁Cat Hub界面",
-    Callback = function()
-        local mainUI = game:GetService("CoreGui"):FindFirstChild("WindUI")
-        if mainUI then
-            mainUI:Destroy()
-            WindUI:Notify({
-                Title = "界面已销毁",
-                Content = "需要重新执行脚本来打开界面",
-                Duration = 3
-            })
-        end
     end
 })
 
