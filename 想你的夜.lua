@@ -3,7 +3,7 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Cat Hub v1.0",
+    Title = "Cat脚盆 v1.0",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
     Content = "By:Ccat\nQQ:3395858053 欢迎使用",
@@ -1181,6 +1181,6 @@ Tabs.Misc:Paragraph({
     Desc = "这里存放一些不属于特定游戏的功能。"
 })
 Tabs.Misc:Code({
-    Title = "Love Players",
-    Code = "感谢游玩\nQQ号:3395858053"
+    Title = "感谢游玩",
+    Code = "QQ号:3395858053"
 })
