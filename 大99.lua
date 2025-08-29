@@ -93,41 +93,95 @@ local function GetClientModule()
     return ClientModule, EatRemote
 end
 
--- 从99night.lua移植的ESP功能
-local function AddESP(target, name, distance, enabled)
+-- 修复后的ESP功能管理
+local espData = {}
+local function createESP(target, name)
     local rootPart = target:FindFirstChild("HumanoidRootPart") or target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart")
-    if not rootPart then return end
+    if not rootPart or espData[target] then return end
 
-    local billboard = rootPart:FindFirstChild("BillboardGui") or Instance.new("BillboardGui")
+    local billboard = Instance.new("BillboardGui")
     billboard.Adornee = rootPart
     billboard.Size = UDim2.new(0, 100, 0, 100)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.AlwaysOnTop = true
-    billboard.Enabled = enabled
     billboard.Parent = rootPart
+    billboard.Enabled = true
 
-    if not billboard:FindFirstChild("TextLabel") then
-        local label = Instance.new("TextLabel")
-        label.Text = name .. "\n" .. math.floor(distance) .. "m"
-        label.Size = UDim2.new(1, 0, 0, 40)
-        label.Position = UDim2.new(0, 0, 0, 0)
-        label.BackgroundTransparency = 1
-        label.TextColor3 = Color3.new(1, 1, 1)
-        label.TextStrokeTransparency = 0.3
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 14
-        label.Parent = billboard
-        
-        if name:match("Chest") then
-            local image = Instance.new("ImageLabel")
-            image.Position = UDim2.new(0, 20, 0, 40)
-            image.Size = UDim2.new(0, 60, 0, 60)
-            image.Image = "rbxassetid://18660563116"
-            image.BackgroundTransparency = 1
-            image.Parent = billboard
+    local label = Instance.new("TextLabel")
+    label.Text = name .. "\n" .. "0m"
+    label.Size = UDim2.new(1, 0, 0, 40)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.3
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 14
+    label.Parent = billboard
+
+    if name:match("Chest") then
+        local image = Instance.new("ImageLabel")
+        image.Position = UDim2.new(0, 20, 0, 40)
+        image.Size = UDim2.new(0, 60, 0, 60)
+        image.Image = "rbxassetid://18660563116"
+        image.BackgroundTransparency = 1
+        image.Parent = billboard
+    end
+
+    espData[target] = {gui = billboard, label = label, image = image}
+end
+
+local function update99NightESP()
+    local playerChar = LP.Character
+    if not playerChar or not playerChar:FindFirstChild("HumanoidRootPart") then return end
+    local playerPos = playerChar.HumanoidRootPart.Position
+
+    -- Clean up removed objects and update existing ones
+    for target, data in pairs(espData) do
+        if not target.Parent or not target:IsDescendantOf(workspace) then
+            data.gui:Destroy()
+            espData[target] = nil
+        else
+            local rootPart = target:FindFirstChild("HumanoidRootPart") or target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart")
+            if rootPart then
+                local dist = (playerPos - rootPart.Position).Magnitude
+                data.label.Text = data.label.Text:match("^(.-)%.-\n") .. "\n" .. math.floor(dist) .. "m"
+            end
         end
+    end
+
+    -- Create new ESP
+    if Features.ChestESP then
+        for _, chest in next, Workspace.Items:GetChildren() do
+            if chest.Name:match("Chest") and chest:IsA("Model") and not table.find(Blacklist, chest) and chest:FindFirstChild("Main") and not espData[chest] then
+                createESP(chest, "宝箱")
+            end
+        end
+    end
+
+    if Features.ChildESP then
+        for _, child in next, Workspace.Characters:GetChildren() do
+            if table.find({"Lost Child", "Lost Child1", "Lost Child2", "Lost Child3", "Dino Kid", "kraken kid", "Squid kid", "Koala Kid", "koala"}, child.Name) and child:FindFirstChild("HumanoidRootPart") and not table.find(Blacklist, child) and not espData[child] then
+                createESP(child, "孩子")
+            end
+        end
+    end
+end
+
+local function toggle99NightESP(enabled)
+    Features.ChestESP = enabled
+    Features.ChildESP = enabled
+
+    if enabled then
+        -- Initial creation and start of the update loop
+        update99NightESP()
+        WindUI:Notify({Title = "提示", Content = "已开启99夜透视", Duration = 2})
     else
-        billboard.TextLabel.Text = name .. "\n" .. math.floor(distance) .. "m"
+        -- Clean up and stop the update loop
+        for _, data in pairs(espData) do
+            data.gui:Destroy()
+        end
+        espData = {}
+        WindUI:Notify({Title = "提示", Content = "已关闭99夜透视", Duration = 2})
     end
 end
 
@@ -431,22 +485,9 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- ESP更新
-    if Features.ChestESP then
-        for _, chest in next, Workspace.Items:GetChildren() do
-            if chest.Name:match("Chest") and chest:IsA("Model") and not table.find(Blacklist, chest) and chest:FindFirstChild("Main") then
-                AddESP(chest, "宝箱", (Character.HumanoidRootPart.Position - chest.Main.Position).Magnitude, true)
-            end
-        end
-    end
-
-    if Features.ChildESP then
-        for _, child in next, Workspace.Characters:GetChildren() do
-            if table.find({"Lost Child", "Lost Child1", "Lost Child2", "Lost Child3", "Dino Kid", "kraken kid", "Squid kid", "Koala Kid", "koala"}, child.Name) 
-               and child:FindFirstChild("HumanoidRootPart") and not table.find(Blacklist, child) then
-                AddESP(child, "孩子", (Character.HumanoidRootPart.Position - child.HumanoidRootPart.Position).Magnitude, true)
-            end
-        end
+    -- 99夜ESP更新
+    if Features.ChestESP or Features.ChildESP then
+        update99NightESP()
     end
 end)
 
@@ -512,19 +553,9 @@ end
 
 -- 透视功能标签页
 Tabs.ESP:Toggle({
-    Title = "宝箱透视",
+    Title = "99夜透视 (宝箱&孩子)",
     Value = false,
-    Callback = function(value)
-        Features.ChestESP = value
-    end
-})
-
-Tabs.ESP:Toggle({
-    Title = "走失的孩子透视",
-    Value = false,
-    Callback = function(value)
-        Features.ChildESP = value
-    end
+    Callback = toggle99NightESP
 })
 
 -- 添加物品透视按钮
@@ -549,6 +580,13 @@ Tabs.ESP:Button({
                 _G["ESP_"..item.name] = nil
             end
         end
+        -- Also clear 99 night ESP
+        for _, data in pairs(espData) do
+            data.gui:Destroy()
+        end
+        espData = {}
+        Features.ChestESP = false
+        Features.ChildESP = false
         WindUI:Notify({Title = "提示", Content = "已清除所有透视", Duration = 2})
     end
 })
@@ -714,6 +752,11 @@ Tabs.Home:Button({
     Desc = "将选中的玩家甩飞",
     Callback = function()
         local selectedPlayerName = playersDropdown.Value
+        if not selectedPlayerName then
+            WindUI:Notify({Title = "错误", Content = "未选择玩家", Duration = 3})
+            return
+        end
+        
         local targetPlayer = game.Players:FindFirstChild(selectedPlayerName)
         if not targetPlayer or not targetPlayer.Character then
             WindUI:Notify({Title = "错误", Content = "未找到玩家或玩家角色", Duration = 3})
@@ -881,6 +924,10 @@ Tabs.Home:Button({
     Desc = "传送到选中的玩家",
     Callback = function()
         local selectedPlayerName = playersDropdown.Value
+        if not selectedPlayerName then
+            WindUI:Notify({Title = "错误", Content = "未选择玩家", Duration = 3})
+            return
+        end
         local targetPlayer = game.Players:FindFirstChild(selectedPlayerName)
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
