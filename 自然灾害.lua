@@ -3,13 +3,13 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Cat脚盆 v1.10",
+    Title = "Cat脚盆 v1.15",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ群:1061490197 欢迎使用99夜",
+    Content = "By:Ccat\nQQ群:1061490197 欢迎使用自然灾害",
     Buttons = {
         {
-            Title = "进入脚本。",
+            Title = "进入脚盆。",
             Icon = "arrow-right",
             Callback = function() Confirmed = true end,
             Variant = "Primary",
@@ -35,11 +35,11 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-        Title = "v1.10",
+        Title = "v1.15",
         Color = Color3.fromHex("#30ff6a")
     })
     Window:Tag({
-        Title = "99夜", 
+        Title = "自然灾害", 
         Color = Color3.fromHex("#315dff")
     })
     local TimeTag = Window:Tag({
