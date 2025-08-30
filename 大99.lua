@@ -811,6 +811,121 @@ Tabs.Home:Toggle({
     end
 })
 
+local function setPlayerHealth(healthValue)
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    
+    -- 等待角色加载
+    if not character then
+        character = player.CharacterAdded:Wait()
+    end
+    
+    -- 等待 Humanoid 加载
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    -- 设置血量
+    humanoid.Health = healthValue
+    
+    -- 显示提示
+    WindUI:Notify({
+        Title = "血量设置",
+        Content = "血量已设置为: " .. healthValue,
+        Duration = 3
+    })
+end
+
+-- 血量滑块
+Tabs.Home:Slider({
+    Title = "设置血量",
+    Desc = "调整人物血量 (0-1000)",
+    Value = { Min = 0, Max = 1000, Default = 100 },
+    Callback = function(val)
+        setPlayerHealth(val)
+    end
+})
+
+-- 快速血量按钮
+Tabs.Home:Button({
+    Title = "满血",
+    Desc = "将血量设置为最大值",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        setPlayerHealth(humanoid.MaxHealth)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "半血",
+    Desc = "将血量设置为一半",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        setPlayerHealth(humanoid.MaxHealth / 2)
+    end
+})
+
+-- 无敌模式切换
+local godModeEnabled = false
+local originalHealth
+local godModeConnection
+
+Tabs.Home:Toggle({
+    Title = "无敌模式",
+    Desc = "开启后血量不会减少",
+    Default = false,
+    Callback = function(state)
+        godModeEnabled = state
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        
+        if not character then
+            character = player.CharacterAdded:Wait()
+        end
+        
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        if state then
+            -- 保存原始血量
+            originalHealth = humanoid.Health
+            
+            -- 监听血量变化
+            godModeConnection = humanoid.HealthChanged:Connect(function(newHealth)
+                if newHealth < humanoid.MaxHealth then
+                    humanoid.Health = humanoid.MaxHealth
+                end
+            end)
+            
+            -- 设置为满血
+            humanoid.Health = humanoid.MaxHealth
+            
+            WindUI:Notify({
+                Title = "无敌模式",
+                Content = "无敌模式已开启",
+                Duration = 3
+            })
+        else
+            -- 关闭无敌模式
+            if godModeConnection then
+                godModeConnection:Disconnect()
+                godModeConnection = nil
+            end
+            
+            -- 恢复原始血量
+            if originalHealth then
+                humanoid.Health = originalHealth
+            end
+            
+            WindUI:Notify({
+                Title = "无敌模式",
+                Content = "无敌模式已关闭",
+                Duration = 3
+            })
+        end
+    end
+})
 -- 速度, 重力, 跳跃
 Tabs.Home:Slider({
     Title = "设置速度",
