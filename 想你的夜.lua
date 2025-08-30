@@ -215,7 +215,7 @@ Tabs.Home:Button({
 Tabs.Home:Button({
     Title = "甩飞",
     Callback = function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()  end)
+        loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()
     end
 })
 -- 防甩飞 (Toggle)
