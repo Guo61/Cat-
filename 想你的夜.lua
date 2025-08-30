@@ -63,6 +63,21 @@ _G.auto_hoop = false
 -- 存储是否通过脚本传送的标志
 local teleportedByScript = false
 
+-- 修复：检查TeleportInitiated事件是否存在
+local TeleportService = game:GetService("TeleportService")
+if TeleportService:FindFirstChild("TeleportInitiated") then
+    TeleportService.TeleportInitiated:Connect(function()
+        teleportedByScript = true
+    end)
+end
+
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function(teleportState)
+    if teleportState == Enum.TeleportState.InProgress and teleportedByScript then
+        -- 保存执行脚本的指令到重入时的执行
+        queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/CatChuanqi.lua"))()')
+    end
+end)
+
 local function startLoop(name, callback, delay)
     if autoLoops[name] then return end
     autoLoops[name] = coroutine.wrap(function()
@@ -78,6 +93,7 @@ local function stopLoop(name)
     if not autoLoops[name] then return end
     autoLoops[name] = nil
 end
+
 --- 主页 Tab ---
 Tabs.Home:Paragraph({
     Title = "666这么帅",
@@ -105,18 +121,6 @@ Tabs.Home:Button({
         end)
     end
 })
-
-game:GetService("TeleportService").TeleportInitiated:Connect(function()
-    teleportedByScript = true
-end)
-
-game:GetService("Players").LocalPlayer.OnTeleport:Connect(function(teleportState)
-    if teleportState == Enum.TeleportState.InProgress and teleportedByScript then
-        -- 保存执行脚本的指令到重入时的执行
-        queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/CatChuanqi.lua"))()')
-    end
-end)
-
 -- 修复图片中的空降功能代码
 Tabs.Home:Button("空降极速传奇",function()
     local game_id = 3101667897
