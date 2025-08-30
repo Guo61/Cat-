@@ -58,6 +58,7 @@ Window:SelectTab(1)
 
 -- 全局控制变量
 local autoLoops = {}
+_G.auto_hoop = false
 
 local function startLoop(name, callback, delay)
     if autoLoops[name] then return end
@@ -74,6 +75,7 @@ local function stopLoop(name)
     if not autoLoops[name] then return end
     autoLoops[name] = nil
 end
+
 
 --- 主页 Tab ---
 Tabs.Home:Paragraph({
@@ -748,6 +750,31 @@ Tabs.LegendsOfSpeed:Button({
     Desc = "从Pastebin加载并执行",
     Callback = function()
         pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/T9wTL150"))() end)
+    end
+})
+
+Tabs.LegendsOfSpeed:Toggle({
+    Title = "自动跳圈",
+    Default = false,
+    Callback = function(state)
+        _G.auto_hoop = state
+        if state then
+            startLoop("auto_hoop", function()
+                pcall(function()
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local children = workspace.Hoops:GetChildren()
+                        for _, child in ipairs(children) do
+                            if child.Name == "Hoop" and child:IsA("BasePart") then
+                                child.CFrame = character.HumanoidRootPart.CFrame
+                            end    
+                        end
+                    end
+                end)
+            end, 0.1) -- 每0.1秒执行一次
+        else
+            stopLoop("auto_hoop")
+        end
     end
 })
 
