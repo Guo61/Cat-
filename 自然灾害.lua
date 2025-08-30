@@ -48,7 +48,7 @@ Window:Tag({
 -- 创建指定的大类（作为标签页）
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
-    local NaturalDisastersTab = Window:Tab({ Title = "自然灾害", Icon = "cloud-rain" })
+    local NaturalDisastersTab = Window:Tab({ Title = "自然灾害", Icon = "cloud-rain" }),
     Misc = Window:Tab({ Title = "杂项", Icon = "settings" }),
 }
 
