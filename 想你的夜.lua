@@ -60,24 +60,6 @@ Window:SelectTab(1)
 local autoLoops = {}
 _G.auto_hoop = false
 
--- 存储是否通过脚本传送的标志
-local teleportedByScript = false
-
--- 修复：检查TeleportInitiated事件是否存在
-local TeleportService = game:GetService("TeleportService")
-if TeleportService:FindFirstChild("TeleportInitiated") then
-    TeleportService.TeleportInitiated:Connect(function()
-        teleportedByScript = true
-    end)
-end
-
-game:GetService("Players").LocalPlayer.OnTeleport:Connect(function(teleportState)
-    if teleportState == Enum.TeleportState.InProgress and teleportedByScript then
-        -- 保存执行脚本的指令到重入时的执行
-        queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/CatChuanqi.lua"))()')
-    end
-end)
-
 local function startLoop(name, callback, delay)
     if autoLoops[name] then return end
     autoLoops[name] = coroutine.wrap(function()
@@ -121,25 +103,6 @@ Tabs.Home:Button({
         end)
     end
 })
--- 修复图片中的空降功能代码
-Tabs.Home:Button("空降极速传奇",function()
-    local game_id = 3101667897
-    teleportedByScript = true
-    game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
-end)
-
-Tabs.Home:Button("空降忍者传奇",function()
-    local game_id = 3956818381
-    teleportedByScript = true
-    game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
-end)
-
-Tabs.Home:Button("空降力量传奇",function()
-    local game_id = 3623096087
-    teleportedByScript = true
-    game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
-end)
-
 -- FPS 显示
 Tabs.Home:Toggle({
     Title = "显示FPS",
@@ -281,6 +244,121 @@ Tabs.Home:Toggle({
     end
 })
 
+local function setPlayerHealth(healthValue)
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    
+    -- 等待角色加载
+    if not character then
+        character = player.CharacterAdded:Wait()
+    end
+    
+    -- 等待 Humanoid 加载
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    -- 设置血量
+    humanoid.Health = healthValue
+    
+    -- 显示提示
+    WindUI:Notify({
+        Title = "血量设置",
+        Content = "血量已设置为: " .. healthValue,
+        Duration = 3
+    })
+end
+
+-- 血量滑块
+Tabs.Home:Slider({
+    Title = "设置血量",
+    Desc = "调整人物血量 (0-1000)",
+    Value = { Min = 0, Max = 1000, Default = 100 },
+    Callback = function(val)
+        setPlayerHealth(val)
+    end
+})
+
+-- 快速血量按钮
+Tabs.Home:Button({
+    Title = "满血",
+    Desc = "将血量设置为最大值",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        setPlayerHealth(humanoid.MaxHealth)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "半血",
+    Desc = "将血量设置为一半",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        setPlayerHealth(humanoid.MaxHealth / 2)
+    end
+})
+
+-- 无敌模式切换
+local godModeEnabled = false
+local originalHealth
+local godModeConnection
+
+Tabs.Home:Toggle({
+    Title = "无敌模式",
+    Desc = "开启后血量不会减少",
+    Default = false,
+    Callback = function(state)
+        godModeEnabled = state
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        
+        if not character then
+            character = player.CharacterAdded:Wait()
+        end
+        
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        if state then
+            -- 保存原始血量
+            originalHealth = humanoid.Health
+            
+            -- 监听血量变化
+            godModeConnection = humanoid.HealthChanged:Connect(function(newHealth)
+                if newHealth < humanoid.MaxHealth then
+                    humanoid.Health = humanoid.MaxHealth
+                end
+            end)
+            
+            -- 设置为满血
+            humanoid.Health = humanoid.MaxHealth
+            
+            WindUI:Notify({
+                Title = "无敌模式",
+                Content = "无敌模式已开启",
+                Duration = 3
+            })
+        else
+            -- 关闭无敌模式
+            if godModeConnection then
+                godModeConnection:Disconnect()
+                godModeConnection = nil
+            end
+            
+            -- 恢复原始血量
+            if originalHealth then
+                humanoid.Health = originalHealth
+            end
+            
+            WindUI:Notify({
+                Title = "无敌模式",
+                Content = "无敌模式已关闭",
+                Duration = 3
+            })
+        end
+    end
+})
 -- 速度, 重力, 跳跃
 Tabs.Home:Slider({
     Title = "设置速度",
