@@ -212,69 +212,10 @@ Tabs.Home:Button({
 })
 
 -- 甩飞功能 (修复版)
-Tabs.Home:Toggle({
+Tabs.Home:Button({
     Title = "甩飞",
-    Desc = "开启后会使角色高速移动",
-    Default = false,
-    Callback = function(state)
-        if state then
-            -- 启动甩飞
-            local walkflinging = true
-            local LocalPlayer = game:GetService("Players").LocalPlayer
-            local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-            local Root = Character:WaitForChild("HumanoidRootPart")
-            local Humanoid = Character:WaitForChild("Humanoid")
-            
-            -- 监听角色死亡
-            Humanoid.Died:Connect(function()
-                walkflinging = false
-            end)
-            
-            -- 设置初始状态
-            Root.CanCollide = false
-            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            
-            -- 甩飞循环
-            task.spawn(function()
-                while walkflinging and Root and Root.Parent do
-                    game:GetService("RunService").Heartbeat:Wait()
-                    local vel = Root.Velocity
-                    Root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
-                    game:GetService("RunService").RenderStepped:Wait()
-                    Root.Velocity = vel
-                    game:GetService("RunService").Stepped:Wait()
-                    Root.Velocity = vel + Vector3.new(0, 0.1, 0)
-                    
-                    -- 短暂延迟防止卡顿
-                    task.wait(0.01)
-                end
-            end)
-            
-            -- 存储引用以便后续关闭
-            autoLoops["walkFling"] = {stop = function() walkflinging = false end}
-        else
-            -- 停止甩飞
-            if autoLoops["walkFling"] then
-                autoLoops["walkFling"].stop()
-                autoLoops["walkFling"] = nil
-                
-                -- 恢复角色正常状态
-                local LocalPlayer = game:GetService("Players").LocalPlayer
-                if LocalPlayer.Character then
-                    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                    local Root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    
-                    if Humanoid then
-                        Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                    end
-                    
-                    if Root then
-                        Root.Velocity = Vector3.new(0, 0, 0)
-                        Root.CanCollide = true
-                    end
-                end
-            end
-        end
+    Callback = function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()  end)
     end
 })
 -- 防甩飞 (Toggle)
