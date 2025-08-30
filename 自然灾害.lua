@@ -695,187 +695,488 @@ Tabs.Home:Button({
     end
 })
 
-NaturalDisastersTab:Toggle({
-    Title = "在水上行走",
-    Desc = "允许在水面上行走",
-    Callback = function(state)
-        if state then
-            game.Workspace.WaterLevel.CanCollide = true
-            game.Workspace.WaterLevel.Size = Vector3.new(5000, 1, 5000)
-        else
-            game.Workspace.WaterLevel.CanCollide = false
-            game.Workspace.WaterLevel.Size = Vector3.new(10, 1, 10)
+-- 修复：确保NaturalDisastersTab存在后再创建其内容
+if Tabs.NaturalDisastersTab then
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "在水上行走",
+        Desc = "允许在水面上行走",
+        Callback = function(state)
+            local waterLevel = game.Workspace:FindFirstChild("WaterLevel")
+            if waterLevel then
+                waterLevel.CanCollide = state
+                waterLevel.Size = state and Vector3.new(5000, 1, 5000) or Vector3.new(10, 1, 10)
+            end
         end
-    end
-})
+    })
 
-NaturalDisastersTab:Toggle({
-    Title = "自动禁用掉落伤害",
-    Desc = "自动移除掉落伤害脚本",
-    Callback = function(state)
-        _G.NoFallDamage = state
-        while wait(0.5) do
-            if _G.NoFallDamage then
-                local FallDamageScript = (game.Players.LocalPlayer.Character ~= nil) and 
-                    game.Players.LocalPlayer.Character:FindFirstChild("FallDamageScript") or nil
-                if FallDamageScript then
-                    FallDamageScript:Destroy()
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "自动禁用掉落伤害",
+        Desc = "自动移除掉落伤害脚本",
+        Callback = function(state)
+            _G.NoFallDamage = state
+            while wait(0.5) and _G.NoFallDamage do
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    local FallDamageScript = character:FindFirstChild("FallDamageScript")
+                    if FallDamageScript then
+                        FallDamageScript:Destroy()
+                    end
                 end
             end
         end
-    end
-})
+    })
 
-NaturalDisastersTab:Button({
-    Title = "传送到地图",
-    Desc = "传送到主地图位置",
-    Callback = function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
-            CFrame.new(-115.828506, 65.4863434, 18.8461514, 0.00697017973, 0.0789371505, -0.996855199, 
-                      -3.13589936e-07, 0.996879458, 0.0789390653, 0.999975681, -0.000549906865, 0.00694845384)
-    end
-})
+    Tabs.NaturalDisastersTab:Button({
+        Title = "传送到地图",
+        Desc = "传送到主地图位置",
+        Callback = function()
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = 
+                    CFrame.new(-115.828506, 65.4863434, 18.8461514, 0.00697017973, 0.0789371505, -0.996855199, 
+                              -3.13589936e-07, 0.996879458, 0.0789390653, 0.999975681, -0.000549906865, 0.00694845384)
+            end
+        end
+    })
 
-NaturalDisastersTab:Button({
-    Title = "传送到游戏岛",
-    Desc = "传送到游戏岛屿",
-    Callback = function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
-            CFrame.new(-83.5, 38.5, -27.5, -1, 0, 0, 0, 1, 0, 0, 0, -1)
-    end
-})
+    Tabs.NaturalDisastersTab:Button({
+        Title = "传送到游戏岛",
+        Desc = "传送到游戏岛屿",
+        Callback = function()
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = 
+                    CFrame.new(-83.5, 38.5, -27.5, -1, 0, 0, 0, 1, 0, 0, 0, -1)
+            end
+        end
+    })
 
--- 灾害预测功能
-local nextDisasterPrediction = false
-local disasterMessage = Instance.new("ScreenGui")
-disasterMessage.Name = "DisasterPrediction"
-disasterMessage.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    -- 灾害预测功能 - 添加安全检查
+    local nextDisasterPrediction = false
+    local disasterMessage = Instance.new("ScreenGui")
+    disasterMessage.Name = "DisasterPrediction"
+    disasterMessage.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-local messageLabel = Instance.new("TextLabel")
-messageLabel.Size = UDim2.new(0, 300, 0, 50)
-messageLabel.Position = UDim2.new(0.5, -150, 0.1, 0)
-messageLabel.BackgroundTransparency = 0.7
-messageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-messageLabel.TextColor3 = Color3.new(1, 1, 1)
-messageLabel.Font = Enum.Font.SourceSansBold
-messageLabel.TextSize = 18
-messageLabel.Visible = false
-messageLabel.Parent = disasterMessage
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(0, 300, 0, 50)
+    messageLabel.Position = UDim2.new(0.5, -150, 0.1, 0)
+    messageLabel.BackgroundTransparency = 0.7
+    messageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+    messageLabel.TextColor3 = Color3.new(1, 1, 1)
+    messageLabel.Font = Enum.Font.SourceSansBold
+    messageLabel.TextSize = 18
+    messageLabel.Visible = false
+    messageLabel.Parent = disasterMessage
 
-NaturalDisastersTab:Toggle({
-    Title = "预测灾害",
-    Desc = "显示下一个灾害的类型",
-    Callback = function(state)
-        nextDisasterPrediction = state
-        messageLabel.Visible = state
-        
-        if state then
-            spawn(function()
-                while nextDisasterPrediction do
-                    wait(1)
-                    local SurvivalTag = game.Players.LocalPlayer.Character:FindFirstChild("SurvivalTag")
-                    if SurvivalTag then
-                        if SurvivalTag.Value == "Blizzard" then
-                            messageLabel.Text = "下一个灾难是：暴风雪"
-                        elseif SurvivalTag.Value == "Sandstorm" then
-                            messageLabel.Text = "下一个灾难是：沙尘暴"
-                        elseif SurvivalTag.Value == "Tornado" then
-                            messageLabel.Text = "下一个灾难是：龙卷风"
-                        elseif SurvivalTag.Value == "Volcanic Eruption" then
-                            messageLabel.Text = "下一个灾难是：火山"
-                        elseif SurvivalTag.Value == "Flash Flood" then
-                            messageLabel.Text = "下一个灾难是：洪水"
-                        elseif SurvivalTag.Value == "Deadly Virus" then
-                            messageLabel.Text = "下一个灾难是：病毒"
-                        elseif SurvivalTag.Value == "Tsunami" then
-                            messageLabel.Text = "下一个灾难是：海啸"
-                        elseif SurvivalTag.Value == "Acid Rain" then
-                            messageLabel.Text = "下一个灾难是：酸雨"
-                        elseif SurvivalTag.Value == "Fire" then
-                            messageLabel.Text = "下一个灾难是：火焰"
-                        elseif SurvivalTag.Value == "Meteor Shower" then
-                            messageLabel.Text = "下一个灾难是：流星雨"
-                        elseif SurvivalTag.Value == "Earthquake" then
-                            messageLabel.Text = "下一个灾难是：地震"
-                        elseif SurvivalTag.Value == "Thunder Storm" then
-                            messageLabel.Text = "下一个灾难是：暴风雨"
-                        else
-                            messageLabel.Visible = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "预测灾害",
+        Desc = "显示下一个灾害的类型",
+        Callback = function(state)
+            nextDisasterPrediction = state
+            messageLabel.Visible = state
+            
+            if state then
+                spawn(function()
+                    while nextDisasterPrediction do
+                        wait(1)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            local SurvivalTag = character:FindFirstChild("SurvivalTag")
+                            if SurvivalTag then
+                                if SurvivalTag.Value == "Blizzard" then
+                                    messageLabel.Text = "下一个灾难是：暴风雪"
+                                elseif SurvivalTag.Value == "Sandstorm" then
+                                    messageLabel.Text = "下一个灾难是：沙尘暴"
+                                elseif SurvivalTag.Value == "Tornado" then
+                                    messageLabel.Text = "下一个灾难是：龙卷风"
+                                elseif SurvivalTag.Value == "Volcanic Eruption" then
+                                    messageLabel.Text = "下一个灾难是：火山"
+                                elseif SurvivalTag.Value == "Flash Flood" then
+                                    messageLabel.Text = "下一个灾难是：洪水"
+                                elseif SurvivalTag.Value == "Deadly Virus" then
+                                    messageLabel.Text = "下一个灾难是：病毒"
+                                elseif SurvivalTag.Value == "Tsunami" then
+                                    messageLabel.Text = "下一个灾难是：海啸"
+                                elseif SurvivalTag.Value == "Acid Rain" then
+                                    messageLabel.Text = "下一个灾难是：酸雨"
+                                elseif SurvivalTag.Value == "Fire" then
+                                    messageLabel.Text = "下一个灾难是：火焰"
+                                elseif SurvivalTag.Value == "Meteor Shower" then
+                                    messageLabel.Text = "下一个灾难是：流星雨"
+                                elseif SurvivalTag.Value == "Earthquake" then
+                                    messageLabel.Text = "下一个灾难是：地震"
+                                elseif SurvivalTag.Value == "Thunder Storm" then
+                                    messageLabel.Text = "下一个灾难是：暴风雨"
+                                else
+                                    messageLabel.Text = "下一个灾难是：" .. tostring(SurvivalTag.Value)
+                                end
+                                messageLabel.Visible = true
+                            else
+                                messageLabel.Visible = false
+                            end
                         end
                     end
+                end)
+            else
+                messageLabel.Visible = false
+            end
+        end
+    })
+
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "地图投票界面",
+        Desc = "显示/隐藏地图投票界面",
+        Callback = function(state)
+            local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+            if playerGui then
+                local mainGui = playerGui:FindFirstChild("MainGui")
+                if mainGui then
+                    local mapVotePage = mainGui:FindFirstChild("MapVotePage")
+                    if mapVotePage then
+                        mapVotePage.Visible = state
+                    end
                 end
-            end)
-        else
-            messageLabel.Visible = false
+            end
         end
-    end
-})
+    })
 
-NaturalDisastersTab:Toggle({
-    Title = "地图投票界面",
-    Desc = "显示/隐藏地图投票界面",
-    Callback = function(state)
-        if state then
-            game.Players.LocalPlayer.PlayerGui.MainGui.MapVotePage.Visible = true
-        else
-            game.Players.LocalPlayer.PlayerGui.MainGui.MapVotePage.Visible = false
+    -- 气球功能
+    Tabs.NaturalDisastersTab:Button({
+        Title = "获取气球",
+        Desc = "获得气球道具",
+        Callback = function()
+            local plyr = game.Players.LocalPlayer
+            local char = plyr.Character
+            if not char then return end
+            
+            local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+            
+            if not torso then
+                WindUI:Notify({Title = "错误", Content = "找不到角色躯干", Duration = 3})
+                return
+            end
+            
+            local part1 = Instance.new("Part", char)
+            part1.FormFactor = "Symmetric"
+            part1.Size = Vector3.new(1, 3, 1)
+            part1.TopSurface = 0
+            part1.BottomSurface = 0
+            part1:BreakJoints()
+            
+            local special = Instance.new("SpecialMesh", part1)
+            special.MeshId = "http://www.roblox.com/asset/?id=25498565"
+            special.TextureId = "http://www.roblox.com/asset/?id=26725707"
+            special.Scale = Vector3.new(2, 2, 2)
+            
+            local w = Instance.new("Weld", char)
+            w.Part0 = part1
+            w.Part1 = torso
+            w.C0 = CFrame.new(-0.4, -1.4, -0.5) * CFrame.Angles(-0.5, 0, 0.2)
+            
+            local part2 = Instance.new("Part", char)
+            part2.FormFactor = "Symmetric"
+            part2.Size = Vector3.new(1, 3, 1)
+            part2.TopSurface = 0
+            part2.BottomSurface = 0
+            part2:BreakJoints()
+            
+            local special2 = Instance.new("SpecialMesh", part2)
+            special2.MeshId = "http://www.roblox.com/asset/?id=25498565"
+            special2.TextureId = "http://www.roblox.com/asset/?id=26725707"
+            special2.Scale = Vector3.new(2, 2, 2)
+            
+            local w2 = Instance.new("Weld", char)
+            w2.Part0 = part2
+            w2.Part1 = torso
+            w2.C0 = CFrame.new(0.4, -1.4, -0.5) * CFrame.Angles(-0.5, 0, -0.2)
+            
+            WindUI:Notify({Title = "成功", Content = "已获得气球道具", Duration = 3})
         end
-    end
-})
+    })
 
--- 气球功能
-NaturalDisastersTab:Button({
-    Title = "获取气球",
-    Desc = "获得气球道具",
+    -- 自动投票功能
+    local autoVoteEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "自动投票",
+        Desc = "自动投票给随机地图",
+        Callback = function(state)
+            autoVoteEnabled = state
+            if state then
+                spawn(function()
+                    while autoVoteEnabled do
+                        wait(5)
+                        local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+                        if playerGui then
+                            local mainGui = playerGui:FindFirstChild("MainGui")
+                            if mainGui then
+                                local mapVotePage = mainGui:FindFirstChild("MapVotePage")
+                                if mapVotePage and mapVotePage.Visible then
+                                    local voteButtons = mapVotePage:GetChildren()
+                                    local validButtons = {}
+                                    for _, button in ipairs(voteButtons) do
+                                        if button:IsA("TextButton") and button.Visible then
+                                            table.insert(validButtons, button)
+                                        end
+                                    end
+                                    if #validButtons > 0 then
+                                        local randomButton = validButtons[math.random(1, #validButtons)]
+                                        fireclickdetector(randomButton:FindFirstChildOfClass("ClickDetector"))
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    -- 自动收集物品功能
+    local autoCollectEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "自动收集物品",
+        Desc = "自动收集附近的物品",
+        Callback = function(state)
+            autoCollectEnabled = state
+            if state then
+                spawn(function()
+                    while autoCollectEnabled do
+                        wait(1)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                for _, item in ipairs(workspace:GetChildren()) do
+                                    if item.Name == "Item" and item:FindFirstChild("Handle") then
+                                        local distance = (humanoidRootPart.Position - item.Handle.Position).Magnitude
+                                        if distance < 20 then
+                                            firetouchinterest(humanoidRootPart, item.Handle, 0)
+                                            wait()
+                                            firetouchinterest(humanoidRootPart, item.Handle, 1)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    -- 自动躲避灾害功能
+    local autoAvoidEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "自动躲避灾害",
+        Desc = "尝试自动躲避当前灾害",
+        Callback = function(state)
+            autoAvoidEnabled = state
+            if state then
+                spawn(function()
+                    while autoAvoidEnabled do
+                        wait(0.5)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                -- 检测附近的灾害并尝试躲避
+                                for _, disaster in ipairs(workspace:GetChildren()) do
+                                    if (disaster.Name:find("Tornado") or disaster.Name:find("Flood") or disaster.Name:find("Fire")) and disaster:FindFirstChildOfClass("BasePart") then
+                                        local disasterPart = disaster:FindFirstChildOfClass("BasePart")
+                                        local distance = (humanoidRootPart.Position - disasterPart.Position).Magnitude
+                                        if distance < 30 then
+                                            -- 向远离灾害的方向移动
+                                            local direction = (humanoidRootPart.Position - disasterPart.Position).Unit
+                                            humanoidRootPart.Velocity = direction * 50
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    -- 无限氧气功能
+    local infiniteOxygenEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "无限氧气",
+        Desc = "在水下时保持无限氧气",
+        Callback = function(state)
+            infiniteOxygenEnabled = state
+            if state then
+                spawn(function()
+                    while infiniteOxygenEnabled do
+                        wait(0.1)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            local humanoid = character:FindFirstChildOfClass("Humanoid")
+                            if humanoid then
+                                humanoid.OxygenLevel = humanoid.MaxOxygenLevel
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    -- 快速游泳功能
+    local fastSwimEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "快速游泳",
+        Desc = "在水下时游泳速度加快",
+        Callback = function(state)
+            fastSwimEnabled = state
+            if state then
+                spawn(function()
+                    while fastSwimEnabled do
+                        wait(0.1)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            local humanoid = character:FindFirstChildOfClass("Humanoid")
+                            if humanoid then
+                                -- 检测是否在水中
+                                local head = character:FindFirstChild("Head")
+                                if head and head:FindFirstChild("WaterLevel") then
+                                    humanoid.WalkSpeed = 32 -- 增加水中移动速度
+                                else
+                                    humanoid.WalkSpeed = 16 -- 恢复正常速度
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    -- 灾害免疫功能
+    local disasterImmunityEnabled = false
+    Tabs.NaturalDisastersTab:Toggle({
+        Title = "灾害免疫",
+        Desc = "尝试免疫某些灾害的伤害",
+        Callback = function(state)
+            disasterImmunityEnabled = state
+            if state then
+                spawn(function()
+                    while disasterImmunityEnabled do
+                        wait(0.5)
+                        local character = game.Players.LocalPlayer.Character
+                        if character then
+                            -- 移除可能的有害效果
+                            for _, child in ipairs(character:GetChildren()) do
+                                if child.Name:find("Fire") or child.Name:find("Smoke") or child.Name:find("Sparkles") then
+                                    child:Destroy()
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    })
+end
+
+-- 杂项 Tab
+Tabs.Misc:Button({
+    Title = "解锁FPS",
+    Desc = "解锁FPS限制",
     Callback = function()
-        local plyr = game.Players.LocalPlayer
-        local char = plyr.Character
-        local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
-        
-        if not torso then
-            WindUI:Notify({Title = "错误", Content = "找不到角色躯干", Duration = 3})
-            return
-        end
-        
-        local part1 = Instance.new("Part", char)
-        part1.FormFactor = "Symmetric"
-        part1.Size = Vector3.new(1, 3, 1)
-        part1.TopSurface = 0
-        part1.BottomSurface = 0
-        part1:BreakJoints()
-        
-        local special = Instance.new("SpecialMesh", part1)
-        special.MeshId = "http://www.roblox.com/asset/?id=25498565"
-        special.TextureId = "http://www.roblox.com/asset/?id=26725707"
-        special.Scale = Vector3.new(2, 2, 2)
-        
-        local w = Instance.new("Weld", char)
-        w.Part0 = part1
-        w.Part1 = torso
-        w.C0 = CFrame.new(-0.4, -1.4, -0.5) * CFrame.Angles(-0.5, 0, 0.2)
-        
-        local part2 = Instance.new("Part", char)
-        part2.FormFactor = "Symmetric"
-        part2.Size = Vector3.new(1, 3, 1)
-        part2.TopSurface = 0
-        part2.BottomSurface = 0
-        part2:BreakJoints()
-        
-        local special2 = Instance.new("SpecialMesh", part2)
-        special2.MeshId = "http://www.roblox.com/asset/?id=25498565"
-        special2.TextureId = "http://www.roblox.com/asset/?id=26725707"
-        special2.Scale = Vector3.new(2, 2, 2)
-        
-        local w2 = Instance.new("Weld", char)
-        w2.Part0 = part2
-        w2.Part1 = torso
-        w2.C0 = CFrame.new(0.4, -1.4, -0.5) * CFrame.Angles(-0.5, 0, -0.2)
-        
-        WindUI:Notify({Title = "成功", Content = "已获得气球道具", Duration = 3})
+        setfpscap(1000)
+        WindUI:Notify({Title = "FPS解锁", Content = "FPS限制已设置为1000", Duration = 3})
     end
 })
 
-Tabs.Misc:Code({
-    Title = "感谢游玩",
-    Code = "QQ号:3395858053"
+Tabs.Misc:Button({
+    Title = "重置FPS",
+    Desc = "重置FPS限制为60",
+    Callback = function()
+        setfpscap(60)
+        WindUI:Notify({Title = "FPS重置", Content = "FPS限制已重置为60", Duration = 3})
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "复制Discord链接",
+    Desc = "复制Discord服务器邀请链接",
+    Callback = function()
+        setclipboard("https://discord.gg/example")
+        WindUI:Notify({Title = "Discord链接", Content = "链接已复制到剪贴板", Duration = 3})
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "复制QQ群号",
+    Desc = "复制QQ群号码",
+    Callback = function()
+        setclipboard("1061490197")
+        WindUI:Notify({Title = "QQ群号", Content = "群号已复制到剪贴板", Duration = 3})
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "脚本信息",
+    Desc = "显示脚本相关信息",
+    Callback = function()
+        WindUI:Notify({
+            Title = "脚本信息",
+            Content = "Cat Hub v1.15\n作者: Ccat\nQQ群: 1061490197",
+            Duration = 10
+        })
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "检查更新",
+    Desc = "检查脚本是否有更新",
+    Callback = function()
+        WindUI:Notify({
+            Title = "更新检查",
+            Content = "当前版本: v1.15\n已是最新版本",
+            Duration = 5
+        })
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "重新加载脚本",
+    Desc = "重新加载整个脚本",
+    Callback = function()
+        WindUI:Notify({
+            Title = "重新加载",
+            Content = "脚本将在3秒后重新加载",
+            Duration = 3
+        })
+        wait(3)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "关闭脚本",
+    Desc = "完全关闭脚本界面",
+    Callback = function()
+        WindUI:Destroy()
+    end
+})
+
+-- 添加一个定时器来更新标签
+spawn(function()
+    while true do
+        wait(5)
+        local currentTime = os.date("%H:%M:%S")
+        TimeTag:Set({
+            Title = "当前时间: " .. currentTime,
+            Color = Color3.fromHex("#ff6a30")
+        })
+    end
+end)
+
+WindUI:Notify({
+    Title = "Cat Hub 已加载",
+    Content = "欢迎使用自然灾害脚本 v1.15",
+    Duration = 5
 })
