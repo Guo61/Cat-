@@ -89,18 +89,6 @@ Tabs.Home:Paragraph({
 })
 
 Tabs.Home:Button({
-    Title = "重新加入服务器",
-    Desc = "尝试重新加入当前服务器",
-    Callback = function()
-        local TeleportService = game:GetService("TeleportService")
-        local placeId = game.PlaceId
-        local jobId = 70a2ca77-c97c-4a1b-b96c-b2a504d2ff68
-        
-        TeleportService:TeleportToPlaceInstance(placeId, jobId, game.Players.LocalPlayer)
-    end
-})
--- 反挂机 (通过外部链接加载)
-Tabs.Home:Button({
     Title = "反挂机",
     Desc = "从GitHub加载并执行反挂机",
     Callback = function()
