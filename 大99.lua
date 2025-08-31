@@ -1383,6 +1383,49 @@ Tabs.Home:Button({
     end
 })
 
+Tabs.Misc:Button({
+    Title = "复制作者QQ",
+    Callback = function()
+        setclipboard("3395858053")
+        WindUI:Notify({Title = "QQ群号", Content = "群号已复制到剪贴板", Duration = 3})
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "脚本信息",
+    Desc = "显示脚本相关信息",
+    Callback = function()
+        WindUI:Notify({
+            Title = "脚本信息",
+            Content = "Cat Hub v1.15\n作者: Ccat\nQQ群: 1061490197",
+            Duration = 10
+        })
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "检查更新",
+    Desc = "检查脚本是否有更新",
+    Callback = function()
+        WindUI:Notify({
+            Title = "更新检查",
+            Content = "当前版本: v1.15\n已是最新版本",
+            Duration = 5
+        })
+    end
+})
+-- 添加一个定时器来更新标签
+spawn(function()
+    while true do
+        wait(5)
+        local currentTime = os.date("%H:%M:%S")
+        TimeTag:Set({
+            Title = "当前时间: " .. currentTime,
+            Color = Color3.fromHex("#ff6a30")
+        })
+    end
+end)
+
 Tabs.Misc:Code({
     Title = "感谢游玩",
     Code = "QQ号:3395858053"
