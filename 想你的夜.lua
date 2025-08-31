@@ -97,9 +97,8 @@ Tabs.Home:Button({
     Title = "传送至忍者传奇",
     Desc = "3956818381",
     Callback = function()
-        local game_id = 3101667897 
-        local game_url = "https://www.roblox.com/games/"..game_id 
-        game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
+        local game_id = 3956818381
+        game:GetService("TeleportService"):Teleport(game_id)
     end
 })
 
