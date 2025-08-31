@@ -1082,37 +1082,9 @@ end
 
 -- 杂项 Tab
 Tabs.Misc:Button({
-    Title = "解锁FPS",
-    Desc = "解锁FPS限制",
+    Title = "复制作者QQ",
     Callback = function()
-        setfpscap(1000)
-        WindUI:Notify({Title = "FPS解锁", Content = "FPS限制已设置为1000", Duration = 3})
-    end
-})
-
-Tabs.Misc:Button({
-    Title = "重置FPS",
-    Desc = "重置FPS限制为60",
-    Callback = function()
-        setfpscap(60)
-        WindUI:Notify({Title = "FPS重置", Content = "FPS限制已重置为60", Duration = 3})
-    end
-})
-
-Tabs.Misc:Button({
-    Title = "复制Discord链接",
-    Desc = "复制Discord服务器邀请链接",
-    Callback = function()
-        setclipboard("https://discord.gg/example")
-        WindUI:Notify({Title = "Discord链接", Content = "链接已复制到剪贴板", Duration = 3})
-    end
-})
-
-Tabs.Misc:Button({
-    Title = "复制QQ群号",
-    Desc = "复制QQ群号码",
-    Callback = function()
-        setclipboard("1061490197")
+        setclipboard("3395858053")
         WindUI:Notify({Title = "QQ群号", Content = "群号已复制到剪贴板", Duration = 3})
     end
 })
@@ -1140,29 +1112,6 @@ Tabs.Misc:Button({
         })
     end
 })
-
-Tabs.Misc:Button({
-    Title = "重新加载脚本",
-    Desc = "重新加载整个脚本",
-    Callback = function()
-        WindUI:Notify({
-            Title = "重新加载",
-            Content = "脚本将在3秒后重新加载",
-            Duration = 3
-        })
-        wait(3)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
-    end
-})
-
-Tabs.Misc:Button({
-    Title = "关闭脚本",
-    Desc = "完全关闭脚本界面",
-    Callback = function()
-        WindUI:Destroy()
-    end
-})
-
 -- 添加一个定时器来更新标签
 spawn(function()
     while true do
