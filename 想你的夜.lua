@@ -91,20 +91,19 @@ Tabs.Home:Paragraph({
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
 
-Tabs.Home:Section({ Title = "游戏传送", Icon = "globe" })
+Tabs.Home:Section({ Title = "游戏传送", Desc = "如果传送失败则Roblox禁止传送" Icon = "globe" })
 
 Tabs.Home:Button({
     Title = "传送至忍者传奇",
-    Desc = "3956818381",
     Callback = function()
-        local game_id = 3956818381
-        game:GetService("TeleportService"):Teleport(game_id)
+        local game_id = 3956818381 
+        local game_url = "https://www.roblox.com/games/"..game_id 
+        game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
     end
 })
 
 Tabs.Home:Button({
     Title = "传送至极速传奇",
-    Desc = "3101667897",
     Callback = function()
         local game_id = 3101667897 
         local game_url = "https://www.roblox.com/games/"..game_id 
@@ -114,7 +113,6 @@ Tabs.Home:Button({
 
 Tabs.Home:Button({
     Title = "传送至力量传奇",
-    Desc = "3623096087",
     Callback = function()
         local game_id = 3101667897 
         local game_url = "https://www.roblox.com/games/"..game_id 
@@ -1406,10 +1404,49 @@ for _, teleport in ipairs(strengthTeleports) do
     })
 end
 
-Tabs.Misc:Paragraph({
-    Title = "无",
-    Desc = "这里存放一些不属于特定游戏的功能。"
+Tabs.Misc:Button({
+    Title = "复制作者QQ",
+    Callback = function()
+        setclipboard("3395858053")
+        WindUI:Notify({Title = "QQ群号", Content = "群号已复制到剪贴板", Duration = 3})
+    end
 })
+
+Tabs.Misc:Button({
+    Title = "脚本信息",
+    Desc = "显示脚本相关信息",
+    Callback = function()
+        WindUI:Notify({
+            Title = "脚本信息",
+            Content = "Cat Hub v1.15\n作者: Ccat\nQQ群: 1061490197",
+            Duration = 10
+        })
+    end
+})
+
+Tabs.Misc:Button({
+    Title = "检查更新",
+    Desc = "检查脚本是否有更新",
+    Callback = function()
+        WindUI:Notify({
+            Title = "更新检查",
+            Content = "当前版本: v1.15\n已是最新版本",
+            Duration = 5
+        })
+    end
+})
+-- 添加一个定时器来更新标签
+spawn(function()
+    while true do
+        wait(5)
+        local currentTime = os.date("%H:%M:%S")
+        TimeTag:Set({
+            Title = "当前时间: " .. currentTime,
+            Color = Color3.fromHex("#ff6a30")
+        })
+    end
+end)
+
 Tabs.Misc:Code({
     Title = "感谢游玩",
     Code = "QQ号:3395858053"
