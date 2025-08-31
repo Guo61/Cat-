@@ -90,6 +90,39 @@ Tabs.Home:Paragraph({
     Title = "欢迎",
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
+
+Tabs.Home:Section({ Title = "游戏传送", Icon = "globe" })
+
+Tabs.Home:Button({
+    Title = "传送至忍者传奇",
+    Desc = "3956818381",
+    Callback = function()
+        local game_id = 3101667897 
+        local game_url = "https://www.roblox.com/games/"..game_id 
+        game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "传送至极速传奇",
+    Desc = "3101667897",
+    Callback = function()
+        local game_id = 3101667897 
+        local game_url = "https://www.roblox.com/games/"..game_id 
+        game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
+    end
+})
+
+Tabs.Home:Button({
+    Title = "传送至力量传奇",
+    Desc = "3623096087",
+    Callback = function()
+        local game_id = 3101667897 
+        local game_url = "https://www.roblox.com/games/"..game_id 
+        game:GetService("TeleportService"):Teleport(game_id, game.Players.LocalPlayer)
+    end
+})
+
 -- 反挂机 (通过外部链接加载)
 Tabs.Home:Button({
     Title = "反挂机",
