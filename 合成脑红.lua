@@ -46,6 +46,25 @@ local TimeTag = Window:Tag({
     Color = Color3.fromHex("#000000")
 })
 
+local Background = Instance.new("ImageLabel")
+Background.Size = UDim2.fromScale(1, 1) -- 覆盖整个窗口内容区
+Background.Position = UDim2.fromScale(0, 0)
+Background.BackgroundTransparency = 1
+Background.Image = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/1756468641440.jpg"
+Background.ZIndex = 0
+Background.Parent = Window.Content 
+
+local TransparencySlider = Window:Slider({
+    Title = "背景透明度",
+    Default = 0, 
+    Min = 0,     
+    Max = 2,     
+    Rounding = 2, 
+    Callback = function(value)
+        Background.ImageTransparency = value
+    end
+})
+
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
     NaturalDisastersTab = Window:Tab({ Title = "主要功能", Icon = "cloud-rain" }),
