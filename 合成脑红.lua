@@ -802,11 +802,10 @@ Tabs.NaturalDisastersTab:Button({
 })
 
 Tabs.NaturalDisastersTab:Toggle({
-    Title = "自动买燃烧黑客",
-    Desc = "1号位",
+    Title = "自动买黑客",
     Callback = function()
         local args = {
-    "9954122c-542a-48b3-a07a-b3aaf9c801d3"
+    "8301050e-9639-40c6-908b-457431537bfa"
 }
 
 local MAX_RETRIES = 3
@@ -827,10 +826,10 @@ local function attemptPurchase()
 end
 
 local function buyGoldenHackerEgg()
-    print("检测Golden Hacker Egg...")
+    print("检测Hacker Egg...")
     
     local function checkAndBuy(model)
-        print("Golden Hacker Egg")
+        print("已检测到Hacker Egg")
         
         local success = pcall(function()
             model:WaitForChild("HumanoidRootPart", 5)
@@ -862,7 +861,7 @@ local function buyGoldenHackerEgg()
     local purchaseMade = false
     
     connection = game.Workspace.ChildAdded:Connect(function(child)
-        if not purchaseMade and child.Name == "Golden Hacker Egg" then
+        if not purchaseMade and child.Name == "Hacker Egg" then
             purchaseMade = checkAndBuy(child)
             if connection then
                 connection:Disconnect()
@@ -915,17 +914,6 @@ Tabs.Misc:Button({
         })
     end
 })
-
-task.spawn(function()
-    while true do
-        task.wait(5)
-        local currentTime = os.date("%H:%M:%S")
-        TimeTag:Set({
-            Title = "当前时间: " .. currentTime,
-            Color = Color3.fromHex("#ff6a30")
-        })
-    end
-end)
 
 WindUI:Notify({
     Title = "Cat Hub 已加载",
