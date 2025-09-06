@@ -46,25 +46,6 @@ local TimeTag = Window:Tag({
     Color = Color3.fromHex("#000000")
 })
 
-local Background = Instance.new("ImageLabel")
-Background.Size = UDim2.fromScale(1, 1) -- 覆盖整个窗口内容区
-Background.Position = UDim2.fromScale(0, 0)
-Background.BackgroundTransparency = 1
-Background.Image = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/1756468641440.jpg"
-Background.ZIndex = 0
-Background.Parent = Window.Content 
-
-local TransparencySlider = Window:Slider({
-    Title = "背景透明度",
-    Default = 0, 
-    Min = 0,     
-    Max = 2,     
-    Rounding = 2, 
-    Callback = function(value)
-        Background.ImageTransparency = value
-    end
-})
-
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
     NaturalDisastersTab = Window:Tab({ Title = "主要功能", Icon = "cloud-rain" }),
@@ -819,6 +800,68 @@ Tabs.NaturalDisastersTab:Button({
             :InvokeServer(unpack(args))
     end
 })
+
+local autoBuyEnabled = false
+
+local section = Window:Section({ Title = "自动购买功能" })
+
+local statusLabel = section:Label({
+    Title = "当前状态: 已关闭",
+    Description = "自动购买 Simple Egg"
+})
+
+section:Toggle({
+    Title = "自动购买鸡蛋",
+    Description = "检测到鸡蛋生成时自动购买并删除装备",
+    Default = false,
+    Callback = function(state)
+        autoBuyEnabled = state
+        if autoBuyEnabled then
+            print("⚡ 自动购买鸡蛋功能: 已开启")
+            if section and section.UpdateToggle then
+                section:UpdateToggle("自动购买鸡蛋", { Title = "关闭自动购买 Simple Egg" })
+            end
+            if statusLabel and statusLabel.Update then
+                statusLabel:Update({ Title = "当前状态: 已开启" })
+            end
+        else
+            print("⚡ 自动购买鸡蛋功能: 已关闭")
+            if section and section.UpdateToggle then
+                section:UpdateToggle("自动购买鸡蛋", { Title = "开启自动购买 Simple Egg" })
+            end
+            if statusLabel and statusLabel.Update then
+                statusLabel:Update({ Title = "当前状态: 已关闭" })
+            end
+        end
+    end
+})
+
+game:GetService("ReplicatedStorage").ChildAdded:Connect(function(child)
+    if autoBuyEnabled and child.Name == "Simple Egg|Normal" then
+        print("📦 检测到目标鸡蛋:", child.Name)
+        
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.EquipmentService.RF.EquipItem:InvokeServer(
+            "Simple Egg|Normal",
+            "17571667613808174333"
+        )
+        print("✅ 已装备鸡蛋")
+
+        -- 购买
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.EggService.RF.BuyEgg:InvokeServer(
+            "67db913e-1615-427b-a4b8-6da654c27b71"
+        )
+        print("✅ 已购买鸡蛋")
+
+        local player = game.Players.LocalPlayer
+        local backpack = player:WaitForChild("Backpack")
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item.Name == "Simple Egg|Normal" then
+                item:Destroy()
+                print("🗑️ 已删除装备鸡蛋")
+            end
+        end
+    end
+end)
 
 Tabs.NaturalDisastersTab:Toggle({
     Title = "自动买黑客",
