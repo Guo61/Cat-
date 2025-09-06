@@ -464,7 +464,6 @@ Tabs.Home:Button({
 
 game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
 game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
-game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
 game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
 
 Tabs.Home:Button({
