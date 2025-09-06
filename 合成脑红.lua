@@ -801,149 +801,47 @@ Tabs.NaturalDisastersTab:Button({
     end
 })
 
-local autoBuyEnabled = false
+local eggToggle = false
 
-local section = Window:Section({ Title = "自动购买功能" })
-
-local statusLabel = section:Label({
-    Title = "当前状态: 已关闭",
-    Description = "自动购买 Simple Egg"
-})
-
-section:Toggle({
-    Title = "自动购买鸡蛋",
-    Description = "检测到鸡蛋生成时自动购买并删除装备",
-    Default = false,
-    Callback = function(state)
-        autoBuyEnabled = state
-        if autoBuyEnabled then
-            print("⚡ 自动购买鸡蛋功能: 已开启")
-            if section and section.UpdateToggle then
-                section:UpdateToggle("自动购买鸡蛋", { Title = "关闭自动购买 Simple Egg" })
-            end
-            if statusLabel and statusLabel.Update then
-                statusLabel:Update({ Title = "当前状态: 已开启" })
-            end
-        else
-            print("⚡ 自动购买鸡蛋功能: 已关闭")
-            if section and section.UpdateToggle then
-                section:UpdateToggle("自动购买鸡蛋", { Title = "开启自动购买 Simple Egg" })
-            end
-            if statusLabel and statusLabel.Update then
-                statusLabel:Update({ Title = "当前状态: 已关闭" })
-            end
-        end
-    end
-})
-
-game:GetService("ReplicatedStorage").ChildAdded:Connect(function(child)
-    if autoBuyEnabled and child.Name == "Simple Egg|Normal" then
-        print("📦 检测到目标鸡蛋:", child.Name)
-        
-        game:GetService("ReplicatedStorage").Packages.Knit.Services.EquipmentService.RF.EquipItem:InvokeServer(
-            "Simple Egg|Normal",
-            "17571667613808174333"
-        )
-        print("✅ 已装备鸡蛋")
-
-        -- 购买
-        game:GetService("ReplicatedStorage").Packages.Knit.Services.EggService.RF.BuyEgg:InvokeServer(
-            "67db913e-1615-427b-a4b8-6da654c27b71"
-        )
-        print("✅ 已购买鸡蛋")
-
-        local player = game.Players.LocalPlayer
-        local backpack = player:WaitForChild("Backpack")
-        for _, item in ipairs(backpack:GetChildren()) do
-            if item.Name == "Simple Egg|Normal" then
-                item:Destroy()
-                print("🗑️ 已删除装备鸡蛋")
-            end
-        end
-    end
-end)
-
-Tabs.NaturalDisastersTab:Toggle({
-    Title = "自动买黑客",
-    Callback = function()
-        local args = {
-    "8301050e-9639-40c6-908b-457431537bfa"
+local eggArgs = {
+    "Simple Egg|Normal",
+    "17571667613808174333"
 }
 
-local MAX_RETRIES = 3
-local retryCount = 0
+local function loopEggCheckAndBuy()
+    local ReplicatedStorage = game:GetService('ReplicatedStorage')
+    local Knit = ReplicatedStorage:WaitForChild('Packages'):WaitForChild('Knit')
+    local EggService = Knit:WaitForChild('Services'):WaitForChild('EggService')
 
-local function attemptPurchase()
-    local buySuccess, buyResult = pcall(function()
-        return game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("EggService"):WaitForChild("RF"):WaitForChild("BuyEgg"):InvokeServer(unpack(args))
-    end)
-    
-    if buySuccess then
-        print("购买成功！")
-        return true
-    else
-        warn("购买尝试失败:", buyResult)
-        return false
-    end
-end
+    task.spawn(function()
+        while true do
+            if eggToggle then
+                local eggModel = ReplicatedStorage:WaitForChild('Eggs'):FindFirstChild(eggArgs[1])
+                if eggModel then
+                    local buyArgs = {
+                        "67db913e-1615-427b-a4b8-6da654c27b71"
+                    }
+                    EggService:WaitForChild('RF'):WaitForChild('BuyEgg'):InvokeServer(unpack(buyArgs))
 
-local function buyGoldenHackerEgg()
-    print("检测Hacker Egg...")
-    
-    local function checkAndBuy(model)
-        print("已检测到Hacker Egg")
-        
-        local success = pcall(function()
-            model:WaitForChild("HumanoidRootPart", 5)
-        end)
-        
-        if success then
-            print("模型加载完成，尝试购买...")
-            wait(0.3) -- 短暂延迟
-            
-            for i = 1, MAX_RETRIES do
-                print("购买尝试 " .. i .. "/" .. MAX_RETRIES)
-                if attemptPurchase() then
-                    return true
+                    repeat
+                        task.wait(0.5)
+                    until not ReplicatedStorage:WaitForChild('Eggs'):FindFirstChild(eggArgs[1])
                 end
-                wait(1) -- 等待1秒后重试
             end
-        else
-            warn("模型加载失败")
-        end
-        return false
-    end
-    
-    local existingModel = game.Workspace:FindFirstChild("Golden Hacker Egg")
-    if existingModel then
-        return checkAndBuy(existingModel)
-    end
-    
-    local connection
-    local purchaseMade = false
-    
-    connection = game.Workspace.ChildAdded:Connect(function(child)
-        if not purchaseMade and child.Name == "Hacker Egg" then
-            purchaseMade = checkAndBuy(child)
-            if connection then
-                connection:Disconnect()
-            end
-        end
-    end)
-    
-    delay(30, function()
-        if connection then
-            connection:Disconnect()
-            if not purchaseMade then
-                print("检测超时，未找到目标模型")
-            end
+            task.wait(0.5)
         end
     end)
 end
 
-pcall(buyGoldenHackerEgg)
+Tabs.NaturalDisastersTab:Toggle({
+    Title = "自动检测并购买鸡蛋",
+    Default = false,
+    Callback = function(state)
+        eggToggle = state
     end
 })
+
+loopEggCheckAndBuy()
 
 Tabs.Misc:Button({
     Title = "复制作者QQ",
