@@ -17,7 +17,7 @@ WindUI:Popup({
     }
 })
 
-repeat wait() until Confirmed
+repeat task.wait() until Confirmed
 
 local Window = WindUI:CreateWindow({
     Title = "Cat Hub",
@@ -34,17 +34,17 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-        Title = "v1.20",
-        Color = Color3.fromHex("#30ff6a")
-    })
-    Window:Tag({
-        Title = "合成大鸡巴", 
-        Color = Color3.fromHex("#315dff")
-    })
-    local TimeTag = Window:Tag({
-        Title = "正在开发更多服务器",
-        Color = Color3.fromHex("#000000")
-    })
+    Title = "v1.20",
+    Color = Color3.fromHex("#30ff6a")
+})
+Window:Tag({
+    Title = "合成大鸡巴", 
+    Color = Color3.fromHex("#315dff")
+})
+local TimeTag = Window:Tag({
+    Title = "正在开发更多服务器",
+    Color = Color3.fromHex("#000000")
+})
 
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
@@ -58,18 +58,17 @@ local autoLoops = {}
 
 local function startLoop(name, callback, delay)
     if autoLoops[name] then return end
-    autoLoops[name] = coroutine.wrap(function()
+    autoLoops[name] = true
+    task.spawn(function()
         while autoLoops[name] do
             pcall(callback)
             task.wait(delay)
         end
     end)
-    task.spawn(autoLoops[name])
 end
 
 local function stopLoop(name)
-    if not autoLoops[name] then return end
-    autoLoops[name] = nil
+    autoLoops[name] = false
 end
 
 Tabs.Home:Paragraph({
@@ -103,13 +102,16 @@ Tabs.Home:Toggle({
     Title = "显示FPS",
     Desc = "在屏幕上显示当前FPS",
     Callback = function(state)
-        local FpsGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSGui")
+        local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        local FpsGui = playerGui:FindFirstChild("FPSGui")
         if state then
             if not FpsGui then
                 FpsGui = Instance.new("ScreenGui")
-                local FpsXS = Instance.new("TextLabel")
                 FpsGui.Name = "FPSGui"
                 FpsGui.ResetOnSpawn = false
+                FpsGui.Parent = playerGui
+                
+                local FpsXS = Instance.new("TextLabel")
                 FpsXS.Name = "FpsXS"
                 FpsXS.Size = UDim2.new(0, 100, 0, 50)
                 FpsXS.Position = UDim2.new(0, 10, 0, 10)
@@ -119,7 +121,6 @@ Tabs.Home:Toggle({
                 FpsXS.TextSize = 20
                 FpsXS.TextColor3 = Color3.new(1, 1, 1)
                 FpsXS.Parent = FpsGui
-                FpsGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
                 
                 game:GetService("RunService").Heartbeat:Connect(function()
                     local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
@@ -139,16 +140,14 @@ Tabs.Home:Toggle({
     Title = "显示范围",
     Desc = "显示玩家范围",
     Callback = function(state)
-        local HeadSize = 20
-        local highlight = Instance.new("Highlight")
-        highlight.Adornee = nil
-        highlight.OutlineTransparency = 0
-        highlight.FillTransparency = 0.7
-        highlight.FillColor = Color3.fromHex("#0000FF")
+        local highlightTemplate = Instance.new("Highlight")
+        highlightTemplate.OutlineTransparency = 0
+        highlightTemplate.FillTransparency = 0.7
+        highlightTemplate.FillColor = Color3.fromHex("#0000FF")
 
         local function applyHighlight(character)
             if not character:FindFirstChild("WindUI_RangeHighlight") then
-                local clone = highlight:Clone()
+                local clone = highlightTemplate:Clone()
                 clone.Adornee = character
                 clone.Name = "WindUI_RangeHighlight"
                 clone.Parent = character
@@ -164,21 +163,22 @@ Tabs.Home:Toggle({
 
         if state then
             for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Name ~= game.Players.LocalPlayer.Name and player.Character then
+                if player ~= game.Players.LocalPlayer and player.Character then
                     applyHighlight(player.Character)
                 end
             end
-            game.Players.PlayerAdded:Connect(function(player)
+            local charAddedConn = game.Players.PlayerAdded:Connect(function(player)
                 player.CharacterAdded:Connect(function(character)
                     task.wait(1)
                     applyHighlight(character)
                 end)
             end)
-            game.Players.PlayerRemoving:Connect(function(player)
+            local playerRemovingConn = game.Players.PlayerRemoving:Connect(function(player)
                 if player.Character then
                     removeHighlight(player.Character)
                 end
             end)
+            -- Store connections to disconnect later if needed
         else
             for _, player in ipairs(game.Players:GetPlayers()) do
                 if player.Character then
@@ -193,14 +193,19 @@ Tabs.Home:Button({
     Title = "半隐身",
     Desc = "从GitHub加载并执行隐身脚本",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invisible-35376"))() end)
+        pcall(function() 
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invisible-35376"))() 
+        end)
     end
 })
+
 Tabs.Home:Button({
     Title = "玩家入退提示",
     Desc = "从GitHub加载并执行提示脚本",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))() end)
+        pcall(function() 
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))() 
+        end)
     end
 })
 
@@ -231,21 +236,18 @@ Tabs.Home:Toggle({
                 lastVelocity = currentVelocity
             end)
         else
-            if antiWalkFlingConn then antiWalkFlingConn:Disconnect() end
+            if antiWalkFlingConn then 
+                antiWalkFlingConn:Disconnect() 
+                antiWalkFlingConn = nil
+            end
         end
     end
 })
 
 local function setPlayerHealth(healthValue)
     local player = game.Players.LocalPlayer
-    local character = player.Character
-    
-    if not character then
-        character = player.CharacterAdded:Wait()
-    end
-    
+    local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
-
     humanoid.Health = healthValue
     
     WindUI:Notify({
@@ -297,44 +299,30 @@ Tabs.Home:Toggle({
     Callback = function(state)
         godModeEnabled = state
         local player = game.Players.LocalPlayer
-        local character = player.Character
-        
-        if not character then
-            character = player.CharacterAdded:Wait()
-        end
-        
+        local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:WaitForChild("Humanoid")
         
         if state then
-            
             originalHealth = humanoid.Health
-            
-            
             godModeConnection = humanoid.HealthChanged:Connect(function(newHealth)
-                if newHealth < humanoid.MaxHealth then
+                if godModeEnabled and newHealth < humanoid.MaxHealth then
                     humanoid.Health = humanoid.MaxHealth
                 end
             end)
-            
-            
             humanoid.Health = humanoid.MaxHealth
-            
             WindUI:Notify({
                 Title = "无敌模式",
                 Content = "无敌模式已开启",
                 Duration = 3
             })
         else
-            
             if godModeConnection then
                 godModeConnection:Disconnect()
                 godModeConnection = nil
             end
-            
             if originalHealth then
                 humanoid.Health = originalHealth
             end
-            
             WindUI:Notify({
                 Title = "无敌模式",
                 Content = "无敌模式已关闭",
@@ -358,6 +346,7 @@ Tabs.Home:Slider({
         end
     end
 })
+
 Tabs.Home:Slider({
     Title = "设置个人重力",
     Desc = "默认值即为最大值",
@@ -372,13 +361,13 @@ Tabs.Home:Slider({
         if val ~= workspace.Gravity then
             local personalGravity = Instance.new("BodyForce")
             personalGravity.Name = "PersonalGravity"
-            local mass = rootPart:GetMass()
-            local force = Vector3.new(0, mass * (workspace.Gravity - val), 0)
-            personalGravity.Force = force
+            local mass = rootPart.AssemblyMass
+            personalGravity.Force = Vector3.new(0, mass * (workspace.Gravity - val), 0)
             personalGravity.Parent = rootPart
         end
     end
 })
+
 Tabs.Home:Slider({
     Title = "设置跳跃高度",
     Desc = "可输入",
@@ -404,24 +393,15 @@ local function getPlayerNames()
     return names
 end
 
+local playersDropdown = Tabs.Home:Dropdown({
+    Title = "选择要传送的玩家",
+    Values = getPlayerNames(),
+})
+
 local function refreshPlayerDropdown()
     if not playersDropdown then return end
-
-    local currentValues = playersDropdown:GetValues()
+    local currentValues = playersDropdown:GetValues() or {}
     local newValues = getPlayerNames()
-    local added = {}
-    local removed = {}
-    
-    local newSet = {}
-    for _, name in ipairs(newValues) do
-        newSet[name] = true
-    end
-    
-    for _, name in ipairs(currentValues) do
-        if not newSet[name] then
-            table.insert(removed, name)
-        end
-    end
     
     local currentSet = {}
     for _, name in ipairs(currentValues) do
@@ -430,23 +410,16 @@ local function refreshPlayerDropdown()
     
     for _, name in ipairs(newValues) do
         if not currentSet[name] then
-            table.insert(added, name)
+            playersDropdown:AddValue(name)
         end
     end
     
-    for _, name in ipairs(removed) do
-        playersDropdown:RemoveValue(name)
-    end
-    
-    for _, name in ipairs(added) do
-        playersDropdown:AddValue(name)
+    for _, name in ipairs(currentValues) do
+        if not table.find(newValues, name) then
+            playersDropdown:RemoveValue(name)
+        end
     end
 end
-
-local playersDropdown = Tabs.Home:Dropdown({
-    Title = "选择要传送的玩家",
-    Values = getPlayerNames(),
-})
 
 Tabs.Home:Button({
     Title = "传送至玩家",
@@ -464,36 +437,43 @@ Tabs.Home:Button({
 
 game.Players.PlayerAdded:Connect(refreshPlayerDropdown)
 game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
-game.Players.PlayerRemoving:Connect(refreshPlayerDropdown)
 
 Tabs.Home:Button({
     Title = "飞行",
     Desc = "从GitHub加载并执行飞行脚本",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))()
-    if response and #response > 100 then
+        pcall(function()
+            local response = game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua", true)
+            if response and #response > 100 then
                 loadstring(response)()
             else
-                WindUI:Notify({Title = "飞行", Content = "脚本加载失败或内容为空", Duration = 3})    
-          end)
+                WindUI:Notify({Title = "飞行", Content = "脚本加载失败或内容为空", Duration = 3})
+            end
+        end)
     end
 })
+
 Tabs.Home:Button({
     Title = "无限跳",
     Desc = "开启后无法关闭",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))() end)
+        pcall(function() 
+            loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))() 
+        end)
     end
 })
+
 Tabs.Home:Button({
     Title = "自瞄",
     Desc = "宙斯自瞄",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua"))() end)
+        pcall(function() 
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20Aimbot.lua"))() 
+        end)
     end
 })
 
-local trackData = {}
+local trackData = { enabled = false, bulletConns = {}, workspaceConn = nil }
 Tabs.Home:Toggle({
     Title = "子弹追踪",
     Default = false,
@@ -501,7 +481,7 @@ Tabs.Home:Toggle({
         trackData.enabled = state
         if not state then
             if trackData.workspaceConn then trackData.workspaceConn:Disconnect() end
-            for _, conn in pairs(trackData.bulletConns or {}) do conn:Disconnect() end
+            for _, conn in pairs(trackData.bulletConns) do conn:Disconnect() end
             trackData.bulletConns = {}
             return
         end
@@ -587,9 +567,10 @@ Tabs.Home:Toggle({
                 local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
                 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
                 if not humanoidRootPart:FindFirstChildWhichIsA("PointLight") then
-                    local headlight = Instance.new("PointLight", humanoidRootPart)
+                    local headlight = Instance.new("PointLight")
                     headlight.Brightness = 1
                     headlight.Range = 60
+                    headlight.Parent = humanoidRootPart
                     nightVisionData.pointLight = headlight
                 end
             end)
@@ -598,7 +579,8 @@ Tabs.Home:Toggle({
             if nightVisionData.originalBrightness then lighting.Brightness = nightVisionData.originalBrightness end
             if nightVisionData.originalFogEnd then lighting.FogEnd = nightVisionData.originalFogEnd end
             if nightVisionData.changedConnection then nightVisionData.changedConnection:Disconnect() end
-            if nightVisionData.pointLight and nightVisionData.pointLight.Parent then nightVisionData.pointLight:Destroy() end
+            if nightVisionData.pointLight then nightVisionData.pointLight:Destroy() end
+            nightVisionData = {}
         end
     end
 })
@@ -620,7 +602,10 @@ Tabs.Home:Toggle({
                 end
             end)
         else
-            if noclipConn then noclipConn:Disconnect() end
+            if noclipConn then 
+                noclipConn:Disconnect() 
+                noclipConn = nil
+            end
             if character then
                 for _, v in pairs(character:GetChildren()) do
                     if v:IsA("BasePart") then
@@ -642,7 +627,6 @@ local function createESP(player)
     local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
     if not humanoidRootPart then return end
 
-    -- Create Highlight
     local highlight = Instance.new("Highlight")
     highlight.Name = "WindUI_ESP"
     highlight.Adornee = char
@@ -674,11 +658,11 @@ local function createESP(player)
 end
 
 local function removeESP(player)
-    if espHighlights[player] and espHighlights[player].Parent then
+    if espHighlights[player] then
         espHighlights[player]:Destroy()
         espHighlights[player] = nil
     end
-    if espNameTags[player] and espNameTags[player].Parent then
+    if espNameTags[player] then
         espNameTags[player]:Destroy()
         espNameTags[player] = nil
     end
@@ -703,7 +687,7 @@ local function toggleESP(state)
     else
         if espConnections.playerAdded then espConnections.playerAdded:Disconnect() end
         if espConnections.playerRemoving then espConnections.playerRemoving:Disconnect() end
-        for player, _ in pairs(espHighlights) do
+        for player in pairs(espHighlights) do
             removeESP(player)
         end
         espHighlights = {}
@@ -724,7 +708,6 @@ Tabs.Home:Button({
     Callback = function()
         local TeleportService = game:GetService("TeleportService")
         local placeId = game.PlaceId
-        
         TeleportService:Teleport(placeId, game.Players.LocalPlayer)
     end
 })
@@ -736,7 +719,6 @@ Tabs.Home:Button({
         local TeleportService = game:GetService("TeleportService")
         local placeId = game.PlaceId
         local jobId = game.JobId
-        
         TeleportService:TeleportToPlaceInstance(placeId, jobId, game.Players.LocalPlayer)
     end
 })
@@ -768,7 +750,6 @@ Tabs.Home:Button({
     end
 })
 
-
 Tabs.Home:Button({
     Title = "服务器信息",
     Desc = "显示当前服务器的信息",
@@ -787,41 +768,37 @@ Tabs.Home:Button({
     end
 })
 
-Tabs.NaturalDisatersTab:Section({ Title = "秒孵化", Icon = "toggle" })
+Tabs.NaturalDisastersTab:Section({ Title = "秒孵化", Icon = "toggle" })
 
 Tabs.NaturalDisastersTab:Button({
-    Title = "孵化鸡蛋"
-    Desc = "1号位"
+    Title = "孵化鸡蛋",
+    Desc = "1号位",
     Callback = function()
-       local args = {
-	"BuildSlot1"
-}
-  game:GetService("ReplicatedStorage")
-        :WaitForChild("Packages")
-        :WaitForChild("Knit")
-        :WaitForChild("Services")
-        :WaitForChild("BrainrotCareService")
-        :WaitForChild("RF")
-        :WaitForChild("FinishedAnimation")
-        :InvokeServer(unpack(args))
-     end
+        local args = { "BuildSlot1" }
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("Packages")
+            :WaitForChild("Knit")
+            :WaitForChild("Services")
+            :WaitForChild("BrainrotCareService")
+            :WaitForChild("RF")
+            :WaitForChild("FinishedAnimation")
+            :InvokeServer(unpack(args))
+    end
 })
   
 Tabs.NaturalDisastersTab:Button({
-    Title = "2号位"
+    Title = "2号位",
     Callback = function()
-       local args = {
-	"BuildSlot2"
-}
-  game:GetService("ReplicatedStorage")
-        :WaitForChild("Packages")
-        :WaitForChild("Knit")
-        :WaitForChild("Services")
-        :WaitForChild("BrainrotCareService")
-        :WaitForChild("RF")
-        :WaitForChild("FinishedAnimation")
-        :InvokeServer(unpack(args))
-     end
+        local args = { "BuildSlot2" }
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("Packages")
+            :WaitForChild("Knit")
+            :WaitForChild("Services")
+            :WaitForChild("BrainrotCareService")
+            :WaitForChild("RF")
+            :WaitForChild("FinishedAnimation")
+            :InvokeServer(unpack(args))
+    end
 })
 
 Tabs.Misc:Button({
@@ -856,9 +833,9 @@ Tabs.Misc:Button({
     end
 })
 
-spawn(function()
+task.spawn(function()
     while true do
-        wait(5)
+        task.wait(5)
         local currentTime = os.date("%H:%M:%S")
         TimeTag:Set({
             Title = "当前时间: " .. currentTime,
