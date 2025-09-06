@@ -801,6 +801,89 @@ Tabs.NaturalDisastersTab:Button({
     end
 })
 
+Tabs.NaturalDisastersTab:Toggle({
+    Title = "自动买燃烧黑客",
+    Desc = "1号位",
+    Callback = function()
+        local args = {
+    "9954122c-542a-48b3-a07a-b3aaf9c801d3"
+}
+
+local MAX_RETRIES = 3
+local retryCount = 0
+
+local function attemptPurchase()
+    local buySuccess, buyResult = pcall(function()
+        return game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("EggService"):WaitForChild("RF"):WaitForChild("BuyEgg"):InvokeServer(unpack(args))
+    end)
+    
+    if buySuccess then
+        print("购买成功！")
+        return true
+    else
+        warn("购买尝试失败:", buyResult)
+        return false
+    end
+end
+
+local function buyGoldenHackerEgg()
+    print("检测Golden Hacker Egg...")
+    
+    local function checkAndBuy(model)
+        print("Golden Hacker Egg")
+        
+        local success = pcall(function()
+            model:WaitForChild("HumanoidRootPart", 5)
+        end)
+        
+        if success then
+            print("模型加载完成，尝试购买...")
+            wait(0.3) -- 短暂延迟
+            
+            for i = 1, MAX_RETRIES do
+                print("购买尝试 " .. i .. "/" .. MAX_RETRIES)
+                if attemptPurchase() then
+                    return true
+                end
+                wait(1) -- 等待1秒后重试
+            end
+        else
+            warn("模型加载失败")
+        end
+        return false
+    end
+    
+    local existingModel = game.Workspace:FindFirstChild("Golden Hacker Egg")
+    if existingModel then
+        return checkAndBuy(existingModel)
+    end
+    
+    local connection
+    local purchaseMade = false
+    
+    connection = game.Workspace.ChildAdded:Connect(function(child)
+        if not purchaseMade and child.Name == "Golden Hacker Egg" then
+            purchaseMade = checkAndBuy(child)
+            if connection then
+                connection:Disconnect()
+            end
+        end
+    end)
+    
+    delay(30, function()
+        if connection then
+            connection:Disconnect()
+            if not purchaseMade then
+                print("检测超时，未找到目标模型")
+            end
+        end
+    end)
+end
+
+pcall(buyGoldenHackerEgg)
+    end
+})
+
 Tabs.Misc:Button({
     Title = "复制作者QQ",
     Callback = function()
