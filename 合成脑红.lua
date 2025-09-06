@@ -471,7 +471,12 @@ Tabs.Home:Button({
     Title = "飞行",
     Desc = "从GitHub加载并执行飞行脚本",
     Callback = function()
-        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))() end)
+        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/%E9%A3%9E%E8%A1%8C%E8%84%9A%E6%9C%AC.lua"))()
+    if response and #response > 100 then
+                loadstring(response)()
+            else
+                WindUI:Notify({Title = "飞行", Content = "脚本加载失败或内容为空", Duration = 3})    
+          end)
     end
 })
 Tabs.Home:Button({
