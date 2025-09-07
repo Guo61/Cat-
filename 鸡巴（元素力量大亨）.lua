@@ -3,10 +3,10 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Cat脚盆 v1.20",
+    Title = "Cat脚盆 v1.30",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 合成大鸡巴",
+    Content = "By:Ccat\nQQ:3395858053 元素力量大亨",
     Buttons = {
         {
             Title = "进入脚盆。",
@@ -34,11 +34,11 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v1.20",
+    Title = "v1.30",
     Color = Color3.fromHex("#30ff6a")
 })
 Window:Tag({
-    Title = "合成大鸡巴", 
+    Title = "元素力量大亨", 
     Color = Color3.fromHex("#315dff")
 })
 local TimeTag = Window:Tag({
@@ -230,7 +230,7 @@ Tabs.Home:Toggle({
                 local hrp = character and character:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
                 local currentVelocity = hrp.Velocity
-                if (currentVelocity - lastVelocity).Magnitude > 100 then
+                if (currentVelocity - lastVelocity).Magnitude > 80 then
                     hrp.Velocity = lastVelocity
                 end
                 lastVelocity = currentVelocity
@@ -899,7 +899,7 @@ Tabs.Misc:Button({
     Callback = function()
         WindUI:Notify({
             Title = "脚本信息",
-            Content = "Cat Hub v1.15\n作者: Ccat\nQQ:3395858053",
+            Content = "Cat Hub v1.30\n作者: Ccat\nQQ:3395858053",
             Duration = 10
         })
     end
