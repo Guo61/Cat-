@@ -1,9 +1,9 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local WindUI = require(ReplicatedStorage:WaitForChild("WindUI"))
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Cat脚盆 v1.30",
+    Title = "Cat 脚盆 v1.30",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
     Content = "By:Ccat\nQQ:3395858053 元素力量大亨",
@@ -11,7 +11,9 @@ WindUI:Popup({
         {
             Title = "进入脚盆。",
             Icon = "arrow-right",
-            Callback = function() Confirmed = true end,
+            Callback = function()
+                Confirmed = true
+            end,
             Variant = "Primary",
         }
     }
