@@ -1,10 +1,12 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/123/refs/heads/main/main.lua"))()
+
 local Confirmed = false
+
 WindUI:Popup({
     Title = "Cat脚盆 v1.0",
     Icon = "rbxassetid://129260712070622",
     IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 欢迎使用",
+    Content = "By:Ccat\nQQ群:1061490197 欢迎使用",
     Buttons = {
         {
             Title = "进入脚盆。",
@@ -14,7 +16,9 @@ WindUI:Popup({
         }
     }
 })
+
 repeat wait() until Confirmed
+
 local Window = WindUI:CreateWindow({
     Title = "Cat Hub",
     Icon = "rbxassetid://129260712070622",
@@ -28,18 +32,22 @@ local Window = WindUI:CreateWindow({
     SideBarWidth = 200,
     ScrollBarEnabled = true,
 })
+
 Window:Tag({
         Title = "v1.0",
         Color = Color3.fromHex("#30ff6a")
     })
+    
     Window:Tag({
         Title = "三传奇", 
         Color = Color3.fromHex("#315dff")
     })
+    
     local TimeTag = Window:Tag({
         Title = "正在开发更多服务器",
         Color = Color3.fromHex("#000000")
     })
+    
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
     LegendsOfSpeed = Window:Tab({ Title = "极速传奇", Icon = "zap" }),
@@ -47,6 +55,7 @@ local Tabs = {
     StrengthLegends = Window:Tab({ Title = "力量传奇", Icon = "dumbbell" }),
     Misc = Window:Tab({ Title = "杂项", Icon = "settings" }),
 }
+
 Window:SelectTab(1)
 local autoLoops = {}
 _G.auto_hoop = false
@@ -70,6 +79,7 @@ local function stopLoop(name)
     autoLoops[name] = nil
 
 end
+
 Tabs.Home:Paragraph({
     Title = "666这么帅",
     Desc = "必须帅",
@@ -78,11 +88,14 @@ Tabs.Home:Paragraph({
     Thumbnail = "https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/1756468641440.jpg",
     ThumbnailSize = 120
 })
+
 Tabs.Home:Paragraph({
     Title = "欢迎",
     Desc = "需要时开启反挂机。脚本仍在更新中... 作者: Ccat\n脚本免费, 请勿倒卖。",
 })
+
 Tabs.Home:Section({ Title = "游戏传送", Desc = "如果传送失败则Roblox禁止传送" Icon = "globe" })
+
 Tabs.Home:Button({
     Title = "传送至忍者传奇",
     Callback = function()
@@ -92,6 +105,7 @@ Tabs.Home:Button({
 
     end
 })
+
 Tabs.Home:Button({
     Title = "传送至极速传奇",
     Callback = function()
@@ -101,6 +115,7 @@ Tabs.Home:Button({
 
     end
 })
+
 Tabs.Home:Button({
     Title = "传送至力量传奇",
     Callback = function()
