@@ -50,8 +50,7 @@ local BlinkButton
 local DistLabel
 local IgnoreWalls = false 
 
-
-BTabs.Home:Slider({
+Tabs.Home:Slider({
     Title = "瞬移距离",
     Description = "选择 1~10 studs",
     Default = BlinkDist,
