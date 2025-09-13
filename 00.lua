@@ -40,7 +40,10 @@ Window:Tag({
     Color = Color3.fromHex("#30ff6a")
 })
 
-local BlinkPage = Window:Page({ Title = "瞬移功能", Icon = "zap" })
+local BlinkPage = Window:CreatePage({
+    Title = "瞬移功能",
+    Icon = "zap"
+})
 
 local BlinkDist = 5
 local Cooldown = 1
