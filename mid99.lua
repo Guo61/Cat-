@@ -1,5 +1,49 @@
-repeat task.wait() until game:IsLoaded()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/main/main.lua"))()
 
+local Confirmed = false
+
+WindUI:Popup({
+    Title = "Cat脚盆 v1.15",
+    Icon = "rbxassetid://129260712070622",
+    IconThemed = true,
+    Content = "By:Ccat\nQQ群:1061490197 欢迎使用自然灾害",
+    Buttons = {
+        {
+            Title = "进入脚盆。",
+            Icon = "arrow-right",
+            Callback = function() Confirmed = true end,
+            Variant = "Primary",
+        }
+    }
+})
+
+local Window = WindUI:CreateWindow({
+    Title = "Cat Hub",
+    Icon = "rbxassetid://129260712070622",
+    IconThemed = true,
+    Author = "感谢游玩",
+    Folder = "CatHub",
+    Size = UDim2.fromOffset(580, 340),
+    Transparent = true,
+    Theme = "Dark",
+    User = { Enabled = true },
+    SideBarWidth = 200,
+    ScrollBarEnabled = true,
+})
+
+Window:Tag({
+        Title = "v1.20",
+        Color = Color3.fromHex("#30ff6a")
+    })
+    Window:Tag({
+        Title = "99夜", 
+        Color = Color3.fromHex("#315dff")
+    })
+    local TimeTag = Window:Tag({
+        Title = "正在开发更多服务器",
+        Color = Color3.fromHex("#000000")
+    })
+        
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -11,24 +55,7 @@ local TweenService = game:GetService("TweenService")
 local VirtualInput = game:GetService("VirtualInputManager")
 local CoreGui = game:GetService("CoreGui")
 
-local Window = YourCustomUI:CreateWindow({
-    Title = "Cat99夜",
-    Author = "团队 | CcatHUB",
-    Size = UDim2.fromOffset(720, 500),
-    Transparent = true,
-    Theme = "Dark"
-})
-
-WindUI:Popup({
-    Title = "Cat脚盆 v1.10",
-    Icon = "rbxassetid://129260712070622",
-    IconThemed = true,
-    Content = "By:Ccat\nQQ:3395858053 欢迎使用99夜",
-    Buttons = {
-        {
-            Title = "进入脚盆。",
-            Icon = "arrow-right",
-            Callback = function() Confirmed = true end,
+ Confirmed = true end,
             Variant = "Primary",
         }
     }
@@ -71,7 +98,7 @@ Tabs.Main:Toggle({
     end
 })
 
--- Auto Cook Meat
+
 Tabs.Main:Button({
     Title = "自动烤肉",
     Callback = function()
@@ -90,11 +117,11 @@ Tabs.Main:Button({
     end
 })
 
--- Auto Tree Farm
+
 local autoTreeFarmActive = false
 local autoTreeFarmThread
 Tabs.Main:Toggle({
-    Title = "自动伐木 (Old Axe)",
+    Title = "自动砍树 (老斧子)",
     Default = false,
     Callback = function(state)
         autoTreeFarmActive = state
@@ -168,7 +195,7 @@ Tabs.Main:Toggle({
     end
 })
 
--- Auto Hit
+
 local autoBreakActive = false
 local autoBreakSpeed = 1
 local autoBreakThread
@@ -214,7 +241,7 @@ Tabs.Main:Toggle({
         end
     end
 })
--- ESP功能
+
 local function CreateEsp(Char, Color, Text, Parent, numberOffset)
     if not Char then return end
     if Char:FindFirstChildOfClass("Highlight") then Char:FindFirstChildOfClass("Highlight"):Destroy() end
@@ -365,7 +392,7 @@ Tabs.Esp:Toggle({
     end
 })
 
--- 分类物品 ESP
+
 local espTypes = {
     ["Fuel All"] = { color = Color3.fromRGB(255, 140, 0), items = { "Log", "Fuel Canister", "Coal", "Oil Barrel" } },
     ["Scraps All"] = { color = Color3.fromRGB(169, 169, 169), items = { "Sheet Metal", "Broken Fan", "UFO Junk", "Bolt", "Old Radio", "UFO Scrap", "Broken Microwave" } },
@@ -421,7 +448,7 @@ for category, data in pairs(espTypes) do
         end
     })
 end
--- TELEPORT
+
 Tabs.Teleport:Button({
     Title = "传送到篝火",
     Callback = function()
@@ -491,7 +518,7 @@ for i, name in ipairs(lostChildNames) do
     })
 end
 
--- BRING
+
 local function bringItemsByName(name)
     local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not root then return end
@@ -517,7 +544,7 @@ Tabs.Bring:Button({
     end
 })
 
--- Lost Child 吸附
+
 for i, name in ipairs(lostChildNames) do
     Tabs.Bring:Button({
         Title = "吸附 " .. name,
@@ -535,7 +562,7 @@ for i, name in ipairs(lostChildNames) do
     })
 end
 
--- 常用物品吸附按钮
+
 local bringList = {
     "Logs","Fuel Canister","Oil Barrel","Coal","Meat","Flashlight","Nails","Fan","Rope","Scrap","Wood","Cloth","Rock","Stone Pickaxe","Knife","Spear",
     "Leather Body","Iron Body","Revolver","Rifle","Bandage","MedKit","Old Radio","Coin Stack","UFO Junk","UFO Scrap","Broken Microwave","Bolt","Chair",
@@ -547,7 +574,7 @@ for _, name in ipairs(bringList) do
         Callback = function() bringItemsByName(name) end
     })
 end
--- HITBOX
+
 local hitboxSettings = {
     Wolf = false,
     Bunny = false,
@@ -603,7 +630,7 @@ Tabs.Hitbox:Toggle({Title="扩展所有Hitbox", Default=false, Callback=function
 Tabs.Hitbox:Slider({Title="Hitbox大小", Value={Min=2, Max=250, Default=10}, Step=1, Callback=function(val) hitboxSettings.Size=val end})
 Tabs.Hitbox:Toggle({Title="显示Hitbox", Default=false, Callback=function(val) hitboxSettings.Show=val end})
 
--- PLAYER
+
 Tabs.Player:Slider({
     Title = "移动速度",
     Min = 5,
@@ -722,7 +749,7 @@ Tabs.Player:Toggle({
         end
     end
 })
--- MISC
+
 
 local instantPrompt = false
 local connection
@@ -798,7 +825,7 @@ Tabs.Misc:Button({
     end
 })
 
--- FPS + Ping 显示
+
 local showFPS, showPing = true, true
 local fpsText, msText = Drawing.new("Text"), Drawing.new("Text")
 fpsText.Size, fpsText.Position, fpsText.Color, fpsText.Center, fpsText.Outline, fpsText.Visible =
