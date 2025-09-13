@@ -1,4 +1,11 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/refs/heads/main/main.lua"))()
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Guo61/Cat-/main/main.lua"))()
+end)
+
+if not success or not WindUI then
+    warn("⚠️ WindUI 脚本加载失败，请检查链接是否正确或网络是否正常")
+    return
+end
 
 local Confirmed = false
 
