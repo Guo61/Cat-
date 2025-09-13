@@ -39,11 +39,9 @@ Window:Tag({
     Title = "v1.30",
     Color = Color3.fromHex("#30ff6a")
 })
-
-local BlinkPage = Window:CreatePage({
-    Title = "瞬移功能",
-    Icon = "zap"
-})
+ local Tabs = {
+    Home = Window:Tab({ Title = "主页", Icon = "crown" })
+    }
 
 local BlinkDist = 5
 local Cooldown = 1
@@ -53,7 +51,7 @@ local DistLabel
 local IgnoreWalls = false 
 
 
-BlinkPage:Slider({
+BTabs.Home:Slider({
     Title = "瞬移距离",
     Description = "选择 1~10 studs",
     Default = BlinkDist,
@@ -67,7 +65,7 @@ BlinkPage:Slider({
     end,
 })
 
-BlinkPage:Toggle({
+Tabs.Home:Toggle({
     Title = "忽略障碍物 (穿墙)",
     Description = "开启后传送不会被墙体阻挡",
     Default = false,
@@ -76,7 +74,7 @@ BlinkPage:Toggle({
     end,
 })
 
-BlinkButton = BlinkPage:Button({
+Tabs.Home:Button({
     Title = "瞬移",
     Icon = "zap",
     Variant = "Primary",
@@ -128,7 +126,7 @@ BlinkButton = BlinkPage:Button({
     end,
 })
 
-DistLabel = BlinkPage:Label({
-    Title = "当前距离：" .. BlinkDist .. " stud",
+Tabs.Home:Label({
+    Title = "当前距离：" .. Desc =  .. " stud",
     Description = "滑条调整后实时更新",
 })
