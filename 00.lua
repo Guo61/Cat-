@@ -21,7 +21,6 @@ WindUI:Popup({
 
 repeat task.wait() until Confirmed
 
--- 主窗口
 local Window = WindUI:CreateWindow({
     Title = "Cat Hub",
     Icon = "rbxassetid://129260712070622",
@@ -41,16 +40,16 @@ Window:Tag({
     Color = Color3.fromHex("#30ff6a")
 })
 
--- ========= 瞬移功能 =========
 local BlinkPage = Window:Page({ Title = "瞬移功能", Icon = "zap" })
 
-local BlinkDist = 5 -- 默认传送距离
-local Cooldown = 1 -- 冷却秒数
+local BlinkDist = 5
+local Cooldown = 1
 local IsCooling = false
-local BlinkButton -- 保存按钮对象
-local DistLabel -- 保存距离标签
+local BlinkButton
+local DistLabel
+local IgnoreWalls = false 
 
--- 距离滑条
+
 BlinkPage:Slider({
     Title = "瞬移距离",
     Description = "选择 1~10 studs",
@@ -65,7 +64,15 @@ BlinkPage:Slider({
     end,
 })
 
--- 瞬移按钮
+BlinkPage:Toggle({
+    Title = "忽略障碍物 (穿墙)",
+    Description = "开启后传送不会被墙体阻挡",
+    Default = false,
+    Callback = function(state)
+        IgnoreWalls = state
+    end,
+})
+
 BlinkButton = BlinkPage:Button({
     Title = "瞬移",
     Icon = "zap",
@@ -74,17 +81,35 @@ BlinkButton = BlinkPage:Button({
         if not IsCooling then
             IsCooling = true
 
-            -- 发起瞬移
-            remote:FireServer(BlinkDist)
+            local player = game.Players.LocalPlayer
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:FindFirstChild("HumanoidRootPart")
 
-            -- 冷却逻辑
+            if hrp then
+                local targetPos = hrp.CFrame * CFrame.new(0, 0, -BlinkDist)
+
+                if IgnoreWalls then
+                    hrp.CFrame = targetPos
+                else
+                    local ray = RaycastParams.new()
+                    ray.FilterDescendantsInstances = {char}
+                    ray.FilterType = Enum.RaycastFilterType.Blacklist
+
+                    local result = workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * BlinkDist, ray)
+
+                    if result then
+                        hrp.CFrame = CFrame.new(result.Position - hrp.CFrame.LookVector * 2, hrp.CFrame.LookVector + Vector3.new(0, 1, 0))
+                    else
+                        hrp.CFrame = targetPos
+                    end
+                end
+            end
+            
             local startTime = tick()
             local endTime = startTime + Cooldown
 
-            -- 禁用按钮
             BlinkButton:SetVariant("Secondary")
 
-            -- 动态更新倒计时
             task.spawn(function()
                 while tick() < endTime do
                     local remaining = math.max(0, endTime - tick())
@@ -92,7 +117,6 @@ BlinkButton = BlinkPage:Button({
                     task.wait(0.1)
                 end
 
-                -- 冷却完成 → 恢复按钮
                 IsCooling = false
                 BlinkButton:SetVariant("Primary")
                 BlinkButton:SetTitle("瞬移")
@@ -101,7 +125,6 @@ BlinkButton = BlinkPage:Button({
     end,
 })
 
--- 距离显示标签
 DistLabel = BlinkPage:Label({
     Title = "当前距离：" .. BlinkDist .. " stud",
     Description = "滑条调整后实时更新",
